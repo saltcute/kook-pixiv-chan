@@ -16,7 +16,8 @@ class Top extends AppCommand {
         async function sendCard(data: any) {
             var link: string[] = [];
             async function uploadImage() {
-                for (const val of data) {
+                for (const k in data) {
+                    var val = data[k];
                     var key = link.length - 1;
                     if (link.length > 9) break;
                     if (val.x_restrict !== 0) {
