@@ -6,7 +6,7 @@ import auth from 'configs/auth';
 
 pixiv.linkmap.load();
 
-setInterval(saveLinkmap, 60 * 1000); // 60 seconds
+setInterval(saveLinkmap, 15 * 60 * 1000); // 15 minutes
 
 if (auth.enableBotMarket) {
     botMarketStayOnline();
