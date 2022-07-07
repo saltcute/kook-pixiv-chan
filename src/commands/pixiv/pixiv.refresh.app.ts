@@ -11,7 +11,7 @@ class Refresh extends AppCommand {
     trigger = 'refresh'; // 用于触发的文字
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
-        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
         var loadingBarMessageID: string = "null";
         if (session.args.length === 0) {
             return session.reply("`.pixiv refresh [插画 ID]` 刷新对应 ID 插画的缓存。（当图片显示不正常时，可以在几分钟后运行此命令）")
