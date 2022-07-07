@@ -107,3 +107,4 @@ src/configs/auth*
 
 test/
 package-lock.json
+src/commands/pixiv/common/linkmap/map.json
