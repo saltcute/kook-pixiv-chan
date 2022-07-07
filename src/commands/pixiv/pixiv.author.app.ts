@@ -11,6 +11,7 @@ class Author extends AppCommand {
     trigger = 'author'; // 用于触发的文字
     intro = 'Author';
     func: AppFunc<BaseSession> = async (session) => {
+        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
         var loadingBarMessageID: string = "null";
         async function sendCard(data: any) {
             var r18 = 0;

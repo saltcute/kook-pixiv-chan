@@ -4,8 +4,12 @@ import upath from 'upath';
 var map: any;
 export namespace linkmap {
     export function load(): void {
-        map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
-        console.log(`[${new Date().toLocaleTimeString()}] loaded "linkmap.json"`);
+        if (fs.existsSync(upath.join(__dirname, "map.json"))) {
+            map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
+            console.log(`[${new Date().toLocaleTimeString()}] loaded "linkmap.json"`);
+        } else {
+            map = [];
+        }
     }
 
     export function isInDatabase(illustID: string): boolean {
