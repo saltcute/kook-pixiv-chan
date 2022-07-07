@@ -1,0 +1,47 @@
+{
+  "name": "kook-pixiv-chan",
+  "version": "1.0.1",
+  "description": "Get trending illustrations or illustration detail",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "node --nolazy -r ts-node/register -r tsconfig-paths/register src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fi6/kbotify-template.git"
+  },
+  "keywords": [
+    "kbotify",
+    "kaiheila",
+    "KOOK",
+    "bot"
+  ],
+  "author": "potatopotat0",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/potatopotat0/potato-chatbot/issues"
+  },
+  "homepage": "https://github.com/potatopotat0/potato-chatbot#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "form-data": "^4.0.0",
+    "fs": "^0.0.1-security",
+    "got": "^11.8.3",
+    "kbotify": "^0.2.5",
+    "prettier": "^2.7.1",
+    "sharp": "^0.30.7",
+    "ts-node": "^10.8.1",
+    "upath": "^2.0.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-no-null": "^1.0.2",
+    "eslint-plugin-prettier": "^3.4.0",
+    "tsconfig-paths": "^3.10.1",
+    "typescript": "^4.3.5"
+  }
+}
