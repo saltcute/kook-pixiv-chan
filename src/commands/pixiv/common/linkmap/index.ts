@@ -8,7 +8,7 @@ export namespace linkmap {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
             console.log(`[${new Date().toLocaleTimeString()}] loaded "linkmap.json"`);
         } else {
-            map = [];
+            map = {};
         }
     }
 
