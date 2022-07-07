@@ -198,7 +198,7 @@ class Author extends AppCommand {
             }
             const card = [new Card({
                 "type": "card",
-                "theme": "secondary",
+                "theme": "info",
                 "size": "lg",
                 "modules": [
                     {

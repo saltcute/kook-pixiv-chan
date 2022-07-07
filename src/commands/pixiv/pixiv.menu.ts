@@ -12,7 +12,7 @@ class PixivMenu extends MenuCommand {
     intro = 'Pixiv';
     menu = new Card({
         "type": "card",
-        "theme": "secondary",
+        "theme": "warning",
         "size": "lg",
         "modules": [
             {
