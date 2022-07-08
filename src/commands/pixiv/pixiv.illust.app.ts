@@ -48,52 +48,63 @@ class Illust extends AppCommand {
                     });
                 }
 
-                //Fetch illustration and resize to 512px
-                const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re");
+                const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re"); // Get image link
                 console.log(`[${new Date().toLocaleTimeString()}] Resaving... ${master1200}`);
                 var bodyFormData = new FormData();
-                const resizer = sharp().resize(512).jpeg();
-                const blurer = sharp().blur(10).jpeg();
-                var stream: any;
-                var bannedTag = false;
-                for (let tags of val.tags) {
-                    let tag = tags.name;
-                    if (pixiv.common.isForbittedTag(tag)) {
-                        session.updateMessage(loadingBarMessageID, [{
-                            "type": "card",
-                            "theme": "warning",
-                            "size": "lg",
-                            "modules": [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "kmarkdown",
-                                        "content": `插画 \`${val.id}_p0.jpg\` 包含禁止的标签，正在预先施加高斯模糊……`
-                                    }
-                                },
-                                {
-                                    "type": "context",
-                                    "elements": [
-                                        {
-                                            "type": "plain-text",
-                                            "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }]);
-                        console.log(`[${new Date().toLocaleTimeString()}] ${val.id}_p0.jpg contains banned tags, applying blur in advance`);
-                        bannedTag = true;
-                        break;
+                const stream = got.stream(master1200);                                        // Get readable stream from origin
+                var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
+                const detection = await pixiv.nsfwjs.detect(buffer);                          // Detect NSFW
+                var NSFW = false;
+                for (let val of detection) {
+                    switch (val.className) {
+                        case "Hentai":
+                        case "Porn":
+                            if (val.probability > 0.9) buffer = await sharp(buffer).blur(42).jpeg().toBuffer();
+                            else if (val.probability > 0.7) buffer = await sharp(buffer).blur(35).jpeg().toBuffer();
+                            else if (val.probability > 0.6) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
+                            else if (val.probability > 0.4) buffer = await sharp(buffer).blur(14).jpeg().toBuffer();
+                            else if (val.probability > 0.2) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
+                            if (val.probability > 0.2) NSFW = true;
+                            break;
+                        case "Sexy":
+                            if (val.probability > 0.8) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
+                            else if (val.probability > 0.6) buffer = await sharp(buffer).blur(14).jpeg().toBuffer();
+                            else if (val.probability > 0.4) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
+                            if (val.probability > 0.4) NSFW = true;
+                            break;
+                        case "Drawing":
+                        case "Natural":
+                        default:
+                            break;
                     }
                 }
-                if (bannedTag) {
-                    stream = got.stream(master1200).pipe(resizer).pipe(blurer); // resize + blur
-                } else {
-                    stream = got.stream(master1200).pipe(resizer); // resize
+                if (NSFW) {
+                    console.log(`[${new Date().toLocaleTimeString()}] Image is NSFW, blurred.`);
+                    session.updateMessage(loadingBarMessageID, [{
+                        "type": "card",
+                        "theme": "warning",
+                        "size": "lg",
+                        "modules": [
+                            {
+                                "type": "section",
+                                "text": {
+                                    "type": "kmarkdown",
+                                    "content": `\`${val.id}_p0.jpg\` 含有不宜内容，已自动添加模糊。`
+                                }
+                            },
+                            {
+                                "type": "context",
+                                "elements": [
+                                    {
+                                        "type": "plain-text",
+                                        "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
+                                    }
+                                ]
+                            }
+                        ]
+                    }])
                 }
-                // const stream = got.stream(master1200); // no resize
-                bodyFormData.append('file', stream, "1.jpg");
+                bodyFormData.append('file', buffer, "1.jpg");
                 var rtLink = "";
                 //Upload image to KOOK's server
                 await axios({
@@ -111,72 +122,6 @@ class Illust extends AppCommand {
                         session.sendCard(pixiv.cards.error(e));
                     }
                 });
-                var uncensored = false;
-                for (let i = 1; i <= 5; ++i) {
-                    await axios({                                       // Check censorship
-                        url: rtLink,
-                        method: "GET"
-                    }).then(() => {                                     // Image is not censored
-                        uncensored = true;
-                    }).catch(async () => {                              // Image is censored
-                        const resizer = sharp().resize(512).jpeg();
-                        const blurer = sharp().blur(i * 7).jpeg();      // Add i * 7px (up to 35px) of gaussian blur
-                        const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re");
-                        console.log(`[${new Date().toLocaleTimeString()}] Censorship detected, resaving with ${i * 7}px of gaussian blur`);
-                        session.updateMessage(loadingBarMessageID, [{
-                            "type": "card",
-                            "theme": "warning",
-                            "size": "lg",
-                            "modules": [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "kmarkdown",
-                                        "content": `\`${val.id}_p0.jpg\` 被和谐，尝试使用 ${i * 7}px 高斯模糊重新上传，可能需要较长时间${i % 2 == 0 ? ":hourglass_flowing_sand:" : ":hourglass:"}……`
-                                    }
-                                },
-                                {
-                                    "type": "context",
-                                    "elements": [
-                                        {
-                                            "type": "plain-text",
-                                            "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }])
-                        var stream: any;
-                        if (bannedTag) {
-                            stream = got.stream(master1200).pipe(resizer).pipe(blurer); // resize + blur
-                        } else {
-                            stream = got.stream(master1200).pipe(resizer); // resize
-                        }
-                        const blur = stream.pipe(blurer);
-                        var bodyFormData = new FormData();
-                        bodyFormData.append('file', blur, "1.jpg");
-                        await axios({                                   // Upload blured image to KOOK's server
-                            method: "post",
-                            url: "https://www.kookapp.cn/api/v3/asset/create",
-                            data: bodyFormData,
-                            headers: {
-                                'Authorization': `Bot ${auth.khltoken}`,
-                                ...bodyFormData.getHeaders()
-                            }
-                        }).then((res: any) => {
-                            rtLink = res.data.data.url
-                        }).catch((e: any) => {
-                            if (e) {
-                                session.sendCard(pixiv.cards.error(e));
-                            }
-                        });
-                    });
-                    if (uncensored) break; // Break as soon as image is not censored
-                }
-                if (!uncensored) { // If image still being censored after 35px of gaussian blur, fall back to Akarin
-                    console.log(`[${new Date().toLocaleTimeString()}] Uncensor failed, falled back with Akarin`);
-                    rtLink = "https://img.kaiheila.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
-                }
                 link = rtLink;
                 pixiv.linkmap.addLink(val.id, rtLink);
             }

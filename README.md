@@ -23,6 +23,8 @@ npm start
 
 - `.pixiv`
     - [ ] Ability to change illustration ranklist time period
+    - [ ] Aliyun image detection
+    - [x] nsfwjs image detection
     - [x] Refresh linkmap of a certain illustration
     - [x] (sort of) Maybe a better way of censoring NSFW
         - NSFW illustrations will be attempted to add gaussian blur for up to 35px before falling back to Akarin
