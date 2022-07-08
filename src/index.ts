@@ -5,6 +5,7 @@ import axios from 'axios';
 import auth from 'configs/auth';
 
 pixiv.linkmap.load();
+pixiv.nsfwjs.init();
 
 setInterval(saveLinkmap, 15 * 60 * 1000); // 15 minutes
 
