@@ -35,12 +35,18 @@ function botMarketStayOnline() {
             uuid: auth.botMarketUUID
         }
     }).then((res) => {
-        console.log(`[${new Date().toLocaleTimeString()}] Bot Market online status updating success, remote returning: `);
-        console.log(res.data);
-        setTimeout(botMarketStayOnline, (res.data.data.onTime + 5) * 1000);
+        if (res.data.code == 0) {
+            console.log(`[${new Date().toLocaleTimeString()}] Bot Market online status updating success, remote returning: `);
+            console.log(res.data);
+            setTimeout(botMarketStayOnline, (res.data.data.onTime + 5) * 1000);
+        } else if (res.data.code == -1) {
+            console.log(`[${new Date().toLocaleTimeString()}] Bot Market online status updating failed. Retring in 30 minutes. Error message: `);
+            console.log(res.data);
+            setTimeout(botMarketStayOnline, 30 * 60 * 1000);
+        }
     }).catch((e) => {
-        console.log(`[${new Date().toLocaleTimeString()}] Bot Market online status updating failed. Retring in 60 seconds. Error message: `);
+        console.log(`[${new Date().toLocaleTimeString()}] Bot Market heartbeat request failed. Retring in 30 minutes. Error message: `);
         console.log(e);
-        setTimeout(botMarketStayOnline, 60 * 1000);
+        setTimeout(botMarketStayOnline, 30 * 60 * 1000);
     })
 }
