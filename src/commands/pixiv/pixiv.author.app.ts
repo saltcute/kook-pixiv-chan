@@ -233,6 +233,9 @@ class Author extends AppCommand {
                 if (res.data.length === 0) {
                     return session.reply("用户不存在或此用户没有上传过插画！")
                 }
+                if (res.data.hasOwnProperty("code") && res.data.code == 400) {
+                    return session.reply("请输入一个合法的用户ID（不需要括号[]）")
+                }
                 sendCard(res.data);
             }).catch((e: any) => {
                 if (e) {

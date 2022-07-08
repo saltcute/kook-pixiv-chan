@@ -205,6 +205,9 @@ class Detail extends AppCommand {
                 if (res.data.hasOwnProperty("status") && res.data.status === 404) {
                     return session.reply("插画不存在或已被删除！")
                 }
+                if (res.data.hasOwnProperty("code") && res.data.code == 400) {
+                    return session.reply("请输入一个合法的插画ID（不需要括号[]）")
+                }
                 sendCard(res.data);
             }).catch((e: any) => {
                 session.sendCard(pixiv.cards.error(e));
