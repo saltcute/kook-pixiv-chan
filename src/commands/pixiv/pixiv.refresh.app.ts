@@ -71,8 +71,8 @@ class Refresh extends AppCommand {
                                 case "Porn":
                                     if (val.probability > 0.9) buffer = await sharp(buffer).blur(42).jpeg().toBuffer();
                                     else if (val.probability > 0.7) buffer = await sharp(buffer).blur(35).jpeg().toBuffer();
-                                    else if (val.probability > 0.5) buffer = await sharp(buffer).blur(14).jpeg().toBuffer();
-                                    if (val.probability > 0.5) NSFW = true;
+                                    else if (val.probability > 0.35) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
+                                    if (val.probability > 0.35) NSFW = true;
                                     break;
                                 case "Sexy":
                                     if (val.probability > 0.8) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
