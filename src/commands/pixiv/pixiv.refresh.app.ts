@@ -11,11 +11,12 @@ class Refresh extends AppCommand {
     trigger = 'refresh'; // 用于触发的文字
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
-        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
         var loadingBarMessageID: string = "null";
         if (session.args.length === 0) {
-            return session.reply("`.pixiv refresh [插画 ID]` 刷新对应 ID 插画的缓存。（当图片显示不正常时，可以在几分钟后运行此命令）")
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+            return session.reply("使用 `.pixiv help refresh` 查询指令详细用法")
         } else {
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             const illust_id = session.args[0].toString();
             if (pixiv.linkmap.isInDatabase(illust_id)) {
                 var rtLink = pixiv.linkmap.getLink(illust_id);

@@ -11,7 +11,6 @@ class Top extends AppCommand {
     trigger = 'top'; // 用于触发的文字
     intro = 'Top illustrations';
     func: AppFunc<BaseSession> = async (session) => {
-        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
         var loadingBarMessageID: string = "null";
         async function sendCard(data: any) {
             var link: string[] = [];
@@ -187,6 +186,7 @@ class Top extends AppCommand {
             }
         }
         if (session.args.length === 0) {
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/ranklist`,
                 method: "GET"
@@ -196,6 +196,7 @@ class Top extends AppCommand {
                 session.sendCard(pixiv.cards.error(e));
             });
         } else {
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/topInTag`,
                 method: "GET",

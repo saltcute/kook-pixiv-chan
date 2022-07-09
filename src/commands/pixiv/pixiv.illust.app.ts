@@ -11,7 +11,6 @@ class Illust extends AppCommand {
     trigger = 'illust'; // 用于触发的文字
     intro = 'Illustration';
     func: AppFunc<BaseSession> = async (session) => {
-        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
         var loadingBarMessageID: string = "null";
         async function sendCard(data: any) {
             var link = "";
@@ -159,8 +158,10 @@ class Illust extends AppCommand {
             }
         }
         if (session.args.length === 0) {
-            return session.reply("`.pixiv illust [插画 ID]` 获取 Pixiv 上对应 ID 的插画")
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+            return session.reply("使用 `.pixiv help illust` 查询指令详细用法")
         } else {
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
                 method: "GET",

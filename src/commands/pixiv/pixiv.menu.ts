@@ -1,6 +1,7 @@
 import { Card, MenuCommand } from 'kbotify';
 import { author } from './pixiv.author.app';
 import { detail } from './pixiv.detail.app';
+import { help } from './pixiv.help.app';
 import { illust } from './pixiv.illust.app';
 import { refresh } from './pixiv.refresh.app';
 import { top } from './pixiv.top.app';
@@ -30,6 +31,16 @@ class PixivMenu extends MenuCommand {
                         "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
                     }
                 ]
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "kmarkdown",
+                    "content": "输入 `.pixiv help` 查询详细指令用法"
+                }
             },
             {
                 "type": "divider"
@@ -74,4 +85,4 @@ class PixivMenu extends MenuCommand {
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh);
+export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh, help);

@@ -11,7 +11,6 @@ class Detail extends AppCommand {
     trigger = 'detail'; // 用于触发的文字
     intro = 'Detail';
     func: AppFunc<BaseSession> = async (session) => {
-        console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
         var loadingBarMessageID: string = "null";
         async function sendCard(data: any) {
             var link = "";
@@ -194,8 +193,10 @@ class Detail extends AppCommand {
             }
         }
         if (session.args.length === 0) {
-            return session.reply("`.pixiv detail [插画 ID]` 获取对应 ID 插画的详细信息（作品名、作者、简介……）")
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+            return session.reply("使用 `.pixiv help detail` 查询指令详细用法")
         } else {
+            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
                 method: "GET",
