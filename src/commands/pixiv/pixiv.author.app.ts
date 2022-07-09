@@ -19,8 +19,8 @@ class Author extends AppCommand {
             async function uploadImage() {
                 for (const k in data) {
                     var val = data[k];
-                    var key = link.length - 1;
-                    if (link.length > 9) break;
+                    var key = link.length;
+                    if (link.length >= 9) break;
                     if (val.x_restrict !== 0) {
                         r18++;
                         continue;
