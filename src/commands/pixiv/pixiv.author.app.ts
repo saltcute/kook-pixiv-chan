@@ -236,7 +236,7 @@ class Author extends AppCommand {
                     return session.reply("用户不存在或此用户没有上传过插画！")
                 }
                 if (res.data.hasOwnProperty("code") && res.data.code == 400) {
-                    return session.reply("请输入一个合法的用户ID（不需要括号[]）")
+                    return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）")
                 }
                 sendCard(res.data);
             }).catch((e: any) => {

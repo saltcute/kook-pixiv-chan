@@ -235,7 +235,7 @@ class Refresh extends AppCommand {
                     });
                 })
             } else {
-                return session.reply(`此插画（${illust_id}）当前没有缓存！`);
+                return session.reply(`此插画（${illust_id}）当前没有缓存！（使用 \`.pixiv help refresh\` 查询指令详细用法）`);
             }
         };
     }

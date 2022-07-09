@@ -173,7 +173,7 @@ class Illust extends AppCommand {
                     return session.reply("插画不存在或已被删除！")
                 }
                 if (res.data.hasOwnProperty("code") && res.data.code == 400) {
-                    return session.reply("请输入一个合法的插画ID（不需要括号[]）")
+                    return session.reply("请输入一个合法的插画ID（使用 `.pixiv help illust` 查询指令详细用法）")
                 }
                 sendCard(res.data);
             }).catch((e: any) => {
