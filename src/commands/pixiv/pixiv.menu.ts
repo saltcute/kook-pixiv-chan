@@ -27,8 +27,8 @@ class PixivMenu extends MenuCommand {
                 "type": "context",
                 "elements": [
                     {
-                        "type": "plain-text",
-                        "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
+                        "type": "kmarkdown",
+                        "content": "如果觉得 Pixiv 酱能帮到你的话，请务必来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评！\n[问题反馈&建议](https://kook.top/iOOsLu)"
                     }
                 ]
             },
