@@ -199,8 +199,11 @@ class Detail extends AppCommand {
             return session.reply("`.pixiv detail [插画 ID]` 获取对应 ID 插画的详细信息（作品名、作者、简介……）")
         } else {
             axios({
-                url: `http://pixiv.lolicon.ac.cn/illustrationDetail?keyword=${session.args[0]}`,
-                method: "GET"
+                url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
+                method: "GET",
+                params: {
+                    keyword: session.args[0]
+                }
             }).then((res: any) => {
                 if (res.data.hasOwnProperty("status") && res.data.status === 404) {
                     return session.reply("插画不存在或已被删除！")

@@ -227,8 +227,11 @@ class Author extends AppCommand {
             return session.reply(`.pixiv author [用户 ID] 获取用户的最新九张插画`)
         } else {
             axios({
-                url: `http://pixiv.lolicon.ac.cn/creatorIllustrations?keyword=${session.args[0]}`,
-                method: "GET"
+                url: `http://pixiv.lolicon.ac.cn/creatorIllustrations`,
+                method: "GET",
+                params: {
+                    keyword: session.args[0]
+                }
             }).then((res: any) => {
                 if (res.data.length === 0) {
                     return session.reply("用户不存在或此用户没有上传过插画！")

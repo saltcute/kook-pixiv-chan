@@ -199,8 +199,11 @@ class Top extends AppCommand {
             });
         } else {
             axios({
-                url: `http://pixiv.lolicon.ac.cn/topInTag?keyword=${session.args[0]}`,
-                method: "GET"
+                url: `http://pixiv.lolicon.ac.cn/topInTag`,
+                method: "GET",
+                params: {
+                    keyword: session.args[0]
+                }
             }).then((res: any) => {
                 sendCard(res.data);
             }).catch((e: any) => {
