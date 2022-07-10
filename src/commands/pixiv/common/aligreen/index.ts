@@ -11,7 +11,7 @@ export namespace aligreen {
                     blurAmount += block;
                     break;
                 case "review":
-                    if (v.rate > 95) {
+                    if (v.rate > 99) {
                         blurAmount += block;
                     } else if (v.rate > 90) {
                         blurAmount += blur;
@@ -29,8 +29,8 @@ export namespace aligreen {
                         switch (v.label) {
                             case "porn":
                                 switch (v.label) {
-                                    case "porn": blur(v, 42, 35, 28); porn = true; break;
-                                    case "sexy": blur(v, 28, 7, 0); porn = true; break;
+                                    case "porn": blur(v, 14, 7, 7); porn = true; break;
+                                    case "sexy": blur(v, 14, 7, 0); porn = true; break;
                                 }
                                 break;
                             case "terrorism":
