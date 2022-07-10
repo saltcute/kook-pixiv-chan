@@ -124,6 +124,11 @@ class Top extends AppCommand {
                     keyword: session.args[0]
                 }
             }).then((res: any) => {
+                if (res.data.length == 0) {
+                    return session.reply(`没有找到任何插画……可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助\n如确定使用方式无误，则没有关于此标签**「${session.args[0]}」**的任何插画，请更换关键词再试一遍`);
+                } else if (res.data.length <= 10) {
+                    session.reply(`关于标签**「${session.args[0]}」**的插画数量极少……Pixiv酱仍会为你获取可用的插画\n但也可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助`);
+                }
                 sendCard(res.data);
             }).catch((e: any) => {
                 session.sendCard(pixiv.cards.error(e));
