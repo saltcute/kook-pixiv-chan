@@ -29,7 +29,7 @@ export namespace aligreen {
                         switch (v.label) {
                             case "porn":
                                 switch (v.label) {
-                                    case "porn": blur(v, 14, 7, 7); porn = true; break;
+                                    case "porn": blur(v, 28, 7, 7); porn = true; break;
                                     case "sexy": blur(v, 14, 7, 0); porn = true; break;
                                 }
                                 break;
