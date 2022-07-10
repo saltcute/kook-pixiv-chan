@@ -15,6 +15,7 @@ class Author extends AppCommand {
         async function sendCard(data: any) {
             var r18 = 0;
             var link: string[] = [];
+            var pid: string[] = [];
             async function uploadImage() {
                 for (const k in data) {
                     var val = data[k];
@@ -26,22 +27,10 @@ class Author extends AppCommand {
                     }
                     if (pixiv.linkmap.isInDatabase(val.id)) {
                         link.push(pixiv.linkmap.getLink(val.id));
+                        pid.push(val.id);
                         continue;
                     } else {
-                        const card = [new Card({
-                            "type": "card",
-                            "theme": "warning",
-                            "size": "lg",
-                            "modules": [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "kmarkdown",
-                                        "content": `正在转存 \`${val.id}_p0.jpg\`，可能需要较长时间……(${key + 1}/9) ${key % 2 == 1 ? ":hourglass_flowing_sand:" : ":hourglass:"}……`
-                                    }
-                                }
-                            ]
-                        })]
+                        const card = [pixiv.cards.author(data[0], r18, link, pid, session, { resave: true, id: val.id })];
                         if (loadingBarMessageID !== "null") {
                             await session.updateMessage(loadingBarMessageID, card)
                         } else {
@@ -49,63 +38,39 @@ class Author extends AppCommand {
                                 if (data.msgSent?.msgId !== undefined) {
                                     loadingBarMessageID = data.msgSent.msgId;
                                 }
-                            });
+                            })
                         }
                     }
 
                     const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re"); // Get image link
-                    console.log(`[${new Date().toLocaleTimeString()}] Resaving... ${master1200}`);
+                    pixiv.common.log(`Resaving... ${master1200}`);
                     var bodyFormData = new FormData();
-                    const stream = got.stream(master1200);                                        // Get readable stream from origin
-                    var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
-                    const detection = await pixiv.nsfwjs.detect(buffer);                          // Detect NSFW
+                    const stream = got.stream(master1200);                               // Get readable stream from origin
                     var NSFW = false;
-                    for (let val of detection) {
-                        switch (val.className) {
-                            case "Hentai":
-                            case "Porn":
-                                if (val.probability > 0.9) buffer = await sharp(buffer).blur(42).jpeg().toBuffer();
-                                else if (val.probability > 0.7) buffer = await sharp(buffer).blur(35).jpeg().toBuffer();
-                                else if (val.probability > 0.5) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
-                                else if (val.probability > 0.3) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
-                                if (val.probability > 0.3) NSFW = true;
-                                break;
-                            case "Sexy":
-                                if (val.probability > 0.8) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
-                                else if (val.probability > 0.6) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
-                                if (val.probability > 0.6) NSFW = true;
-                                break;
-                            case "Drawing":
-                            case "Natural":
-                            default:
-                                break;
-                        }
+                    var blurAmount: number = 0;
+                    var blurReason: pixiv.type.blurReason;
+                    var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
+
+                    if (auth.useAliyunGreen) {                            // Detect NSFW
+                        pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
+                        const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
+                        const result = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
+                        NSFW = result.blur > 0;
+                        blurAmount = result.blur;
+                        blurReason = result.reason;
+                        pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
+                    } else {
+                        pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);
+                        const result = await pixiv.nsfwjs.getBlurAmount(buffer);
+                        NSFW = result.blur > 0;
+                        blurAmount = result.blur;
+                        blurReason = result.reason;
+                        pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                     }
                     if (NSFW) {
-                        console.log(`[${new Date().toLocaleTimeString()}] Image is NSFW, blurred.`);
-                        session.updateMessage(loadingBarMessageID, [{
-                            "type": "card",
-                            "theme": "warning",
-                            "size": "lg",
-                            "modules": [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "kmarkdown",
-                                        "content": `\`${val.id}_p0.jpg\` 含有不宜内容，已自动添加模糊。`
-                                    }
-                                },
-                                {
-                                    "type": "context",
-                                    "elements": [
-                                        {
-                                            "type": "plain-text",
-                                            "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }])
+                        pixiv.common.log(`Image is NSFW, blurred.`);
+                        session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
+                        buffer = await sharp(buffer).blur(blurAmount).jpeg().toBuffer();
                     }
                     bodyFormData.append('file', buffer, "1.jpg");
                     var rtLink = "";
@@ -126,6 +91,7 @@ class Author extends AppCommand {
                         }
                     });
                     link.push(rtLink);
+                    pid.push(val.id);
                     pixiv.linkmap.addLink(val.id, rtLink);
                 }
             }
@@ -140,91 +106,19 @@ class Author extends AppCommand {
             }
             while (link.length <= 9) {
                 link.push(pixiv.common.akarin);
+                pid.push("没有了");
             }
-            const card = [new Card({
-                "type": "card",
-                "theme": "info",
-                "size": "lg",
-                "modules": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "kmarkdown",
-                            "content": `${(() => {
-                                if (r18 > 9) {
-                                    return `(spl)**${data[0].user.name}**(spl) 不可以涩涩`;
-                                } else {
-                                    return `**${data[0].user.name}**`
-                                }
-                            })()}`
-                        }
-                    },
-                    {
-                        "type": "context",
-                        "elements": [
-                            {
-                                "type": "kmarkdown",
-                                "content": `[uid ${data[0].user.uid}](https://www.pixiv.net/users/${data[0].user.uid})`
-                            }
-                        ]
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "image-group",
-                        "elements": [
-                            {
-                                "type": "image",
-                                "src": link[0]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[1]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[2]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[3]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[4]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[5]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[6]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[7]
-                            },
-                            {
-                                "type": "image",
-                                "src": link[8]
-                            }
-                        ]
-                    }
-                ]
-            })]
             if (loadingBarMessageID == "null") {
-                session.sendCard(card)
+                session.sendCard(pixiv.cards.author(data[0], r18, link, pid, session, {}))
             } else {
-                session.updateMessage(loadingBarMessageID, card);
+                session.updateMessage(loadingBarMessageID, [pixiv.cards.author(data[0], r18, link, pid, session, {})]);
             }
         }
         if (session.args.length === 0) {
-            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help author` 查询指令详细用法")
         } else {
-            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
+            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/creatorIllustrations`,
                 method: "GET",

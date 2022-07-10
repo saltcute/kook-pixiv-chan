@@ -1,12 +1,13 @@
 import fs from 'fs';
 import upath from 'upath';
+import { common } from '..';
 
 var map: any;
 export namespace linkmap {
     export function load(): void {
         if (fs.existsSync(upath.join(__dirname, "map.json"))) {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
-            console.log(`[${new Date().toLocaleTimeString()}] Loaded "linkmap.json"`);
+            common.log(`Loaded "linkmap.json"`);
         } else {
             map = {};
         }
@@ -35,11 +36,11 @@ export namespace linkmap {
     export function saveLink() {
         fs.writeFile(upath.join(__dirname, "map.json"), JSON.stringify(map), (err) => {
             if (err) {
-                console.log(`[${new Date().toLocaleTimeString()}] Saving "linkmap.json" failed, error message: `);
+                common.log(`Saving "linkmap.json" failed, error message: `);
                 console.log(err);
             }
             else {
-                console.log(`[${new Date().toLocaleTimeString()}] Saved "linkmap.json"`);
+                common.log(`Saved "linkmap.json"`);
             }
         });
     }

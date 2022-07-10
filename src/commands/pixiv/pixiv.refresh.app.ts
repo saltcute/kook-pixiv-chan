@@ -13,10 +13,10 @@ class Refresh extends AppCommand {
     func: AppFunc<BaseSession> = async (session) => {
         var loadingBarMessageID: string = "null";
         if (session.args.length === 0) {
-            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help refresh` 查询指令详细用法")
         } else {
-            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
+            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             const illust_id = session.args[0].toString();
             if (pixiv.linkmap.isInDatabase(illust_id)) {
                 var rtLink = pixiv.linkmap.getLink(illust_id);
@@ -24,13 +24,13 @@ class Refresh extends AppCommand {
                     return session.reply("插画因为 R-18/R-18G 无法刷新缓存");
                 }
                 var loadingBarMessageID: string;
-                console.log(`[${new Date().toLocaleTimeString()}] Refreshing ${illust_id}_0.jpg`);
+                pixiv.common.log(`Refreshing ${illust_id}_0.jpg`);
                 axios({
                     url: rtLink,
                     method: "GET"
                 }).then((res) => {
                     session.reply("插画可以正常访问！");
-                    console.log(`[${new Date().toLocaleTimeString()}] ${illust_id}_0.jpg is normal, skipped.`);
+                    pixiv.common.log(`${illust_id}_0.jpg is normal, skipped.`);
                 }).catch(async () => {
                     axios.get(`http://pixiv.lolicon.ac.cn/illustrationDetail?keyword=${illust_id}`, {
                     }).then(async (res: any) => {
@@ -60,58 +60,34 @@ class Refresh extends AppCommand {
                             }
                         });
                         const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re"); // Get image link
-                        console.log(`[${new Date().toLocaleTimeString()}] Resaving... ${master1200}`);
+                        pixiv.common.log(`Resaving... ${master1200}`);
                         var bodyFormData = new FormData();
-                        const stream = got.stream(master1200);                                        // Get readable stream from origin
-                        var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
-                        const detection = await pixiv.nsfwjs.detect(buffer);                          // Detect NSFW
+                        const stream = got.stream(master1200);                               // Get readable stream from origin
                         var NSFW = false;
-                        for (let val of detection) {
-                            switch (val.className) {
-                                case "Hentai":
-                                case "Porn":
-                                    if (val.probability > 0.9) buffer = await sharp(buffer).blur(42).jpeg().toBuffer();
-                                    else if (val.probability > 0.7) buffer = await sharp(buffer).blur(35).jpeg().toBuffer();
-                                    else if (val.probability > 0.5) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
-                                    else if (val.probability > 0.3) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
-                                    if (val.probability > 0.3) NSFW = true;
-                                    break;
-                                case "Sexy":
-                                    if (val.probability > 0.8) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
-                                    else if (val.probability > 0.6) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
-                                    if (val.probability > 0.6) NSFW = true;
-                                    break;
-                                case "Drawing":
-                                case "Natural":
-                                default:
-                                    break;
-                            }
+                        var blurAmount: number = 0;
+                        var blurReason: pixiv.type.blurReason;
+                        var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
+
+                        if (auth.useAliyunGreen) {                            // Detect NSFW
+                            pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
+                            const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
+                            const result = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
+                            NSFW = result.blur > 0;
+                            blurAmount = result.blur;
+                            blurReason = result.reason;
+                            pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
+                        } else {
+                            pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);
+                            const result = await pixiv.nsfwjs.getBlurAmount(buffer);
+                            NSFW = result.blur > 0;
+                            blurAmount = result.blur;
+                            blurReason = result.reason;
+                            pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                         }
                         if (NSFW) {
-                            console.log(`[${new Date().toLocaleTimeString()}] Image is NSFW, blurred.`);
-                            session.updateMessage(loadingBarMessageID, [{
-                                "type": "card",
-                                "theme": "warning",
-                                "size": "lg",
-                                "modules": [
-                                    {
-                                        "type": "section",
-                                        "text": {
-                                            "type": "kmarkdown",
-                                            "content": `\`${val.id}_p0.jpg\` 含有不宜内容，已自动添加模糊。`
-                                        }
-                                    },
-                                    {
-                                        "type": "context",
-                                        "elements": [
-                                            {
-                                                "type": "plain-text",
-                                                "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }])
+                            pixiv.common.log(`Image is NSFW, blurred.`);
+                            session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
+                            buffer = await sharp(buffer).blur(blurAmount).jpeg().toBuffer();
                         }
                         bodyFormData.append('file', buffer, "1.jpg");
                         var rtLink = "";

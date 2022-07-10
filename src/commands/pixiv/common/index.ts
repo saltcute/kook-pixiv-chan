@@ -1,13 +1,31 @@
 export * from './cards';
 export * from './linkmap';
 export * from './nsfwjs'
+export * from './aligreen'
 import base64url from 'base64url';
 import crypto from 'crypto';
 import { tagBanList } from './tagBanList';
 import { Stream } from 'form-data';
 
+export namespace type {
+    export type detectionResult = { blur: number, reason: blurReason }
+    export type blurReason = { terrorism: boolean, ad: boolean, live: boolean, porn: boolean };
+}
+
 export namespace common {
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
+
+    export function pid2Markdown(pid: string) {
+        if (isNaN(parseInt(pid))) {
+            return pid;
+        } else {
+            return `[${pid}](https://www.pixiv.net/artworks/${pid})`;
+        }
+    }
+
+    export function log(output: string) {
+        console.log(`[${new Date().toLocaleTimeString()}] ${output}`);
+    }
 
     export function isForbittedTag(tag: string) {
         if (tagBanList.includes(tag)) {
@@ -15,15 +33,6 @@ export namespace common {
         } else {
             return false;
         }
-    }
-
-    /**
-     * Generate a safe base64 string token that is URL-safe
-     * @param size Determines how many bytes of data is to be generated
-     * @returns URL-safe base64 string
-     */
-    export function tokenBase64(size: number): string {
-        return base64url(crypto.randomBytes(size));
     }
 
     export async function stream2buffer(stream: Stream): Promise<Buffer> {

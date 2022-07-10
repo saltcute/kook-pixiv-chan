@@ -2,6 +2,7 @@ import { Card, AppCommand, AppFunc, BaseSession } from 'kbotify';
 import auth from '../../configs/auth';
 import * as pixiv from './common';
 import axios from 'axios';
+import { read } from 'fs';
 const FormData = require('form-data');
 const sharp = require('sharp');
 const got = require('got');
@@ -48,58 +49,34 @@ class Detail extends AppCommand {
                 }
 
                 const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re"); // Get image link
-                console.log(`[${new Date().toLocaleTimeString()}] Resaving... ${master1200}`);
+                pixiv.common.log(`Resaving... ${master1200}`);
                 var bodyFormData = new FormData();
-                const stream = got.stream(master1200);                                        // Get readable stream from origin
-                var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
-                const detection = await pixiv.nsfwjs.detect(buffer);                          // Detect NSFW
+                const stream = got.stream(master1200);                               // Get readable stream from origin
                 var NSFW = false;
-                for (let val of detection) {
-                    switch (val.className) {
-                        case "Hentai":
-                        case "Porn":
-                            if (val.probability > 0.9) buffer = await sharp(buffer).blur(42).jpeg().toBuffer();
-                            else if (val.probability > 0.7) buffer = await sharp(buffer).blur(35).jpeg().toBuffer();
-                            else if (val.probability > 0.5) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
-                            else if (val.probability > 0.3) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
-                            if (val.probability > 0.3) NSFW = true;
-                            break;
-                        case "Sexy":
-                            if (val.probability > 0.8) buffer = await sharp(buffer).blur(21).jpeg().toBuffer();
-                            else if (val.probability > 0.6) buffer = await sharp(buffer).blur(7).jpeg().toBuffer();
-                            if (val.probability > 0.6) NSFW = true;
-                            break;
-                        case "Drawing":
-                        case "Natural":
-                        default:
-                            break;
-                    }
+                var blurAmount: number = 0;
+                var blurReason: pixiv.type.blurReason;
+                var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
+
+                if (auth.useAliyunGreen) {                            // Detect NSFW
+                    pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
+                    const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
+                    const result = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
+                    NSFW = result.blur > 0;
+                    blurAmount = result.blur;
+                    blurReason = result.reason;
+                    pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
+                } else {
+                    pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);
+                    const result = await pixiv.nsfwjs.getBlurAmount(buffer);
+                    NSFW = result.blur > 0;
+                    blurAmount = result.blur;
+                    blurReason = result.reason;
+                    pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                 }
                 if (NSFW) {
-                    console.log(`[${new Date().toLocaleTimeString()}] Image is NSFW, blurred.`);
-                    session.updateMessage(loadingBarMessageID, [{
-                        "type": "card",
-                        "theme": "warning",
-                        "size": "lg",
-                        "modules": [
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "kmarkdown",
-                                    "content": `\`${val.id}_p0.jpg\` 含有不宜内容，已自动添加模糊。`
-                                }
-                            },
-                            {
-                                "type": "context",
-                                "elements": [
-                                    {
-                                        "type": "plain-text",
-                                        "content": "请避免主动查询 擦边球/R-18/R-18G 插画"
-                                    }
-                                ]
-                            }
-                        ]
-                    }])
+                    pixiv.common.log("Image is NSFW, blurred.");
+                    session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
+                    buffer = await sharp(buffer).blur(blurAmount).jpeg().toBuffer();
                 }
                 bodyFormData.append('file', buffer, "1.jpg");
                 var rtLink = "";
@@ -109,7 +86,7 @@ class Detail extends AppCommand {
                     url: "https://www.kookapp.cn/api/v3/asset/create",
                     data: bodyFormData,
                     headers: {
-                        'Authorization': `Bot ${auth.khltoken}`,
+                        'Authorization': `Bot ${auth.khltoken} `,
                         ...bodyFormData.getHeaders()
                     }
                 }).then((res: any) => {
@@ -132,13 +109,14 @@ class Detail extends AppCommand {
                         "type": "section",
                         "text": {
                             "type": "kmarkdown",
-                            "content": `**${(() => {
+                            "content": `** ${(() => {
                                 if (data.x_restrict == 0) {
                                     return data.title;
                                 } else {
                                     return `不可以涩涩`
                                 }
-                            })()}**`
+                            })()
+                                }** `
                         }
                     },
                     {
@@ -146,7 +124,7 @@ class Detail extends AppCommand {
                         "elements": [
                             {
                                 "type": "kmarkdown",
-                                "content": `**[${data.user.name}](https://www.pixiv.net/users/${data.user.uid})**(${data.user.uid}) | [pid ${data.id}](https://www.pixiv.net/artworks/${data.id})`
+                                "content": `** [${data.user.name}](https://www.pixiv.net/users/${data.user.uid})**(${data.user.uid}) | [pid ${data.id}](https://www.pixiv.net/artworks/${data.id})`
                             }
                         ]
                     },
@@ -174,7 +152,7 @@ class Detail extends AppCommand {
                                     if (data.x_restrict == 0) {
                                         var str = ""
                                         for (const val of data.tags) {
-                                            str += `[#${val.name}](https://www.pixiv.net/tags/${val.name}/illustrations) `
+                                            str += `[#${val.name}](https://www.pixiv.net/tags/${val.name.replace(")", "\\)")}/illustrations)${val.translated_name == null ? "" : ` ${val.translated_name}`} `
                                         }
                                         return str;
                                     } else {
@@ -193,10 +171,10 @@ class Detail extends AppCommand {
             }
         }
         if (session.args.length === 0) {
-            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help detail` 查询指令详细用法")
         } else {
-            console.log(`[${new Date().toLocaleTimeString()}] From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
+            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
                 method: "GET",

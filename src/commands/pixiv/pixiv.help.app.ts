@@ -6,30 +6,44 @@ class Help extends AppCommand {
     intro = 'Help';
     func: AppFunc<BaseSession> = async (session) => {
         if (session.args.length == 0) {
-            return session.sendCard([{
-                "type": "card",
-                "theme": "warning",
-                "size": "lg",
-                "modules": [
-                    {
-                        "type": "header",
-                        "text": {
-                            "type": "plain-text",
-                            "content": ".pixiv help"
+            return session.sendCard([
+                {
+                    "type": "card",
+                    "theme": "warning",
+                    "size": "lg",
+                    "modules": [
+                        {
+                            "type": "header",
+                            "text": {
+                                "type": "plain-text",
+                                "content": ".pixiv help"
+                            }
+                        },
+                        {
+                            "type": "divider"
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "kmarkdown",
+                                "content": "`.pixiv help [指令]` 查询指令的详细用法\n  例：`.pixiv help top`\n        `.pixiv help detail`\n        `.pixiv help refresh`"
+                            }
+                        },
+                        {
+                            "type": "divider"
+                        },
+                        {
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "kmarkdown",
+                                    "content": ".pixiv top 的本月排名或自定义时间排名在做了:dove::dove::dove:"
+                                }
+                            ]
                         }
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "kmarkdown",
-                            "content": "`.pixiv help [指令]` 查询指令的详细用法\n  例：`.pixiv help top`\n        `.pixiv help detail`\n        `.pixiv help refresh`"
-                        }
-                    }
-                ]
-            }]);
+                    ]
+                }
+            ]);
         }
         switch (session.args[0]) {
             case "top":
