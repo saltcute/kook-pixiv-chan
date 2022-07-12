@@ -23,7 +23,7 @@ export namespace nsfwjs {
     }
     export async function getBlurAmount(buffer: Buffer): Promise<type.detectionResult> {
         var blurAmount = 0;
-        var NSFW = false;
+        var NSFW = { ban: false, probability: 100 };
         await detect(buffer).then((res) => {
             for (let val of res) {
                 switch (val.className) {
@@ -33,12 +33,12 @@ export namespace nsfwjs {
                         else if (val.probability > 0.7) blurAmount += 35;
                         else if (val.probability > 0.5) blurAmount += 21;
                         else if (val.probability > 0.3) blurAmount += 7;
-                        if (val.probability > 0.3) NSFW = true;
+                        if (val.probability > 0.3) NSFW = { ban: true, probability: val.probability };
                         break;
                     case "Sexy":
                         if (val.probability > 0.8) blurAmount += 21;
                         else if (val.probability > 0.6) blurAmount += 7;
-                        if (val.probability > 0.6) NSFW = true;
+                        if (val.probability > 0.6) NSFW = { ban: true, probability: val.probability };
                         break;
                     case "Drawing":
                     case "Natural":
@@ -52,10 +52,10 @@ export namespace nsfwjs {
         return {
             blur: blurAmount,
             reason: {
-                terrorism: false,
-                ad: false,
-                live: false,
-                porn: blurAmount > 0 ? true : false
+                terrorism: { ban: false, probability: 100 },
+                ad: { ban: false, probability: 100 },
+                live: { ban: false, probability: 100 },
+                porn: NSFW
             }
         };
     }

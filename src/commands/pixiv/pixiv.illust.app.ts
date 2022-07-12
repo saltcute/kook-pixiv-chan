@@ -17,12 +17,11 @@ class Illust extends AppCommand {
             async function uploadImage() { // Upload image
                 const val = data;
                 if (val.x_restrict !== 0) { // Reject explicit R-18 or R-18G illustrations
-                    link = "https://img.kaiheila.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
-                    pixiv.linkmap.addLink(val.id, link);
+                    link = pixiv.common.akarin;
                     return;
                 }
                 if (pixiv.linkmap.isInDatabase(val.id)) {  // Return link if exist in linkmap
-                    link = pixiv.linkmap.getLink(val.id);
+                    link = pixiv.linkmap.getLink(val.id, "0");
                     return;
                 } else {                                   // Send loading message to user
                     await session.sendCard([
@@ -51,31 +50,24 @@ class Illust extends AppCommand {
                 pixiv.common.log(`Resaving... ${master1200}`);
                 var bodyFormData = new FormData();
                 const stream = got.stream(master1200);                               // Get readable stream from origin
-                var NSFW = false;
                 var blurAmount: number = 0;
-                var blurReason: pixiv.type.blurReason;
+                var detectionResult: pixiv.type.detectionResult;
                 var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
 
                 if (auth.useAliyunGreen) {                            // Detect NSFW
                     pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
                     const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
-                    const result = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
-                    NSFW = result.blur > 0;
-                    blurAmount = result.blur;
-                    blurReason = result.reason;
+                    detectionResult = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
                     pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                 } else {
                     pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);
-                    const result = await pixiv.nsfwjs.getBlurAmount(buffer);
-                    NSFW = result.blur > 0;
-                    blurAmount = result.blur;
-                    blurReason = result.reason;
+                    detectionResult = await pixiv.nsfwjs.getBlurAmount(buffer);
                     pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                 }
-                if (NSFW) {
+                if (detectionResult.blur > 0) {
                     pixiv.common.log(`Image is NSFW, blurred.`);
                     session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
-                    buffer = await sharp(buffer).blur(blurAmount).jpeg().toBuffer();
+                    buffer = await sharp(buffer).blur(detectionResult.blur).jpeg().toBuffer();
                 }
                 bodyFormData.append('file', buffer, "1.jpg");
                 var rtLink = "";
@@ -85,7 +77,7 @@ class Illust extends AppCommand {
                     url: "https://www.kookapp.cn/api/v3/asset/create",
                     data: bodyFormData,
                     headers: {
-                        'Authorization': `Bot ${auth.khltoken}`,
+                        'Authorization': `Bot ${auth.khltoken} `,
                         ...bodyFormData.getHeaders()
                     }
                 }).then((res: any) => {
@@ -95,8 +87,8 @@ class Illust extends AppCommand {
                         session.sendCard(pixiv.cards.error(e));
                     }
                 });
+                pixiv.linkmap.addLink(val.id, "0", rtLink, detectionResult);
                 link = rtLink;
-                pixiv.linkmap.addLink(val.id, rtLink);
             }
             await uploadImage();
             const card = [new Card({

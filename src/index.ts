@@ -10,6 +10,7 @@ if (auth.useAliyunGreen === false) {
     pixiv.nsfwjs.init();
 }
 
+// setInterval(saveLinkmap, 30 * 1000); // 15 minutes
 setInterval(saveLinkmap, 15 * 60 * 1000); // 15 minutes
 
 if (auth.enableBotMarket) {

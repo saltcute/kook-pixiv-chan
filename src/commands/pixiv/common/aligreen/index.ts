@@ -4,7 +4,11 @@ import { type } from '../'
 export namespace aligreen {
     export async function imageDetectionSync(imageURL: string): Promise<type.detectionResult> {
         var blurAmount = 0;
-        var porn = false, terrorism = false, ad = false, live = false;
+        var porn: type.banResult, terrorism: type.banResult, ad: type.banResult, live: type.banResult;
+        porn = terrorism = ad = live = {
+            ban: false,
+            probability: 100
+        }
         function blur(v: any, block: number, blur: number, dodge: number) {
             switch (v.suggestion) {
                 case "block":
@@ -29,8 +33,8 @@ export namespace aligreen {
                         switch (v.label) {
                             case "porn":
                                 switch (v.label) {
-                                    case "porn": blur(v, 28, 7, 7); porn = true; break;
-                                    case "sexy": blur(v, 14, 7, 0); porn = true; break;
+                                    case "porn": blur(v, 21, 7, 7); porn = { ban: true, probability: v.rate }; break;
+                                    case "sexy": blur(v, 14, 7, 0); porn = { ban: true, probability: v.rate }; break;
                                 }
                                 break;
                             case "terrorism":
@@ -38,10 +42,10 @@ export namespace aligreen {
                                     case "flag":
                                     case "logo":
                                     case "location":
-                                    case "politics": blur(v, 42, 42, 35); terrorism = true; break;
+                                    case "politics": blur(v, 42, 42, 35); terrorism = { ban: true, probability: v.rate }; break;
                                     case "drug":
                                     case "bloody":
-                                    case "others": blur(v, 42, 28, 14); terrorism = true; break;
+                                    case "others": blur(v, 42, 28, 14); terrorism = { ban: true, probability: v.rate }; break;
                                 }
                                 break;
                             case "ad":
@@ -55,12 +59,12 @@ export namespace aligreen {
                                     case "politics":
                                     case "terrorism":
                                     case "contraband":
-                                    case "programCode": blur(v, 42, 42, 35); ad = true; break;
+                                    case "programCode": blur(v, 42, 42, 35); ad = { ban: true, probability: v.rate }; break;
                                 }
                                 break;
                             case "live":
                                 switch (v.label) {
-                                    case "drug": blur(v, 42, 28, 14); live = true; break;
+                                    case "drug": blur(v, 42, 28, 14); live = { ban: true, probability: v.rate }; break;
                                 }
                                 break;
                         }

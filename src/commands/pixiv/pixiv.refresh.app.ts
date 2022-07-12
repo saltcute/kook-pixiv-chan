@@ -2,6 +2,7 @@ import { Card, AppCommand, AppFunc, BaseSession } from 'kbotify';
 import auth from '../../configs/auth';
 import * as pixiv from './common';
 import axios from 'axios';
+import { illust } from './pixiv.illust.app';
 const FormData = require('form-data');
 const sharp = require('sharp');
 const got = require('got');
@@ -19,7 +20,7 @@ class Refresh extends AppCommand {
             pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             const illust_id = session.args[0].toString();
             if (pixiv.linkmap.isInDatabase(illust_id)) {
-                var rtLink = pixiv.linkmap.getLink(illust_id);
+                var rtLink = pixiv.linkmap.getLink(illust_id, "0")
                 if (rtLink == "https://img.kaiheila.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg") {
                     return session.reply("插画因为 R-18/R-18G 无法刷新缓存");
                 }
@@ -60,31 +61,24 @@ class Refresh extends AppCommand {
                     pixiv.common.log(`Resaving... ${master1200}`);
                     var bodyFormData = new FormData();
                     const stream = got.stream(master1200);                               // Get readable stream from origin
-                    var NSFW = false;
                     var blurAmount: number = 0;
-                    var blurReason: pixiv.type.blurReason;
+                    var detectionResult: pixiv.type.detectionResult;
                     var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
 
                     if (auth.useAliyunGreen) {                            // Detect NSFW
                         pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
                         const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
-                        const result = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
-                        NSFW = result.blur > 0;
-                        blurAmount = result.blur;
-                        blurReason = result.reason;
+                        detectionResult = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
                         pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                     } else {
                         pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);
-                        const result = await pixiv.nsfwjs.getBlurAmount(buffer);
-                        NSFW = result.blur > 0;
-                        blurAmount = result.blur;
-                        blurReason = result.reason;
+                        detectionResult = await pixiv.nsfwjs.getBlurAmount(buffer);
                         pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                     }
-                    if (NSFW) {
+                    if (detectionResult.blur > 0) {
                         pixiv.common.log(`Image is NSFW, blurred.`);
                         session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
-                        buffer = await sharp(buffer).blur(blurAmount).jpeg().toBuffer();
+                        buffer = await sharp(buffer).blur(detectionResult.blur).jpeg().toBuffer();
                     }
                     bodyFormData.append('file', buffer, "1.jpg");
                     var rtLink = "";
@@ -94,7 +88,7 @@ class Refresh extends AppCommand {
                         url: "https://www.kookapp.cn/api/v3/asset/create",
                         data: bodyFormData,
                         headers: {
-                            'Authorization': `Bot ${auth.khltoken}`,
+                            'Authorization': `Bot ${auth.khltoken} `,
                             ...bodyFormData.getHeaders()
                         }
                     }).then((res: any) => {
@@ -104,7 +98,6 @@ class Refresh extends AppCommand {
                             session.sendCard(pixiv.cards.error(e));
                         }
                     });
-
                     var uncensored = false;
                     for (let i = 1; i <= 5; ++i) {
                         await axios({
@@ -143,66 +136,68 @@ class Refresh extends AppCommand {
                                     "type": "section",
                                     "text": {
                                         "type": "kmarkdown",
-                                        "content": `给 \`${val.id}_p0.jpg\` 施加了超过 100+px 高斯模糊都救不回来…？属于是世间奇图了，请务必反馈到 Pixiv 酱的交流服务器中`
+                                        "content": `给 \`${val.id}_p0.jpg\` 施加了超过 100px 高斯模糊都救不回来…？属于是世间奇图了，请务必反馈到 Pixiv 酱的[交流服务器](https://kook.top/iOOsLu)中`
                                     }
                                 }
                             ]
                         }])
-                    }
-                    session.updateMessage(loadingBarMessageID, [{ // Send detail
-                        "type": "card",
-                        "theme": "info",
-                        "size": "lg",
-                        "modules": [
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "kmarkdown",
-                                    "content": `**${val.title}**`
+                        pixiv.linkmap.addLink(val.id, "0", pixiv.common.akarin, detectionResult);
+                    } else {
+                        session.updateMessage(loadingBarMessageID, [{ // Send detail
+                            "type": "card",
+                            "theme": "info",
+                            "size": "lg",
+                            "modules": [
+                                {
+                                    "type": "section",
+                                    "text": {
+                                        "type": "kmarkdown",
+                                        "content": `**${val.title}**`
+                                    }
+                                },
+                                {
+                                    "type": "context",
+                                    "elements": [
+                                        {
+                                            "type": "kmarkdown",
+                                            "content": `**[${val.user.name}](https://www.pixiv.net/users/${val.user.uid})**(${val.user.uid}) | [pid ${val.id}](https://www.pixiv.net/artworks/${val.id})`
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "divider"
+                                },
+                                {
+                                    "type": "container",
+                                    "elements": [
+                                        {
+                                            "type": "image",
+                                            "src": rtLink
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "divider"
+                                },
+                                {
+                                    "type": "context",
+                                    "elements": [
+                                        {
+                                            "type": "kmarkdown",
+                                            "content": `${((): string => {
+                                                var str = ""
+                                                for (const v of val.tags) {
+                                                    str += `[#${v.name}](https://www.pixiv.net/tags/${v.name.replace(")", "\\)")}/illustrations)${v.translated_name == null ? "" : ` ${v.translated_name}`} `
+                                                }
+                                                return str;
+                                            })()}`
+                                        }
+                                    ]
                                 }
-                            },
-                            {
-                                "type": "context",
-                                "elements": [
-                                    {
-                                        "type": "kmarkdown",
-                                        "content": `**[${val.user.name}](https://www.pixiv.net/users/${val.user.uid})**(${val.user.uid}) | [pid ${val.id}](https://www.pixiv.net/artworks/${val.id})`
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "divider"
-                            },
-                            {
-                                "type": "container",
-                                "elements": [
-                                    {
-                                        "type": "image",
-                                        "src": rtLink
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "divider"
-                            },
-                            {
-                                "type": "context",
-                                "elements": [
-                                    {
-                                        "type": "kmarkdown",
-                                        "content": `${((): string => {
-                                            var str = ""
-                                            for (const v of val.tags) {
-                                                str += `[#${v.name}](https://www.pixiv.net/tags/${v.name.replace(")", "\\)")}/illustrations)${v.translated_name == null ? "" : ` ${v.translated_name}`} `
-                                            }
-                                            return str;
-                                        })()}`
-                                    }
-                                ]
-                            }
-                        ]
-                    }]);
-                    pixiv.linkmap.addLink(illust_id, rtLink);
+                            ]
+                        }]);
+                        pixiv.linkmap.addLink(val.id, "0", rtLink, detectionResult);
+                    }
                 }).catch((e: any) => {
                     session.sendCard(pixiv.cards.error(e));
                 });

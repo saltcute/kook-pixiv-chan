@@ -1,9 +1,23 @@
 import fs from 'fs';
+import { NSFWJS } from 'nsfwjs';
 import upath from 'upath';
-import { common } from '..';
+import { common, type } from '..';
 
-var map: any;
 export namespace linkmap {
+    var map: {
+        [key: string]: {
+            [key: string]: linkmap
+        }
+    };
+    type linkmap = {
+        kookLink: string,
+        NSFWResult: type.detectionResult,
+        suggestion: {
+            ban: boolean
+            blurAmount: number
+        }
+    }
+
     export function load(): void {
         if (fs.existsSync(upath.join(__dirname, "map.json"))) {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
@@ -21,16 +35,28 @@ export namespace linkmap {
         }
     }
 
-    export function getLink(illustID: string): string {
+    export function getLink(illustID: string, page: string): string {
         if (isInDatabase(illustID)) {
-            return map[illustID];
+            return map[illustID][page].kookLink;
         } else {
             return "";
         }
     }
 
-    export function addLink(illustID: string, illustLink: string): void {
-        map[illustID] = illustLink;
+    export function addLink(illustID: string, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
+        map = {
+            ...map,
+            [illustID]: {
+                [illustPage]: {
+                    kookLink: illustLink,
+                    NSFWResult: detectionResult,
+                    suggestion: {
+                        ban: detectionResult.blur > 0,
+                        blurAmount: detectionResult.blur
+                    }
+                }
+            }
+        };
     }
 
     export function saveLink() {

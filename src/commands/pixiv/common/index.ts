@@ -8,8 +8,20 @@ import { tagBanList } from './tagBanList';
 import { Stream } from 'form-data';
 
 export namespace type {
-    export type detectionResult = { blur: number, reason: blurReason }
-    export type blurReason = { terrorism: boolean, ad: boolean, live: boolean, porn: boolean };
+    export type detectionResult = {
+        blur: number,
+        reason: blurReason
+    }
+    export type blurReason = {
+        terrorism: banResult,
+        ad: banResult,
+        live: banResult,
+        porn: banResult,
+    };
+    export type banResult = {
+        ban: boolean,
+        probability: number
+    }
 }
 
 export namespace common {
