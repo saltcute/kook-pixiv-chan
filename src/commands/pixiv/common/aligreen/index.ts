@@ -9,14 +9,16 @@ export namespace aligreen {
             ban: false,
             probability: 100
         }
-        function blur(v: any, block: number, hide: number, blur: number, dodge: number) {
+        function blur(v: any, block: number, censor: number, hide: number, blur: number, dodge: number) {
             switch (v.suggestion) {
                 case "block":
                     blurAmount += block;
                     break;
                 case "review":
-                    if (v.rate > 99) {
+                    if (v.rate == 100) {
                         blurAmount += block;
+                    } else if (v.rate > 99) {
+                        blurAmount += censor;
                     } else if (v.rate > 95) {
                         blurAmount += hide;
                     } else if (v.rate > 90) {
@@ -35,8 +37,8 @@ export namespace aligreen {
                         switch (v.scene) {
                             case "porn":
                                 switch (v.label) {
-                                    case "porn": blur(v, 21, 14, 7, 7); porn = { ban: true, label: v.label, probability: v.rate }; break;
-                                    case "sexy": blur(v, 14, 7, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "porn": blur(v, 21, 21, 14, 7, 7); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "sexy": blur(v, 7, 0, 0, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "terrorism":
@@ -44,10 +46,10 @@ export namespace aligreen {
                                     case "flag":
                                     case "logo":
                                     case "location":
-                                    case "politics": blur(v, 35, 35, 35, 21); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "politics": blur(v, 42, 35, 35, 35, 21); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
                                     case "drug":
                                     case "bloody":
-                                    case "others": blur(v, 42, 28, 21, 14); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "others": blur(v, 42, 35, 28, 21, 14); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "ad":
@@ -61,12 +63,12 @@ export namespace aligreen {
                                     case "politics":
                                     case "terrorism":
                                     case "contraband":
-                                    case "programCode": blur(v, 35, 35, 35, 21); ad = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "programCode": blur(v, 42, 35, 35, 35, 21); ad = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "live":
                                 switch (v.label) {
-                                    case "drug": blur(v, 35, 35, 35, 21); live = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "drug": blur(v, 42, 35, 35, 35, 21); live = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                         }
