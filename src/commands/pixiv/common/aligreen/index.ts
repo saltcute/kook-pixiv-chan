@@ -30,11 +30,11 @@ export namespace aligreen {
             if (data.code == 200) {
                 for (const val of data.data) {
                     for (const v of val.results) {
-                        switch (v.label) {
+                        switch (v.scene) {
                             case "porn":
                                 switch (v.label) {
-                                    case "porn": blur(v, 21, 7, 7); porn = { ban: true, probability: v.rate }; break;
-                                    case "sexy": blur(v, 14, 7, 0); porn = { ban: true, probability: v.rate }; break;
+                                    case "porn": blur(v, 21, 7, 7); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "sexy": blur(v, 14, 7, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "terrorism":
@@ -42,10 +42,10 @@ export namespace aligreen {
                                     case "flag":
                                     case "logo":
                                     case "location":
-                                    case "politics": blur(v, 42, 42, 35); terrorism = { ban: true, probability: v.rate }; break;
+                                    case "politics": blur(v, 42, 42, 35); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
                                     case "drug":
                                     case "bloody":
-                                    case "others": blur(v, 42, 28, 14); terrorism = { ban: true, probability: v.rate }; break;
+                                    case "others": blur(v, 42, 28, 14); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "ad":
@@ -59,12 +59,12 @@ export namespace aligreen {
                                     case "politics":
                                     case "terrorism":
                                     case "contraband":
-                                    case "programCode": blur(v, 42, 42, 35); ad = { ban: true, probability: v.rate }; break;
+                                    case "programCode": blur(v, 42, 42, 35); ad = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "live":
                                 switch (v.label) {
-                                    case "drug": blur(v, 42, 28, 14); live = { ban: true, probability: v.rate }; break;
+                                    case "drug": blur(v, 42, 28, 14); live = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                         }

@@ -20,6 +20,7 @@ export namespace type {
     };
     export type banResult = {
         ban: boolean,
+        label?: string,
         probability: number
     }
 }

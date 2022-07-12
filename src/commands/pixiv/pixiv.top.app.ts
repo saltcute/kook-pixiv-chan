@@ -45,7 +45,6 @@ class Top extends AppCommand {
                     pixiv.common.log(`Resaving... ${master1200}`);
                     var bodyFormData = new FormData();
                     const stream = got.stream(master1200);                               // Get readable stream from origin
-                    var blurAmount: number = 0;
                     var detectionResult: pixiv.type.detectionResult;
                     var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
 
@@ -53,12 +52,11 @@ class Top extends AppCommand {
                         pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
                         const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
                         detectionResult = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
-                        pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                     } else {
                         pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);
                         detectionResult = await pixiv.nsfwjs.getBlurAmount(buffer);
-                        pixiv.common.log(`Detection done with a target of ${blurAmount}px gaussian blur.`);
                     }
+                    pixiv.common.log(`Detection done with a target of ${detectionResult.blur}px gaussian blur.`);
                     if (detectionResult.blur > 0) {
                         pixiv.common.log(`Image is NSFW, blurred.`);
                         session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
