@@ -18,7 +18,7 @@ export namespace aligreen {
                     if (v.rate > 99) {
                         blurAmount += block;
                     } else if (v.rate > 95) {
-                        blurAmount += blur;
+                        blurAmount += hide;
                     } else if (v.rate > 90) {
                         blurAmount += blur;
                     } else if (v.rate > 80) {
