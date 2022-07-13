@@ -37,8 +37,8 @@ export namespace aligreen {
                         switch (v.scene) {
                             case "porn":
                                 switch (v.label) {
-                                    case "porn": blur(v, 21, 21, 14, 7, 7); porn = { ban: true, label: v.label, probability: v.rate }; break;
-                                    case "sexy": blur(v, 7, 0, 0, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "porn": blur(v, 35, 28, 18, 14, 10); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                    case "sexy": blur(v, 7, 7, 4, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
                                 }
                                 break;
                             case "terrorism":
