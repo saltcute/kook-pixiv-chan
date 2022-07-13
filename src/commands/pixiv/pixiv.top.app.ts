@@ -59,7 +59,7 @@ class Top extends AppCommand {
                     pixiv.common.log(`Detection done with a target of ${detectionResult.blur}px gaussian blur.`);
                     if (detectionResult.blur > 0) {
                         pixiv.common.log(`Image is NSFW, blurred.`);
-                        session.updateMessage(loadingBarMessageID, [pixiv.cards.nsfw(val.id)])
+                        session.updateMessage(loadingBarMessageID, [pixiv.cards.top(link, pid, session, { nsfw: true, id: val.id })])
                         buffer = await sharp(buffer).blur(detectionResult.blur).jpeg().toBuffer();
                     }
                     bodyFormData.append('file', buffer, "1.jpg");
