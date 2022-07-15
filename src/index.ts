@@ -3,17 +3,18 @@ import { pixivMenu } from 'commands/pixiv/pixiv.menu';
 import * as pixiv from 'commands/pixiv/common'
 import axios from 'axios';
 import auth from 'configs/auth';
+import config from 'configs/config';
 
 pixiv.linkmap.load();
 
-if (auth.useAliyunGreen === false) {
+if (config.useAliyunGreen === false) {
     pixiv.nsfwjs.init();
 }
 
 // setInterval(saveLinkmap, 30 * 1000); // 15 minutes
 setInterval(saveLinkmap, 15 * 60 * 1000); // 15 minutes
 
-if (auth.enableBotMarket) {
+if (config.enableBotMarket) {
     botMarketStayOnline();
 }
 

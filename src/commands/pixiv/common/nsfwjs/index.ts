@@ -1,3 +1,4 @@
+import config from "configs/config";
 import { type, common } from "../";
 import auth from '../../../../configs/auth'
 const nsfw = require('nsfwjs')
@@ -7,9 +8,9 @@ var model: any;
 
 export namespace nsfwjs {
     export async function init() {
-        if (auth.customNSFWModel) {
-            common.log(`Loaded custom nsfwjs model at ${auth.customNSFWLink}`);
-            model = await nsfw.load(auth.customNSFWLink, { size: 299 });
+        if (config.customNSFWModel) {
+            common.log(`Loaded custom nsfwjs model at ${config.customNSFWLink}`);
+            model = await nsfw.load(config.customNSFWLink, { size: 299 });
         } else {
             common.log(`Loaded default nsfwjs model`);
             model = await nsfw.load();

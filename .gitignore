@@ -104,6 +104,7 @@ dist
 .tern-port
 
 src/configs/auth*
+src/configs/config*
 
 test/
 package-lock.json

@@ -1,5 +1,6 @@
 import { Card, AppCommand, AppFunc, BaseSession } from 'kbotify';
 import auth from '../../configs/auth';
+import config from '../../configs/config';
 import * as pixiv from './common';
 import axios from 'axios';
 const FormData = require('form-data');
@@ -42,16 +43,16 @@ class Author extends AppCommand {
                         }
                     }
 
-                    const master1200 = val.image_urls.large.replace("i.pximg.net", "i.pixiv.re"); // Get image link
+                    const master1200 = val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname); // Get image link
                     pixiv.common.log(`Resaving... ${master1200}`);
                     var bodyFormData = new FormData();
                     const stream = got.stream(master1200);                               // Get readable stream from origin
                     var detectionResult: pixiv.type.detectionResult;
                     var buffer = await sharp(await pixiv.common.stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
 
-                    if (auth.useAliyunGreen) {                            // Detect NSFW
+                    if (config.useAliyunGreen) {                            // Detect NSFW
                         pixiv.common.log(`Aliyun image censoring started for ${val.id}_p0.jpg.`);
-                        const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", "i.pixiv.re");
+                        const lowResDetectLink = val.image_urls.medium.replace("i.pximg.net", config.pixivProxyHostname);
                         detectionResult = await pixiv.aligreen.imageDetectionSync(lowResDetectLink);
                     } else {
                         pixiv.common.log(`NSFW.js image censoring started for ${val.id}_p0.jpg.`);

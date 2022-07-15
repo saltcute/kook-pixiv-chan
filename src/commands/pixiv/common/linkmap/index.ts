@@ -21,7 +21,7 @@ export namespace linkmap {
     export function load(): void {
         if (fs.existsSync(upath.join(__dirname, "map.json"))) {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
-            common.log(`Loaded "linkmap.json"`);
+            common.log(`Loaded linkmap`);
         } else {
             map = {};
         }
@@ -62,11 +62,11 @@ export namespace linkmap {
     export function saveLink() {
         fs.writeFile(upath.join(__dirname, "map.json"), JSON.stringify(map), (err) => {
             if (err) {
-                common.log(`Saving "linkmap.json" failed, error message: `);
+                common.log(`Saving linkmap failed, error message: `);
                 console.log(err);
             }
             else {
-                common.log(`Saved "linkmap.json"`);
+                common.log(`Saved linkmap`);
             }
         });
     }
