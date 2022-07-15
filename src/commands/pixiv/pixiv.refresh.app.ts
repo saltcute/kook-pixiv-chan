@@ -21,7 +21,7 @@ class Refresh extends AppCommand {
             const illust_id = session.args[0].toString();
             if (pixiv.linkmap.isInDatabase(illust_id)) {
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0")
-                if (rtLink == "https://img.kaiheila.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg") {
+                if (rtLink == pixiv.common.akarin) {
                     return session.reply("插画因为 R-18/R-18G 无法刷新缓存");
                 }
                 var loadingBarMessageID: string;
@@ -102,10 +102,12 @@ class Refresh extends AppCommand {
                             url: rtLink,
                             method: "GET"
                         }).then(() => {
+                            pixiv.common.log("Uncensoring done");
                             uncensored = true;
                         }).catch(async () => {
+                            pixiv.common.log(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
                             bodyFormData = new FormData();
-                            bodyFormData.append('file', await sharp(buffer).blur(14).jpeg().toBuffer(), "1.jpg");
+                            bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
                             await axios({
                                 method: "post",
                                 url: "https://www.kookapp.cn/api/v3/asset/create",

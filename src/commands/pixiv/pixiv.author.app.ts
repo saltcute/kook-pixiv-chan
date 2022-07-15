@@ -88,12 +88,12 @@ class Author extends AppCommand {
                 }
             }
             await uploadImage();
-            for (let key = 0; key < 9; key++) {
+            for (let key = 0; key < link.length; key++) {
                 await axios({
                     url: link[key],
                     method: "GET"
                 }).catch(() => {
-                    link[key] = "https://img.kaiheila.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
+                    link[key] = pixiv.common.akarin;
                 });
             }
             while (link.length <= 9) {

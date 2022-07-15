@@ -87,6 +87,14 @@ class Top extends AppCommand {
                 }
             }
             await uploadImage();
+            for (let key = 0; key < link.length; key++) {
+                await axios({
+                    url: link[key],
+                    method: "GET"
+                }).catch(() => {
+                    link[key] = pixiv.common.akarin;
+                });
+            }
             while (link.length <= 9) {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
