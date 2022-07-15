@@ -71,7 +71,7 @@ class Author extends AppCommand {
                         url: "https://www.kookapp.cn/api/v3/asset/create",
                         data: bodyFormData,
                         headers: {
-                            'Authorization': `Bot ${auth.khltoken} `,
+                            'Authorization': `Bot ${auth.assetUploadToken} `,
                             ...bodyFormData.getHeaders()
                         }
                     }).then((res: any) => {

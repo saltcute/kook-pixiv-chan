@@ -1,6 +1,6 @@
 {
   "name": "kook-pixiv-chan",
-  "version": "1.0.5b",
+  "version": "1.0.5c",
   "description": "Get trending illustrations or illustration detail",
   "main": "src/index.ts",
   "scripts": {
