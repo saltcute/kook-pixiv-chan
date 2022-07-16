@@ -1,6 +1,6 @@
 {
   "name": "kook-pixiv-chan",
-  "version": "1.0.6b",
+  "version": "1.1.0",
   "description": "Get trending illustrations or illustration detail",
   "main": "src/index.ts",
   "scripts": {
@@ -40,6 +40,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/sharp": "^0.30.4",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "@typescript-eslint/parser": "^4.28.4",

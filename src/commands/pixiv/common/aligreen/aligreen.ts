@@ -23,14 +23,20 @@ var clientInfo = {
     "ip": "127.0.0.1"
 };
 
-export async function greenNodejs(imageURL: string) {
+export async function greenNodejs(imageURL: string[]) {
     const requestBody = JSON.stringify({
         bizType: 'pixiv',
         scenes: ["porn", "terrorism", "ad", "live"],
-        tasks: [{
-            'dataId': uuidV1(),
-            'url': imageURL
-        }]
+        tasks: (() => {
+            var res = [];
+            for (var val of imageURL) {
+                res.push({
+                    'dataId': uuidV1(),
+                    'url': val
+                })
+            }
+            return res;
+        })()
     });
     const UTCDate = new Date().toUTCString();
     var requestHeaders = {

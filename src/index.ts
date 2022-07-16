@@ -3,7 +3,7 @@ import { pixivMenu } from 'commands/pixiv/pixiv.menu';
 import * as pixiv from 'commands/pixiv/common'
 import axios from 'axios';
 import auth from 'configs/auth';
-import config from 'configs/config';
+import config from './configs/config';
 
 pixiv.linkmap.load();
 
@@ -31,7 +31,7 @@ bot.connect();
 bot.logger.debug('system init success');
 
 function saveLinkmap() {
-    pixiv.linkmap.saveLink();
+    pixiv.linkmap.save();
 }
 function botMarketStayOnline() {
     axios({

@@ -26,12 +26,16 @@ npm start
 ## TODO
 
 - `.pixiv`
-    - [ ] Ability to change illustration ranklist time period
-    - [x] Aliyun image detection
-    - [x] nsfwjs image detection
-    - [x] Refresh linkmap of a certain illustration
-    - [x] (sort of) Maybe a better way of censoring NSFW
-        - NSFW illustrations will be attempted to add gaussian blur for up to 35px before falling back to Akarin
+    - [ ] Ability to change illustration ranklist time period.
+    - [x] Aliyun image detection.
+    - [x] ~~NSFW.js image detection.~~
+        - [ ] Remove NSFW.js / Fix NSFW.js
+        - This method is broken and won't be fixed due to its unreliability. It's just not worth the effort.
+        - `config.useAliyunGreen`, `config.customNSFWModel` and `config.customNSFWLink` have no use and effects now.
+        - Even when `config.useAliyunGreen` is set to `false`, Pixiv chan will still try to use Aliyun image detection.
+    - [x] Refresh linkmap of a certain illustration.
+    - [x] (sort of) Maybe a better way of censoring NSFW.
+        - NSFW illustrations will be attempted to add gaussian blur for up to 35px before falling back to Akarin.
 
 ---
 

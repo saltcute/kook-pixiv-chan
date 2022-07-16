@@ -1,5 +1,4 @@
 import fs from 'fs';
-import { NSFWJS } from 'nsfwjs';
 import upath from 'upath';
 import { common, type } from '..';
 
@@ -24,6 +23,8 @@ export namespace linkmap {
             common.log(`Loaded linkmap`);
         } else {
             map = {};
+            save();
+            common.log(`Linkmap not found, creating new`);
         }
     }
 
@@ -43,7 +44,35 @@ export namespace linkmap {
         }
     }
 
-    export function addLink(illustID: string, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
+    export function getDetection(illustID: string, page: string): type.detectionResult {
+        if (isInDatabase(illustID)) {
+            return map[illustID][page].NSFWResult;
+        } else {
+            return {
+                blur: 0,
+                reason: {
+                    terrorism: {
+                        ban: false,
+                        probability: 100
+                    },
+                    ad: {
+                        ban: false,
+                        probability: 100
+                    },
+                    live: {
+                        ban: false,
+                        probability: 100
+                    },
+                    porn: {
+                        ban: false,
+                        probability: 100
+                    }
+                }
+            };
+        }
+    }
+
+    export function addMap(illustID: string, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
         map = {
             ...map,
             [illustID]: {
@@ -59,7 +88,7 @@ export namespace linkmap {
         };
     }
 
-    export function saveLink() {
+    export function save() {
         fs.writeFile(upath.join(__dirname, "map.json"), JSON.stringify(map), (err) => {
             if (err) {
                 common.log(`Saving linkmap failed, error message: `);
