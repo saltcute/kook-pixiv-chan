@@ -81,6 +81,15 @@ export function main(link: string[], pid: string[], session: BaseSession, { resa
                 }
             },
             {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "kmarkdown",
+                        "content": "没有找到想要的插画？发送 `.pixiv help top` 查询帮助"
+                    }
+                ]
+            },
+            {
                 "type": "divider"
             },
             {
