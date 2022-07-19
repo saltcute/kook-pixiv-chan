@@ -44,6 +44,7 @@ class Top extends AppCommand {
                 url: `http://pixiv.lolicon.ac.cn/ranklist`,
                 method: "GET"
             }).then((res: any) => {
+                pixiv.common.getNotifications(session);
                 sendCard(res.data);
             }).catch((e: any) => {
                 session.sendCard(pixiv.cards.error(e));
@@ -62,6 +63,7 @@ class Top extends AppCommand {
                 } else if (res.data.length <= 10) {
                     session.reply(`关于标签**「${session.args[0]}」**的插画数量极少……Pixiv酱仍会为你获取可用的插画\n但也可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助`);
                 }
+                pixiv.common.getNotifications(session);
                 sendCard(res.data);
             }).catch((e: any) => {
                 session.sendCard(pixiv.cards.error(e));

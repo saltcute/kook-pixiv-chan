@@ -101,4 +101,22 @@ export namespace common {
         linkmap.addMap(val.id, "0", rtLink, detectionResult);
         return { link: rtLink, pid: val.id };
     }
+
+    var noticed: string[] = [];
+    var notification: string = "";
+    var enableNotification = false;
+    export function deleteNotifications() {
+        enableNotification = false;
+    }
+    export function addNotifications(content: string) {
+        notification = content;
+        enableNotification = true;
+        noticed = [];
+    }
+    export function getNotifications(session: BaseSession) {
+        if (enableNotification && !noticed.includes(session.user.id)) {
+            noticed.push(session.user.id)
+            return session.sendCardTemp([cards.notification(notification)]);
+        }
+    }
 }

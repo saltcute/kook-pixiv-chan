@@ -19,6 +19,7 @@ class Refresh extends AppCommand {
             pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             const illust_id = session.args[0].toString();
             if (pixiv.linkmap.isInDatabase(illust_id)) {
+                pixiv.common.getNotifications(session);
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
                 if (rtLink == pixiv.common.akarin) {
                     return session.reply("插画因为 R-18/R-18G 无法刷新缓存");
@@ -42,6 +43,7 @@ class Refresh extends AppCommand {
                         pixiv.common.log("Send message failed");
                         return;
                     }
+                    pixiv.common.getNotifications(session);
                     const detectionResult = pixiv.linkmap.isInDatabase(val.id) ? pixiv.linkmap.getDetection(val.id, "0") : (await pixiv.aligreen.imageDetectionSync([val]))[val.id];
                     var buffer: Buffer = await sharp(await pixiv.common.stream2buffer(got.stream(val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname)))).resize(512).jpeg().toBuffer();
                     if (detectionResult.blur > 0) {

@@ -67,7 +67,7 @@ function nsfws(nsfw: boolean, id: string) {
     } else return [];
 }
 
-export function main(data: any, r18: number, link: string[], pid: string[], session: BaseSession, { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) {
+export default (data: any, r18: number, link: string[], pid: string[], session: BaseSession, { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
     return new Card({
         "type": "card",
         "theme": "info",
@@ -125,7 +125,7 @@ export function main(data: any, r18: number, link: string[], pid: string[], sess
                 "elements": [
                     {
                         "type": "kmarkdown",
-                        "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
+                        "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
                     }
                 ]
             },

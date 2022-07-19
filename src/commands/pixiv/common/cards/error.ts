@@ -1,6 +1,6 @@
 import { Card } from "kbotify"
 
-export function main(e: any) {
+export default (e: any) => {
     return new Card({
         "type": "card",
         "theme": "danger",

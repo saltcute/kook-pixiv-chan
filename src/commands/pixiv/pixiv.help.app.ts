@@ -22,6 +22,15 @@ class Help extends AppCommand {
                             }
                         },
                         {
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "kmarkdown",
+                                    "content": "发送 `.pixiv` 查看所有指令列表"
+                                }
+                            ]
+                        },
+                        {
                             "type": "divider"
                         },
                         {
@@ -30,18 +39,6 @@ class Help extends AppCommand {
                                 "type": "kmarkdown",
                                 "content": "`.pixiv help [指令]` 查询指令的详细用法\n  例：\n        `.pixiv help top`\n        `.pixiv help detail`\n        `.pixiv help refresh`"
                             }
-                        },
-                        {
-                            "type": "divider"
-                        },
-                        {
-                            "type": "context",
-                            "elements": [
-                                {
-                                    "type": "kmarkdown",
-                                    "content": ".pixiv top 的本月排名或自定义时间排名在做了:dove::dove::dove:"
-                                }
-                            ]
                         }
                     ]
                 }

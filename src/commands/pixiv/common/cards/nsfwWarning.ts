@@ -1,6 +1,6 @@
 import { Card } from "kbotify"
 
-export function main(id: string) {
+export default (id: string) => {
     return new Card({
         "type": "card",
         "theme": "warning",
@@ -27,7 +27,7 @@ export function main(id: string) {
                 "elements": [
                     {
                         "type": "kmarkdown",
-                        "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
+                        "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
                     }
                 ]
             },

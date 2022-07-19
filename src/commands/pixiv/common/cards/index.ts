@@ -1,17 +1,23 @@
-import * as ErrorCard from './error'
-import * as NSFWCard from './nsfwWarning'
-import * as TopCard from './top'
-import * as AuthorCard from './author'
-import * as DetailCard from './detail'
-import * as IllustCard from './illust'
-import * as ResavingCard from './resaving'
+import ErrorCard from './error'
+import NSFWCard from './nsfwWarning'
+import TopCard from './top'
+import AuthorCard from './author'
+import DetailCard from './detail'
+import IllustCard from './illust'
+import ResavingCard from './resaving'
+import CreditCard from './credit'
+import RandomCard from './random'
+import NotificationCard from './notification'
 
 export namespace cards {
-    export const error = ErrorCard.main;
-    export const nsfw = NSFWCard.main;
-    export const top = TopCard.main;
-    export const author = AuthorCard.main;
-    export const detail = DetailCard.main;
-    export const illust = IllustCard.main;
-    export const resaving = ResavingCard.main;
+    export const error = ErrorCard;
+    export const nsfw = NSFWCard;
+    export const top = TopCard;
+    export const author = AuthorCard;
+    export const detail = DetailCard;
+    export const illust = IllustCard;
+    export const resaving = ResavingCard;
+    export const credit = CreditCard;
+    export const random = RandomCard;
+    export const notification = NotificationCard;
 }

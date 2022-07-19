@@ -1,11 +1,13 @@
 import { Card, MenuCommand } from 'kbotify';
 import { author } from './pixiv.author.app';
 import { detail } from './pixiv.detail.app';
-import { donate } from './pixiv.donate.app';
+import { credit } from './pixiv.credit.app';
 import { help } from './pixiv.help.app';
 import { illust } from './pixiv.illust.app';
 import { refresh } from './pixiv.refresh.app';
 import { top } from './pixiv.top.app';
+import { random } from './pixiv.random.app';
+import { notice } from './admin/pixiv.notice.app';
 
 class PixivMenu extends MenuCommand {
     code = 'pixiv';
@@ -23,15 +25,6 @@ class PixivMenu extends MenuCommand {
                     "type": "plain-text",
                     "content": "Pixiv 命令"
                 }
-            },
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "kmarkdown",
-                        "content": "如果觉得 Pixiv 酱能帮到你的话，请务必来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评！\n[问题反馈&建议](https://kook.top/iOOsLu)"
-                    }
-                ]
             },
             {
                 "type": "divider"
@@ -54,6 +47,13 @@ class PixivMenu extends MenuCommand {
             },
             {
                 "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "kmarkdown",
+                    "content": "`.pixiv random` 获取⑨张随机插画"
+                }
             },
             {
                 "type": "section",
@@ -94,12 +94,21 @@ class PixivMenu extends MenuCommand {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv donate` 查看赞助与感谢列表"
+                    "content": "`.pixiv credit` 查看赞助与感谢列表"
                 }
-            }
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "kmarkdown",
+                        "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
+                    }
+                ]
+            },
         ]
     }).toString();
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh, help, donate);
+export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh, help, credit, random, notice);
