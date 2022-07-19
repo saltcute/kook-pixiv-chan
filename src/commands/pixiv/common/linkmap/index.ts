@@ -60,13 +60,13 @@ export namespace linkmap {
                 data: diff
             }).then(() => {
                 common.log("Linkmap uploaded");
+                diff = {};
             }).catch((e) => {
                 common.log("Linkmap upload failed");
                 if (e) {
                     common.log(e);
                 }
             });
-            diff = {};
         }
     }
 
