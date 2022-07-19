@@ -1,6 +1,6 @@
 {
   "name": "kook-pixiv-chan",
-  "version": "1.1.0a",
+  "version": "1.1.0b",
   "description": "Get trending illustrations or illustration detail",
   "main": "src/index.ts",
   "scripts": {
@@ -26,6 +26,7 @@
     "@alicloud/imageaudit-2019-12-30": "^2.0.0",
     "@alicloud/pop-core": "^1.7.12",
     "@tensorflow/tfjs-node": "^3.18.0",
+    "@types/node-schedule": "^2.1.0",
     "@types/sharp": "^0.30.4",
     "@types/uuid": "^8.3.4",
     "axios": "^0.27.2",

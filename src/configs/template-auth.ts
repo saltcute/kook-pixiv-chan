@@ -10,4 +10,7 @@ export default {
     // Aliyun (NSFW detection on cloud)
     aliyunAccessKeyID: "Aliyun access key ID here",
     aliyunAccessKeySecret: "Aliyun access key secert here",
+    // Linkmap
+    remoteLinkmapUUID: "",
+    remoteLinkmapToken: "",
 };
