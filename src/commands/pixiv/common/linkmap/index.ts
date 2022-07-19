@@ -1,3 +1,6 @@
+import axios from 'axios';
+import auth from 'configs/auth';
+import config from 'configs/config';
 import fs from 'fs';
 import upath from 'upath';
 import { common, type } from '..';
@@ -7,7 +10,12 @@ export namespace linkmap {
         [key: string]: {
             [key: string]: linkmap
         }
-    };
+    } = {};
+    var diff: {
+        [key: string]: {
+            [key: string]: linkmap
+        }
+    } = {};
     type linkmap = {
         kookLink: string,
         NSFWResult: type.detectionResult,
@@ -17,12 +25,65 @@ export namespace linkmap {
         }
     }
 
-    export function load(): void {
+    export async function download() {
+        if (config.useRemoteLinkmap) {
+            await axios({
+                url: `https://${config.remoteLinkmapHostname}/linkmap`,
+                method: "GET",
+                headers: {
+                    'uuid': auth.remoteLinkmapUUID
+                }
+            }).then((res) => {
+                for (const key in res.data) {
+                    for (const page in res.data[key]) {
+                        linkmap.addMap(key, page, res.data[key][page].kookLink, res.data[key][page].NSFWResult)
+                    }
+                }
+                common.log("Downloaded linkmap from remote");
+            }).catch((e) => {
+                load();
+                common.log("Linkmap download failed, loading local");
+                common.log(e);
+            })
+        }
+    }
+
+    export async function upload() {
+        if (config.maintainingRemoteLinkmap) {
+            axios({
+                url: `https://${config.remoteLinkmapHostname}/updateLinkmap`,
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
+                    'uuid': auth.remoteLinkmapUUID
+                },
+                data: diff
+            }).then(() => {
+                common.log("Linkmap uploaded");
+            }).catch((e) => {
+                common.log("Linkmap upload failed");
+                if (e) {
+                    common.log(e);
+                }
+            });
+            diff = {};
+        }
+    }
+
+
+    export async function init() {
+        if (config.useRemoteLinkmap) {
+            await download();
+            save();
+        } else {
+            await load();
+        }
+    }
+    export async function load() {
         if (fs.existsSync(upath.join(__dirname, "map.json"))) {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
-            common.log(`Loaded linkmap`);
+            common.log(`Loaded linkmap from local`);
         } else {
-            map = {};
             save();
             common.log(`Linkmap not found, creating new`);
         }
@@ -75,6 +136,19 @@ export namespace linkmap {
     export function addMap(illustID: string, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
         map = {
             ...map,
+            [illustID]: {
+                [illustPage]: {
+                    kookLink: illustLink,
+                    NSFWResult: detectionResult,
+                    suggestion: {
+                        ban: detectionResult.blur > 0,
+                        blurAmount: detectionResult.blur
+                    }
+                }
+            }
+        };
+        diff = {
+            ...diff,
             [illustID]: {
                 [illustPage]: {
                     kookLink: illustLink,

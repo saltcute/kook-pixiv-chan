@@ -26,6 +26,15 @@ export function main(e: any) {
                 ]
             },
             {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "kmarkdown",
+                        "content": "遇到问题了？[问题反馈&建议](https://kook.top/iOOsLu)"
+                    }
+                ]
+            },
+            {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",

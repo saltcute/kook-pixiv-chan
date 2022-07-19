@@ -4,35 +4,43 @@ import * as pixiv from 'commands/pixiv/common'
 import axios from 'axios';
 import auth from 'configs/auth';
 import config from './configs/config';
+import schedule from 'node-schedule';
 
-pixiv.linkmap.load();
+/**
+ * Linkmap initialization
+ */
+pixiv.linkmap.init();
+if (config.useRemoteLinkmap) {
+    schedule.scheduleJob('30 * * * *', async () => {
+        await pixiv.linkmap.download();
+    });
+}
+schedule.scheduleJob('15 * * * *', async () => {
+    pixiv.linkmap.save();
+    await pixiv.linkmap.upload();
+})
 
+/**
+ * NSFW.js initialization
+ */
 if (config.useAliyunGreen === false) {
     pixiv.nsfwjs.init();
 }
 
-// setInterval(saveLinkmap, 30 * 1000); // 15 minutes
-setInterval(saveLinkmap, 15 * 60 * 1000); // 15 minutes
-
+/**
+ * Bot Market Initializatiojn
+ */
 if (config.enableBotMarket) {
     botMarketStayOnline();
 }
 
 bot.messageSource.on('message', (e) => {
     bot.logger.debug(`received:`, e);
-    // 如果想要在console里查看收到信息也可以用
-    // console.log(e);
 });
-
 bot.addCommands(pixivMenu);
-
 bot.connect();
-
 bot.logger.debug('system init success');
 
-function saveLinkmap() {
-    pixiv.linkmap.save();
-}
 function botMarketStayOnline() {
     axios({
         url: 'http://bot.gekj.net/api/v1/online.bot',

@@ -8,6 +8,9 @@ class Illust extends AppCommand {
     intro = 'Illustration';
     func: AppFunc<BaseSession> = async (session) => {
         async function sendCard(data: any) {
+            if (data.x_restrict !== 0) {
+                return session.sendCard(pixiv.cards.illust(data, pixiv.common.akarin));
+            }
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving(`\`${data.id}_p0.jpg\``))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
                 return pixiv.common.log("Send message failed");

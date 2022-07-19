@@ -2,6 +2,9 @@ export default {
     enableBotMarket: false,
     customNSFWModel: false,
     customNSFWLink: ``,
-    useAliyunGreen: false,
-    pixivProxyHostname: "i.pixiv.re"
+    useAliyunGreen: true,
+    pixivProxyHostname: "i.pixiv.lolicon.ac.cn",
+    useRemoteLinkmap: false,
+    remoteLinkmapHostname: "",
+    maintainingRemoteLinkmap: false
 }

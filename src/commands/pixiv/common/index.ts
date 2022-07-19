@@ -45,7 +45,7 @@ export namespace common {
     }
 
     export function log(output: string) {
-        console.log(`[${new Date().toLocaleTimeString()}] ${output.replaceAll('\n', `\n[${new Date().toLocaleTimeString()}] `)}`);
+        console.log(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
     }
 
     export function isForbittedTag(tag: string) {
