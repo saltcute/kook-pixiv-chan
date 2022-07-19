@@ -10,19 +10,25 @@ class Notice extends AppCommand {
             return session.reply("You do not have the permission to use this command")
         }
         if (session.args.length == 0) {
-            return session.reply("Please specified an action");
+            return session.replyTemp("Please specified an action");
         }
+        pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
         switch (session.args[0]) {
             case "add":
+                pixiv.common.log("Added notification:")
                 const content = session.args.slice(1).join(" ");
-                console.log(content);
+                pixiv.common.log(content);
+                session.replyCardTemp([pixiv.cards.notification(content)]);
                 pixiv.common.addNotifications(content);
                 break;
             case "delete":
+                pixiv.common.log("Deleted current notification");
+                session.replyTemp("Deleted");
                 pixiv.common.deleteNotifications();
                 break;
             default:
-                return session.reply("Action invalid");
+                pixiv.common.log("Action invalid");
+                return session.replyTemp("Action invalid");
         }
     }
 }

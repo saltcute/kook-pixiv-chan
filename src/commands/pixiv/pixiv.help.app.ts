@@ -180,8 +180,10 @@ class Help extends AppCommand {
                                 }
                             }
                         ]
-                    }])
-                case "donate":
+                    }]);
+                case "random":
+                    return session.reply("发送 `.pixiv random` 即可");
+                case "credit":
                     return session.reply("呃…你是想要知道怎么打钱吗？")
                 default:
                     return session.reply("没有这个指令！输入 `.pixiv` 查看指令列表。");
