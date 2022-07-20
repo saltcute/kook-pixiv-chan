@@ -1,8 +1,11 @@
-import { greenNodejs } from './aligreen';
+import * as greenNodejs from './aligreen';
 import { common, linkmap, type } from '../'
 import config from 'configs/config';
 
 export namespace aligreen {
+    export const addDetectScene = greenNodejs.addScene;
+    export const removeDetectScene = greenNodejs.removeScene;
+    export const currentDetectScenes = greenNodejs.currentScenes;
     export async function imageDetectionSync(datas: any[]): Promise<{ [key: string]: type.detectionResult }> {
         var imageURL: { [key: string]: string } = {};
         var empty: boolean = true;
@@ -40,7 +43,7 @@ export namespace aligreen {
             return 0;
         }
         var result: { [key: string]: type.detectionResult } = {};
-        await greenNodejs(Object.values(imageURL)).then((res) => {
+        await greenNodejs.detect(Object.values(imageURL)).then((res) => {
             const data = res.data;
             if (data.code == 200) {
                 for (const key in data.data) {

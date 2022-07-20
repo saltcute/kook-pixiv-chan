@@ -7,8 +7,6 @@ import { illust } from './pixiv.illust.app';
 import { refresh } from './pixiv.refresh.app';
 import { top } from './pixiv.top.app';
 import { random } from './pixiv.random.app';
-import { notice } from './admin/pixiv.notice.app';
-
 class PixivMenu extends MenuCommand {
     code = 'pixiv';
     trigger = 'pixiv';
@@ -111,4 +109,4 @@ class PixivMenu extends MenuCommand {
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh, help, credit, random, notice);
+export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh, help, credit, random);

@@ -1,10 +1,13 @@
 import { bot } from 'init/client';
 import { pixivMenu } from 'commands/pixiv/pixiv.menu';
+import { pixivAdminMenu } from 'commands/pixiv/admin/pixivadmin.menu';
 import * as pixiv from 'commands/pixiv/common'
 import axios from 'axios';
 import auth from 'configs/auth';
 import config from './configs/config';
 import schedule from 'node-schedule';
+
+pixiv.common.log("kook-pixiv-chan initialization start");
 
 /**
  * Linkmap initialization
@@ -38,6 +41,7 @@ bot.messageSource.on('message', (e) => {
     bot.logger.debug(`received:`, e);
 });
 bot.addCommands(pixivMenu);
+bot.addCommands(pixivAdminMenu);
 bot.connect();
 bot.logger.debug('system init success');
 

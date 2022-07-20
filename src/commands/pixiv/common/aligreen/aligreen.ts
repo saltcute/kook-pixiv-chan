@@ -23,10 +23,22 @@ var clientInfo = {
     "ip": "127.0.0.1"
 };
 
-export async function greenNodejs(imageURL: string[]) {
+var detectionScenes: Set<"porn" | "live" | "ad" | "terrorism"> = new Set(["porn", "terrorism"]);
+
+export function addScene(scene: "porn" | "live" | "ad" | "terrorism") {
+    detectionScenes.add(scene);
+}
+export function removeScene(scene: "porn" | "live" | "ad" | "terrorism") {
+    detectionScenes.delete(scene);
+}
+export function currentScenes(): Array<"porn" | "live" | "ad" | "terrorism"> {
+    return Array.from(detectionScenes);
+}
+
+export async function detect(imageURL: string[]) {
     const requestBody = JSON.stringify({
         bizType: 'pixiv',
-        scenes: ["porn", "terrorism", "ad", "live"],
+        scenes: Array.from(detectionScenes),
         tasks: (() => {
             var res = [];
             for (var val of imageURL) {
