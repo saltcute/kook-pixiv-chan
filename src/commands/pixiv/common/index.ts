@@ -76,12 +76,13 @@ export namespace common {
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
         log(`Download ${val.id} success, starts blurring`);
-        var detectionResult: type.detectionResult;
         var buffer = await sharp(await stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
         var blur = 0;
-        if (detectionResult.hasOwnProperty("blur") && detectionResult.blur > 0) {
+        if (detectionResult !== undefined && detectionResult.blur > 0) {
             blur = detectionResult.blur;
         } else {
+            log("Detection failed, return");
+            console.log(detectionResult);
             blur = 7;
         }
         buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
