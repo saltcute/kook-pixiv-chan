@@ -16,10 +16,6 @@ class Refresh extends AppCommand {
             pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help refresh` 查询指令详细用法")
         } else {
-            const lastExecutionTimestamp = pixiv.common.lastExecutionTimestamp(session.userId);
-            if (lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= 15 * 1000) {
-                return session.reply(`您已达到速率限制。每个用户每15秒内只能发起一次 \`.pixiv refresh\` 指令，请于 ${Math.round((lastExecutionTimestamp + 15 * 1000 - Date.now()) / 1000)} 秒后再试。`);
-            }
             pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             const illust_id = session.args[0].toString();
             if (pixiv.linkmap.isInDatabase(illust_id)) {
@@ -48,20 +44,15 @@ class Refresh extends AppCommand {
                         return;
                     }
                     pixiv.common.getNotifications(session);
-                    var detectionResult = (await pixiv.aligreen.imageDetectionSync([val]))[val.id];
-                    if (detectionResult == undefined) {
-                        if (pixiv.linkmap.isInDatabase(val.id)) {
-                            detectionResult = pixiv.linkmap.getDetection(val.id, "0");
-                        } else {
-                            detectionResult = {
-                                blur: 7
-                            }
-                        }
-                    }
+                    const detectionResult = pixiv.linkmap.isInDatabase(val.id) ? pixiv.linkmap.getDetection(val.id, "0") : (await pixiv.aligreen.imageDetectionSync([val]))[val.id];
                     var buffer: Buffer = await sharp(await pixiv.common.stream2buffer(got.stream(val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname)))).resize(512).jpeg().toBuffer();
-                    if (detectionResult.blur > 0) {
-                        buffer = await sharp(buffer).blur(detectionResult.blur).jpeg().toBuffer();
+                    var blur = 0;
+                    if (detectionResult.hasOwnProperty("blur") && detectionResult.blur > 0) {
+                        blur = detectionResult.blur;
+                    } else {
+                        blur = 7;
                     }
+                    buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
                     var uncensored = false;
                     for (let i = 1; i <= 5; ++i) {
                         await axios({
@@ -92,7 +83,7 @@ class Refresh extends AppCommand {
                         })
                         if (uncensored) break;
                     }
-                    pixiv.common.log(`Process endeding, presenting to user`);
+                    pixiv.common.log(`Process ended, presenting to user`);
                     if (!uncensored) {
                         session.updateMessage(loadingBarMessageID, [{
                             "type": "card",
@@ -108,10 +99,10 @@ class Refresh extends AppCommand {
                                 }
                             ]
                         }])
-                        pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
+                        if (detectionResult !== undefined) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
                     } else {
                         session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, rtLink)]);
-                        pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
+                        if (detectionResult !== undefined) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
                     }
                 }).catch((e: any) => {
                     session.sendCard(pixiv.cards.error(e));

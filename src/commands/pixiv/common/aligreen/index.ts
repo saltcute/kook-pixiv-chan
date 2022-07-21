@@ -94,16 +94,13 @@ export namespace aligreen {
                                 break;
                         }
                     }
-                    result = {
-                        ...result,
-                        [Object.keys(imageURL)[parseInt(key)]]: {
-                            blur: blurAmount,
-                            reason: {
-                                terrorism: terrorism,
-                                ad: ad,
-                                live: live,
-                                porn: porn,
-                            }
+                    result[Object.keys(imageURL)[parseInt(key)]] = {
+                        blur: blurAmount,
+                        reason: {
+                            terrorism: terrorism,
+                            ad: ad,
+                            live: live,
+                            porn: porn,
                         }
                     }
                 }
