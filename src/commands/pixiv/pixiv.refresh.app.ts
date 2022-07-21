@@ -79,6 +79,7 @@ class Refresh extends AppCommand {
                         })
                         if (uncensored) break;
                     }
+                    pixiv.common.log(`Process ended, presenting to user`);
                     if (!uncensored) {
                         session.updateMessage(loadingBarMessageID, [{
                             "type": "card",

@@ -72,14 +72,17 @@ export namespace common {
         }
 
         const master1200 = val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname); // Get image link
-        log(`Resaving... ${master1200}`);
+        log(`Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
+        log(`Download ${val.id} success, starts blurring`);
         var detectionResult: type.detectionResult;
         var buffer = await sharp(await stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
         if (detectionResult.blur > 0) {
             buffer = await sharp(buffer).blur(detectionResult.blur).jpeg().toBuffer();
         }
+
+        log(`Finished blurring ${val.id} with ${detectionResult.blur}px of gaussian blur, starts uploading`);
         bodyFormData.append('file', buffer, "1.jpg");
         var rtLink = "";
         //Upload image to KOOK's server
@@ -92,8 +95,10 @@ export namespace common {
                 ...bodyFormData.getHeaders()
             }
         }).then((res: any) => {
+            log(`Upload ${val.id} success`);
             rtLink = res.data.data.url
         }).catch((e: any) => {
+            log(`Upload ${val.id} failed`);
             if (e) {
                 session.sendCard(cards.error(e));
             }
@@ -102,6 +107,7 @@ export namespace common {
         return { link: rtLink, pid: val.id };
     }
 
+    //================Notification================
     var noticed: string[] = [];
     var notification: string = "";
     var enableNotification = false;
@@ -120,7 +126,7 @@ export namespace common {
         }
     }
 
-    //Rate control
+    //================Rate control================
     var rateControl: { [key: string]: number } = {};
     export function registerExecution(id: string) {
         rateControl[id] = Date.now();

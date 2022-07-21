@@ -37,6 +37,7 @@ class Author extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
+            pixiv.common.log(`Process ended, presenting to user`);
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.author(data[0], r18, link, pid, session, {})]);
         }
         if (session.args.length === 0) {

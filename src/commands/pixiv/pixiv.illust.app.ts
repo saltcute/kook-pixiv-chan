@@ -17,6 +17,7 @@ class Illust extends AppCommand {
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
             const uploadResult = await pixiv.common.uploadImage(data, detectionResult, session);
+            pixiv.common.log(`Process ended, presenting to user`);
             session.updateMessage(loadingBarMessageID, [pixiv.cards.illust(data, uploadResult.link)])
         }
         if (session.args.length === 0) {

@@ -41,6 +41,7 @@ class Random extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
+            pixiv.common.log(`Process ended, presenting to user`);
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.random(link, pid, {})]);
         }
         pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
