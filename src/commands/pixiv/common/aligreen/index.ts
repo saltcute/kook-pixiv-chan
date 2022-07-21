@@ -9,16 +9,16 @@ export namespace aligreen {
     export const setServerRegion = greenNodejs.setRegion;
     export const getServerRegion = greenNodejs.getRegion;
     export const getServerHostname = greenNodejs.getHostname;
-    export async function imageDetectionSync(datas: any[]): Promise<{ [key: string]: type.detectionResult }> {
+    export async function imageDetectionSync(datas: any[], ignoreLinkmap: boolean = false): Promise<{ [key: string]: type.detectionResult }> {
         var imageURL: { [key: string]: string } = {};
         var empty: boolean = true;
         for (const key in datas) {
             const val = datas[key];
-            if (linkmap.isInDatabase(val.id) == false) {
+            if (ignoreLinkmap || linkmap.isInDatabase(val.id) == false || !linkmap.getDetection(val.id, "0").success) {
                 empty = false;
                 imageURL = {
                     ...imageURL,
-                    [val.id]: val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname)
+                    [val.id]: val.image_urls.medium.replace("i.pximg.net", config.pixivProxyHostname)
                 }
             }
         }
@@ -51,64 +51,76 @@ export namespace aligreen {
             if (data.code == 200) {
                 for (const key in data.data) {
                     const val = data.data[key];
-                    var blurAmount = 0;
-                    var porn: type.banResult | undefined, terrorism: type.banResult | undefined, ad: type.banResult | undefined, live: type.banResult | undefined;
-                    porn = terrorism = ad = live = undefined;
-                    for (const k in val.results) {
-                        const v = val.results[k];
-                        switch (v.scene) {
-                            case "porn":
-                                switch (v.label) {
-                                    case "porn": blurAmount += blur(v, 35, 28, 18, 14, 10); porn = { ban: true, label: v.label, probability: v.rate }; break;
-                                    case "sexy": blurAmount += blur(v, 7, 7, 4, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
-                                }
-                                break;
-                            case "terrorism":
-                                switch (v.label) {
-                                    case "flag":
-                                    case "logo":
-                                    case "location":
-                                    case "politics": blurAmount += blur(v, 42, 35, 35, 35, 21); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
-                                    case "drug":
-                                    case "bloody":
-                                    case "others": blurAmount += blur(v, 42, 35, 28, 21, 14); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
-                                }
-                                break;
-                            case "ad":
-                                switch (v.label) {
-                                    case "ad":
-                                    case "npx":
-                                    case "spam":
-                                    case "porn":
-                                    case "abuse":
-                                    case "qrcode":
-                                    case "politics":
-                                    case "terrorism":
-                                    case "contraband":
-                                    case "programCode": blurAmount += blur(v, 42, 35, 35, 35, 21); ad = { ban: true, label: v.label, probability: v.rate }; break;
-                                }
-                                break;
-                            case "live":
-                                switch (v.label) {
-                                    case "drug": blurAmount += blur(v, 42, 35, 35, 35, 21); live = { ban: true, label: v.label, probability: v.rate }; break;
-                                }
-                                break;
+                    if (val.code == 200) {
+                        var blurAmount = 0;
+                        var porn: type.banResult | undefined, terrorism: type.banResult | undefined, ad: type.banResult | undefined, live: type.banResult | undefined;
+                        porn = terrorism = ad = live = undefined;
+                        for (const k in val.results) {
+                            const v = val.results[k];
+                            switch (v.scene) {
+                                case "porn":
+                                    switch (v.label) {
+                                        case "porn": blurAmount += blur(v, 35, 28, 18, 14, 10); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                        case "sexy": blurAmount += blur(v, 7, 7, 4, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                    }
+                                    break;
+                                case "terrorism":
+                                    switch (v.label) {
+                                        case "flag":
+                                        case "logo":
+                                        case "location":
+                                        case "politics": blurAmount += blur(v, 42, 35, 35, 35, 21); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
+                                        case "drug":
+                                        case "bloody":
+                                        case "others": blurAmount += blur(v, 42, 35, 28, 21, 14); terrorism = { ban: true, label: v.label, probability: v.rate }; break;
+                                    }
+                                    break;
+                                case "ad":
+                                    switch (v.label) {
+                                        case "ad":
+                                        case "npx":
+                                        case "spam":
+                                        case "porn":
+                                        case "abuse":
+                                        case "qrcode":
+                                        case "politics":
+                                        case "terrorism":
+                                        case "contraband":
+                                        case "programCode": blurAmount += blur(v, 42, 35, 35, 35, 21); ad = { ban: true, label: v.label, probability: v.rate }; break;
+                                    }
+                                    break;
+                                case "live":
+                                    switch (v.label) {
+                                        case "drug": blurAmount += blur(v, 42, 35, 35, 35, 21); live = { ban: true, label: v.label, probability: v.rate }; break;
+                                    }
+                                    break;
+                            }
                         }
-                    }
-                    result[Object.keys(imageURL)[parseInt(key)]] = {
-                        blur: blurAmount,
-                        reason: {
-                            terrorism: terrorism,
-                            ad: ad,
-                            live: live,
-                            porn: porn,
+                        result[Object.keys(imageURL)[parseInt(key)]] = {
+                            status: val.code,
+                            success: true,
+                            blur: blurAmount,
+                            reason: {
+                                terrorism: terrorism,
+                                ad: ad,
+                                live: live,
+                                porn: porn,
+                            }
+                        }
+                    } else {
+                        common.log("Aliyun returned error:");
+                        console.log(val);
+                        result[Object.keys(imageURL)[parseInt(key)]] = {
+                            status: val.code,
+                            success: false,
+                            blur: 0
                         }
                     }
                 }
             }
         }).catch((e) => {
             if (e) {
-                console.log(e);
+                console.error(e);
             }
         });
         return result;

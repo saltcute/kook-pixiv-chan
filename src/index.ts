@@ -64,7 +64,7 @@ function botMarketStayOnline() {
         }
     }).catch((e) => {
         pixiv.common.log(`Bot Market heartbeat request failed. Retring in 30 minutes. Error message: `);
-        console.log(e);
+        console.error(e);
         setTimeout(botMarketStayOnline, 30 * 60 * 1000);
     })
 }

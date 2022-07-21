@@ -27,7 +27,18 @@ class Top extends AppCommand {
             for (const val of datas) {
                 promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
             }
-            const uploadResults = await Promise.all(promises);
+            var uploadResults: {
+                link: string;
+                pid: string;
+            }[] = [];
+            await Promise.all(promises).then((res) => {
+                uploadResults = res;
+            }).catch((e) => {
+                if (e) {
+                    console.error(e);
+                    session.sendCard(pixiv.cards.error(e, true));
+                }
+            });
             for (var val of uploadResults) {
                 link.push(val.link);
                 pid.push(val.pid);
@@ -48,7 +59,10 @@ class Top extends AppCommand {
                 pixiv.common.getNotifications(session);
                 sendCard(res.data);
             }).catch((e: any) => {
-                session.sendCard(pixiv.cards.error(e));
+                if (e) {
+                    console.error(e);
+                    session.sendCard(pixiv.cards.error(e, true));
+                }
             });
         } else {
             pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
@@ -67,7 +81,10 @@ class Top extends AppCommand {
                 pixiv.common.getNotifications(session);
                 sendCard(res.data);
             }).catch((e: any) => {
-                session.sendCard(pixiv.cards.error(e));
+                if (e) {
+                    console.error(e);
+                    session.sendCard(pixiv.cards.error(e, true));
+                }
             });
         }
     };

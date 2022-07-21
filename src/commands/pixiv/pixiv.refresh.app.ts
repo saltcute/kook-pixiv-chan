@@ -44,27 +44,31 @@ class Refresh extends AppCommand {
                         return;
                     }
                     pixiv.common.getNotifications(session);
-                    const detectionResult = pixiv.linkmap.isInDatabase(val.id) ? pixiv.linkmap.getDetection(val.id, "0") : (await pixiv.aligreen.imageDetectionSync([val]))[val.id];
+                    const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];
                     var buffer: Buffer = await sharp(await pixiv.common.stream2buffer(got.stream(val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname)))).resize(512).jpeg().toBuffer();
                     var blur = 0;
-                    if (detectionResult.hasOwnProperty("blur") && detectionResult.blur > 0) {
+                    if (detectionResult.success) {
                         blur = detectionResult.blur;
+                        if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
                     } else {
-                        blur = 7;
+                        pixiv.common.log("Detection failed, returned");
+                        session.sendCard([pixiv.cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
+                        console.log(detectionResult);
                     }
-                    buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
+                    pixiv.common.log(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
                     var uncensored = false;
+                    var tyblur = 0;
                     for (let i = 1; i <= 5; ++i) {
                         await axios({
                             url: rtLink,
                             method: "GET"
                         }).then(() => {
-                            pixiv.common.log("Uncensoring done");
                             uncensored = true;
                         }).catch(async () => {
                             pixiv.common.log(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
                             var bodyFormData = new FormData();
                             bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
+                            tyblur = 7 * i;
                             await axios({
                                 method: "post",
                                 url: "https://www.kookapp.cn/api/v3/asset/create",
@@ -77,12 +81,14 @@ class Refresh extends AppCommand {
                                 rtLink = res.data.data.url
                             }).catch((e: any) => {
                                 if (e) {
-                                    session.sendCard(pixiv.cards.error(e));
+                                    console.error(e);
+                                    session.sendCard(pixiv.cards.error(e, true));
                                 }
                             });
                         })
                         if (uncensored) break;
                     }
+                    pixiv.common.log(`Refreshing stage 2 ended with ${tyblur}px of gaussian blur (trial & error)`);
                     pixiv.common.log(`Process ended, presenting to user`);
                     if (!uncensored) {
                         session.updateMessage(loadingBarMessageID, [{
@@ -99,16 +105,19 @@ class Refresh extends AppCommand {
                                 }
                             ]
                         }])
-                        if (detectionResult !== undefined) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
+                        if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
                     } else {
                         session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, rtLink)]);
-                        if (detectionResult !== undefined) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
+                        if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
                     }
                 }).catch((e: any) => {
-                    session.sendCard(pixiv.cards.error(e));
+                    if (e) {
+                        console.error(e);
+                        session.sendCard(pixiv.cards.error(e, true));
+                    }
                 });
             } else {
-                return session.reply(`此插画（${illust_id}）当前没有缓存！（使用 \`.pixiv help refresh\` 查询指令详细用法）`);
+                return session.reply(`此插画（${illust_id}）当前没有缓存或插画 ID 错误！（使用 \`.pixiv help refresh\` 查询指令详细用法）`);
             }
         };
     }

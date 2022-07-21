@@ -1,6 +1,18 @@
 import { Card } from "kbotify"
 
-export default (e: any) => {
+function trace(containTrace: boolean) {
+    if (containTrace) {
+        return [{
+            "type": "section",
+            "text": {
+                "type": "kmarkdown",
+                "content": `\`\`\`\n${Error().stack}\n\`\`\``
+            }
+        }]
+    } else return [];
+}
+
+export default (e: any, containTrace: boolean) => {
     return new Card({
         "type": "card",
         "theme": "danger",
@@ -34,6 +46,7 @@ export default (e: any) => {
                     }
                 ]
             },
+            ...trace(containTrace),
             {
                 "type": "section",
                 "text": {

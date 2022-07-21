@@ -110,25 +110,9 @@ export namespace linkmap {
             return map[illustID][page].NSFWResult;
         } else {
             return {
-                blur: 0,
-                reason: {
-                    terrorism: {
-                        ban: false,
-                        probability: 100
-                    },
-                    ad: {
-                        ban: false,
-                        probability: 100
-                    },
-                    live: {
-                        ban: false,
-                        probability: 100
-                    },
-                    porn: {
-                        ban: false,
-                        probability: 100
-                    }
-                }
+                success: false,
+                status: -1,
+                blur: 7
             };
         }
     }

@@ -16,7 +16,18 @@ class Illust extends AppCommand {
                 return pixiv.common.log("Send message failed");
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
-            const uploadResult = await pixiv.common.uploadImage(data, detectionResult, session);
+            var uploadResult: {
+                link: string;
+                pid: string;
+            } = { link: pixiv.common.akarin, pid: "没有了" };
+            await pixiv.common.uploadImage(data, detectionResult, session).then((res) => {
+                uploadResult = res;
+            }).catch((e) => {
+                if (e) {
+                    console.error(e);
+                    session.sendCard(pixiv.cards.error(e, true));
+                }
+            });
             pixiv.common.log(`Process ended, presenting to user`);
             session.updateMessage(loadingBarMessageID, [pixiv.cards.illust(data, uploadResult.link)])
         }
@@ -41,7 +52,10 @@ class Illust extends AppCommand {
                 pixiv.common.getNotifications(session);
                 sendCard(res.data);
             }).catch((e: any) => {
-                session.sendCard(pixiv.cards.error(e));
+                if (e) {
+                    console.error(e);
+                    session.sendCard(pixiv.cards.error(e, true));
+                }
             });
         }
     };

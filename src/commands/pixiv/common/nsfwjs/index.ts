@@ -50,14 +50,13 @@ export namespace nsfwjs {
                 }
             }
         }).catch((e) => {
-            console.log(e);
+            console.error(e);
         });
         return {
+            success: true,
+            status: 0,
             blur: blurAmount,
             reason: {
-                terrorism: { ban: false, probability: 100 },
-                ad: { ban: false, probability: 100 },
-                live: { ban: false, probability: 100 },
                 porn: NSFW
             }
         };

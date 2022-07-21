@@ -76,11 +76,11 @@ class Help extends AppCommand {
                                 "type": "section",
                                 "text": {
                                     "type": "kmarkdown",
-                                    "content": "**标签需要使用原文（日文汉字/假名/英文）且不包含空格、括号（[]）\n空格后的文字将被忽略（后面可能会支持多标签搜索，敬请期待）\n**部分作品可能能由不同的标签指代，如**「ドールズフロントライン（少女前线）」**及**「ドルフロ（少前）」**均指向同一作品。搜索这样的两个标签并不会得到相对应的另一个标签的结果。\n  例：\n    发送`.pixiv top`，获取全站前九的插画/漫画\n    发送`.pixiv top VOCALOID`，获取`VOCALOID`标签前九的插画\n    发送`.pixiv top ゆるゆり`，获取`ゆるゆり`标签前九的插画"
+                                    "content": "**部分标签可以使用中文搜索，但最好使用原文（日文汉字/假名/英文）\n搜索内容不能包含空格、括号（[]）\n空格后的文字将被忽略（后面可能会支持多标签搜索，敬请期待）\n**部分作品可能能由不同的标签指代，如**「ドールズフロントライン（少女前线）」**及**「ドルフロ（少前）」**均指向同一作品。搜索这样的两个标签并不会得到相对应的另一个标签的结果。\n  例：\n    发送`.pixiv top`，获取全站前九的插画/漫画\n    发送`.pixiv top VOCALOID`，获取`VOCALOID`标签前九的插画\n    发送`.pixiv top ゆるゆり`，获取`ゆるゆり`标签前九的插画"
                                 }
                             }
                         ]
-                    }])
+                    }]);
                 case "author":
                     return session.sendCard([{
                         "type": "card",
@@ -130,7 +130,7 @@ class Help extends AppCommand {
                                 }
                             }
                         ]
-                    }])
+                    }]);
                 case "detail":
                     return session.sendCard([{
                         "type": "card",
@@ -155,7 +155,7 @@ class Help extends AppCommand {
                                 }
                             }
                         ]
-                    }])
+                    }]);
                 case "refresh":
                     return session.sendCard([{
                         "type": "card",
@@ -184,7 +184,7 @@ class Help extends AppCommand {
                 case "random":
                     return session.reply("发送 `.pixiv random` 即可");
                 case "credit":
-                    return session.reply("呃…你是想要知道怎么打钱吗？")
+                    return session.reply("呃…你是想要知道怎么打钱吗？");
                 default:
                     return session.reply("没有这个指令！输入 `.pixiv` 查看指令列表。");
             }

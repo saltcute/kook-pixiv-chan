@@ -17,6 +17,8 @@ const sharp = require('sharp');
 
 export namespace type {
     export type detectionResult = {
+        success: boolean,
+        status: number,
         blur: number,
         reason?: blurReason
     }
@@ -46,6 +48,9 @@ export namespace common {
 
     export function log(output: string) {
         console.log(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
+    }
+    export function err(output: string) {
+        console.error(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
     }
 
     export function isForbittedTag(tag: string) {
@@ -78,14 +83,14 @@ export namespace common {
         log(`Download ${val.id} success, starts blurring`);
         var buffer = await sharp(await stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
         var blur = 0;
-        if (detectionResult !== undefined && detectionResult.blur > 0) {
+        if (detectionResult.success) {
             blur = detectionResult.blur;
+            if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
         } else {
-            log("Detection failed, return");
+            log("Detection failed, returned");
+            session.sendCard([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
             console.log(detectionResult);
-            blur = 7;
         }
-        buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
 
         log(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
         bodyFormData.append('file', buffer, "1.jpg");
@@ -105,10 +110,10 @@ export namespace common {
         }).catch((e: any) => {
             log(`Upload ${val.id} failed`);
             if (e) {
-                session.sendCard(cards.error(e));
+                session.sendCard(cards.error(e, true),);
             }
         });
-        if (detectionResult !== undefined) linkmap.addMap(val.id, "0", rtLink, detectionResult);
+        if (detectionResult.success) linkmap.addMap(val.id, "0", rtLink, detectionResult);
         return { link: rtLink, pid: val.id };
     }
 
