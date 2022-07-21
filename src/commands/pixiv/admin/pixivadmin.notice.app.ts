@@ -1,12 +1,13 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from '../common';
+import * as pixivadmin from './common';
 
 class Notice extends AppCommand {
     code = 'notice'; // 只是用作标记
     trigger = 'notice'; // 用于触发的文字
     intro = 'Notice';
     func: AppFunc<BaseSession> = async (session) => {
-        if (session.user.id !== "1854484583") {
+        if (!pixivadmin.common.isAdmin(session.userId)) {
             return session.reply("You do not have the permission to use this command")
         }
         if (session.args.length == 0) {

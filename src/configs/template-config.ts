@@ -6,5 +6,8 @@ export default {
     pixivProxyHostname: "i.pixiv.lolicon.ac.cn",
     useRemoteLinkmap: false,
     remoteLinkmapHostname: "",
-    maintainingRemoteLinkmap: false
+    maintainingRemoteLinkmap: false,
+    adminList: [ // Administrator users list, contains an array of user ID
+        "1854484583"
+    ]
 }

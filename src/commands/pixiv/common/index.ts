@@ -119,4 +119,22 @@ export namespace common {
             return session.sendCardTemp([cards.notification(notification)]);
         }
     }
+
+    //Rate control
+    var rateControl: { [key: string]: number } = {};
+    export function registerExecution(id: string) {
+        rateControl[id] = Date.now();
+    }
+    /**
+     * Get timestamp of the last execution of a user 
+     * @param id User id
+     * @returns Timestamp of last execution if exist. If not, returns `-1`
+     */
+    export function lastExecutionTimestamp(id: string): number {
+        if (rateControl.hasOwnProperty(id)) {
+            return rateControl[id];
+        } else {
+            return -1;
+        }
+    }
 }

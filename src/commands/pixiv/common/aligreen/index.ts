@@ -6,6 +6,9 @@ export namespace aligreen {
     export const addDetectScene = greenNodejs.addScene;
     export const removeDetectScene = greenNodejs.removeScene;
     export const currentDetectScenes = greenNodejs.currentScenes;
+    export const setServerRegion = greenNodejs.setRegion;
+    export const getServerRegion = greenNodejs.getRegion;
+    export const getServerHostname = greenNodejs.getHostname;
     export async function imageDetectionSync(datas: any[]): Promise<{ [key: string]: type.detectionResult }> {
         var imageURL: { [key: string]: string } = {};
         var empty: boolean = true;

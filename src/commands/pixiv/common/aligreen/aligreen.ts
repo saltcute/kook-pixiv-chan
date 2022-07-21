@@ -11,12 +11,25 @@ const regionID = {
     Singapore: "ap-southeast-1"
 }
 
-const serverRegion: keyof typeof regionID = "Singapore";
 
 const accessKeyId = auth.aliyunAccessKeyID;
 const accessKeySecret = auth.aliyunAccessKeySecret;
 const greenVersion = '2018-05-09';
-const hostname = `green.${regionID[serverRegion]}.aliyuncs.com`;
+
+var serverRegion: keyof typeof regionID = "Shanghai";
+var hostname = `green.${regionID[serverRegion]}.aliyuncs.com`;
+
+export function setRegion(region: keyof typeof regionID) {
+    serverRegion = region;
+    hostname = `green.${regionID[serverRegion]}.aliyuncs.com`;
+}
+export function getRegion(): keyof typeof regionID {
+    return serverRegion;
+}
+export function getHostname(): string {
+    return hostname;
+}
+
 const path = '/green/image/scan';
 
 var clientInfo = {

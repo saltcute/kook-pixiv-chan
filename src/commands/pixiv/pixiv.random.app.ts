@@ -7,6 +7,11 @@ class Random extends AppCommand {
     trigger = 'random'; // 用于触发的文字
     intro = 'Recommendation';
     func: AppFunc<BaseSession> = async (session) => {
+        const lastExecutionTimestamp = pixiv.common.lastExecutionTimestamp(session.userId);
+        if (lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= 10 * 1000) {
+            return session.reply(`您已达到速率限制。每个用户10秒内只能发起一次 \`.pixiv random\` 指令，请于 ${Math.round((lastExecutionTimestamp + 10 * 1000 - Date.now()) / 1000)} 秒后再试。`);
+        }
+        pixiv.common.registerExecution(session.userId);
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
