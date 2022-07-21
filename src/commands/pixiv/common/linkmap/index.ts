@@ -64,7 +64,7 @@ export namespace linkmap {
             }).catch((e) => {
                 common.log("Linkmap upload failed");
                 if (e) {
-                    common.log(e);
+                    console.error(e);
                 }
             });
         }

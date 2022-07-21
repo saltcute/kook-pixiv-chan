@@ -143,17 +143,20 @@ export namespace common {
     }
 
     //================Rate control================
-    var rateControl: { [key: string]: number } = {};
-    export function registerExecution(id: string) {
-        rateControl[id] = Date.now();
+    var rateControl: { [key: string]: { [key: string]: number } } = {};
+    export function registerExecution(id: string, trigger: string) {
+        rateControl[id] = {
+            ...rateControl[id],
+            [trigger]: Date.now()
+        }
     }
-    export function isRateLimited(session: BaseSession, limit: number, command: string): boolean {
-        const lastExecutionTimestamp = common.lastExecutionTimestamp(session.userId);
+    export function isRateLimited(session: BaseSession, limit: number, trigger: string): boolean {
+        const lastExecutionTimestamp = common.lastExecutionTimestamp(session.userId, trigger);
         if (!pixivadmin.common.isAdmin(session.userId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
-            session.reply(`您已达到速率限制。每个用户每${limit}秒内只能发起一次 \`${command}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
+            session.replyTemp(`您已达到速率限制。每个用户每 ${limit} 秒内只能发起一次 \`.pixiv ${trigger}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
             return true;
         } else {
-            common.registerExecution(session.userId);
+            common.registerExecution(session.userId, trigger);
             return false;
         }
     }
@@ -162,11 +165,10 @@ export namespace common {
      * @param id User id
      * @returns Timestamp of last execution if exist. If not, returns `-1`
      */
-    export function lastExecutionTimestamp(id: string): number {
-        if (rateControl.hasOwnProperty(id)) {
-            return rateControl[id];
-        } else {
-            return -1;
-        }
+    export function lastExecutionTimestamp(id: string, trigger: string): number {
+        if (rateControl.hasOwnProperty(id))
+            if (rateControl[id].hasOwnProperty(trigger)) return rateControl[id][trigger];
+            else return -1
+        else return -1;
     }
 }

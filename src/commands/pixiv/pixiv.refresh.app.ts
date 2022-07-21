@@ -13,7 +13,7 @@ class Refresh extends AppCommand {
     trigger = 'refresh'; // 用于触发的文字
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
-        if (pixiv.common.isRateLimited(session, 15, `.pixiv ${this.trigger}`)) return;
+        if (pixiv.common.isRateLimited(session, 15, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         if (session.args.length === 0) {
             return session.reply("使用 `.pixiv help refresh` 查询指令详细用法")

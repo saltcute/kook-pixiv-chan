@@ -7,7 +7,7 @@ class Illust extends AppCommand {
     trigger = 'illust'; // 用于触发的文字
     intro = 'Illustration';
     func: AppFunc<BaseSession> = async (session) => {
-        if (pixiv.common.isRateLimited(session, 3, `.pixiv ${this.trigger}`)) return;
+        if (pixiv.common.isRateLimited(session, 3, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             if (data.x_restrict !== 0) {

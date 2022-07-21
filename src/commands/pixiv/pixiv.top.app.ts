@@ -7,7 +7,7 @@ class Top extends AppCommand {
     trigger = 'top'; // 用于触发的文字
     intro = 'Top illustrations';
     func: AppFunc<BaseSession> = async (session) => {
-        if (pixiv.common.isRateLimited(session, 6, `.pixiv ${this.trigger}`)) return;
+        if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
