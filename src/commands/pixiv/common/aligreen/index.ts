@@ -52,11 +52,8 @@ export namespace aligreen {
                 for (const key in data.data) {
                     const val = data.data[key];
                     var blurAmount = 0;
-                    var porn: type.banResult, terrorism: type.banResult, ad: type.banResult, live: type.banResult;
-                    porn = terrorism = ad = live = {
-                        ban: false,
-                        probability: 100
-                    }
+                    var porn: type.banResult | undefined, terrorism: type.banResult | undefined, ad: type.banResult | undefined, live: type.banResult | undefined;
+                    porn = terrorism = ad = live = undefined;
                     for (const v of val.results) {
                         switch (v.scene) {
                             case "porn":

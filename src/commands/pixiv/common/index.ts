@@ -18,13 +18,13 @@ const sharp = require('sharp');
 export namespace type {
     export type detectionResult = {
         blur: number,
-        reason: blurReason
+        reason?: blurReason
     }
     export type blurReason = {
-        terrorism: banResult,
-        ad: banResult,
-        live: banResult,
-        porn: banResult,
+        terrorism?: banResult,
+        ad?: banResult,
+        live?: banResult,
+        porn?: banResult,
     };
     export type banResult = {
         ban: boolean,
@@ -59,9 +59,9 @@ export namespace common {
     export async function stream2buffer(stream: Stream): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
             const _buf = Array<any>();
-            stream.on("data", chunk => _buf.push(chunk));
+            stream.on("data", (chunk: any) => _buf.push(chunk));
             stream.on("end", () => resolve(Buffer.concat(_buf)));
-            stream.on("error", err => reject(`error converting stream - ${err}`));
+            stream.on("error", (err: any) => reject(`error converting stream - ${err}`));
         });
     }
 
@@ -70,13 +70,21 @@ export namespace common {
         if (linkmap.isInDatabase(val.id)) {
             return { link: linkmap.getLink(val.id, "0"), pid: val.id };
         }
+        if (detectionResult == undefined) {
+            if (linkmap.isInDatabase(val.id)) {
+                detectionResult = linkmap.getDetection(val.id, "0");
+            } else {
+                detectionResult = {
+                    blur: 7
+                }
+            }
+        }
 
         const master1200 = val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname); // Get image link
         log(`Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
         log(`Download ${val.id} success, starts blurring`);
-        var detectionResult: type.detectionResult;
         var buffer = await sharp(await stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
         if (detectionResult.blur > 0) {
             buffer = await sharp(buffer).blur(detectionResult.blur).jpeg().toBuffer();
