@@ -147,12 +147,15 @@ export namespace common {
     export function registerExecution(id: string) {
         rateControl[id] = Date.now();
     }
-    export function isReachRateLimit(session: BaseSession, limit: number, command: string) {
+    export function isRateLimited(session: BaseSession, limit: number, command: string): boolean {
         const lastExecutionTimestamp = common.lastExecutionTimestamp(session.userId);
         if (!pixivadmin.common.isAdmin(session.userId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
-            return session.reply(`您已达到速率限制。每个用户每${limit}秒内只能发起一次 \`${command}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
+            session.reply(`您已达到速率限制。每个用户每${limit}秒内只能发起一次 \`${command}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
+            return true;
+        } else {
+            common.registerExecution(session.userId);
+            return false;
         }
-        common.registerExecution(session.userId);
     }
     /**
      * Get timestamp of the last execution of a user 

@@ -8,7 +8,7 @@ class Random extends AppCommand {
     trigger = 'random'; // 用于触发的文字
     intro = 'Recommendation';
     func: AppFunc<BaseSession> = async (session) => {
-        pixiv.common.isReachRateLimit(session, 10, `.pixiv ${this.trigger}`);
+        if (pixiv.common.isRateLimited(session, 10, `.pixiv ${this.trigger}`)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId

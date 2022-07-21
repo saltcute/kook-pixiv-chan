@@ -7,7 +7,7 @@ class Detail extends AppCommand {
     trigger = 'detail'; // 用于触发的文字
     intro = 'Detail';
     func: AppFunc<BaseSession> = async (session) => {
-        pixiv.common.isReachRateLimit(session, 3, `.pixiv ${this.trigger}`);
+        if (pixiv.common.isRateLimited(session, 3, `.pixiv ${this.trigger}`)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             if (data.x_restrict !== 0) {
