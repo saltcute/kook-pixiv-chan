@@ -7,6 +7,8 @@ class Author extends AppCommand {
     trigger = 'author'; // 用于触发的文字
     intro = 'Author';
     func: AppFunc<BaseSession> = async (session) => {
+        pixiv.common.isReachRateLimit(session, 7, `.pixiv ${this.trigger}`);
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
@@ -52,10 +54,8 @@ class Author extends AppCommand {
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.author(data[0], r18, link, pid, session, {})]);
         }
         if (session.args.length === 0) {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help author` 查询指令详细用法")
         } else {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/creatorIllustrations`,
                 method: "GET",

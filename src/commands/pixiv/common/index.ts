@@ -8,11 +8,10 @@ import { BaseSession } from 'kbotify';
 import { linkmap } from './linkmap';
 import config from 'configs/config';
 import got from 'got/dist/source';
-import { aligreen } from './aligreen';
 import axios from 'axios';
 import auth from 'configs/auth';
 import { cards } from './cards';
-import { nsfwjs } from './nsfwjs';
+import * as pixivadmin from '../admin/common'
 const sharp = require('sharp');
 
 export namespace type {
@@ -46,11 +45,17 @@ export namespace common {
         }
     }
 
+
+    //======================Logging======================
     export function log(output: string) {
         console.log(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
     }
     export function err(output: string) {
         console.error(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
+    }
+    export function logInvoke(command: string, session: BaseSession) {
+        log(`From ${session.user.nickname} (ID ${session.user.id}), invoke "${command} ${session.args.join(" ")}"`);
+
     }
 
     export function isForbittedTag(tag: string) {
@@ -72,7 +77,8 @@ export namespace common {
 
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
-        if (linkmap.isInDatabase(val.id)) {
+        if (linkmap.isInDatabase(val.id, "0")) {
+            log(`${val.id} in database, skipped`);
             return { link: linkmap.getLink(val.id, "0"), pid: val.id };
         }
 
@@ -140,6 +146,13 @@ export namespace common {
     var rateControl: { [key: string]: number } = {};
     export function registerExecution(id: string) {
         rateControl[id] = Date.now();
+    }
+    export function isReachRateLimit(session: BaseSession, limit: number, command: string) {
+        const lastExecutionTimestamp = common.lastExecutionTimestamp(session.userId);
+        if (!pixivadmin.common.isAdmin(session.userId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
+            return session.reply(`您已达到速率限制。每个用户每${limit}秒内只能发起一次 \`${command}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
+        }
+        common.registerExecution(session.userId);
     }
     /**
      * Get timestamp of the last execution of a user 

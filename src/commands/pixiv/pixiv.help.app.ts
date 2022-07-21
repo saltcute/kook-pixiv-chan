@@ -6,8 +6,8 @@ class Help extends AppCommand {
     trigger = 'help'; // 用于触发的文字
     intro = 'Help';
     func: AppFunc<BaseSession> = async (session) => {
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         if (session.args.length == 0) {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.sendCard([
                 {
                     "type": "card",
@@ -44,7 +44,6 @@ class Help extends AppCommand {
                 }
             ]);
         } else {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             switch (session.args[0]) {
                 case "top":
                     return session.sendCard([{

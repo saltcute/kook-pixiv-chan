@@ -1,5 +1,6 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
+import * as pixivadmin from './admin/common';
 import axios from 'axios';
 
 class Random extends AppCommand {
@@ -7,11 +8,8 @@ class Random extends AppCommand {
     trigger = 'random'; // 用于触发的文字
     intro = 'Recommendation';
     func: AppFunc<BaseSession> = async (session) => {
-        const lastExecutionTimestamp = pixiv.common.lastExecutionTimestamp(session.userId);
-        if (lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= 10 * 1000) {
-            return session.reply(`您已达到速率限制。每个用户每10秒内只能发起一次 \`.pixiv random\` 指令，请于 ${Math.round((lastExecutionTimestamp + 10 * 1000 - Date.now()) / 1000)} 秒后再试。`);
-        }
-        pixiv.common.registerExecution(session.userId);
+        pixiv.common.isReachRateLimit(session, 10, `.pixiv ${this.trigger}`);
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
@@ -55,7 +53,6 @@ class Random extends AppCommand {
             pixiv.common.log(`Processing ended, presenting to user`);
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.random(link, pid, {})]);
         }
-        pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
         axios({
             url: `http://pixiv.lolicon.ac.cn/recommend`,
             method: "GET"

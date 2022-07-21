@@ -14,7 +14,7 @@ export namespace aligreen {
         var empty: boolean = true;
         for (const key in datas) {
             const val = datas[key];
-            if (ignoreLinkmap || linkmap.isInDatabase(val.id) == false || !linkmap.getDetection(val.id, "0").success) {
+            if (ignoreLinkmap || !linkmap.isInDatabase(val.id, "0")) {
                 empty = false;
                 imageURL = {
                     ...imageURL,

@@ -7,6 +7,8 @@ class Top extends AppCommand {
     trigger = 'top'; // 用于触发的文字
     intro = 'Top illustrations';
     func: AppFunc<BaseSession> = async (session) => {
+        pixiv.common.isReachRateLimit(session, 6, `.pixiv ${this.trigger}`);
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
@@ -47,11 +49,9 @@ class Top extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            pixiv.common.log(`Process ended, presenting to user`);
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.top(link, pid, session, {})]);
         }
         if (session.args.length === 0) {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/ranklist`,
                 method: "GET"

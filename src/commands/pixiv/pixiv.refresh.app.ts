@@ -1,6 +1,7 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import auth from '../../configs/auth';
 import * as pixiv from './common';
+import * as pixivadmin from './admin/common';
 import axios from 'axios';
 import config from '../../configs/config';
 import FormData from 'form-data';
@@ -12,13 +13,13 @@ class Refresh extends AppCommand {
     trigger = 'refresh'; // 用于触发的文字
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
+        pixiv.common.isReachRateLimit(session, 15, `.pixiv ${this.trigger}`);
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         if (session.args.length === 0) {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help refresh` 查询指令详细用法")
         } else {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             const illust_id = session.args[0].toString();
-            if (pixiv.linkmap.isInDatabase(illust_id)) {
+            if (pixiv.linkmap.isInDatabase(illust_id, "0")) {
                 pixiv.common.getNotifications(session);
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
                 if (rtLink == pixiv.common.akarin) {
@@ -55,6 +56,24 @@ class Refresh extends AppCommand {
                         session.sendCard([pixiv.cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
                         console.log(detectionResult);
                     }
+                    var bodyFormData = new FormData();
+                    bodyFormData.append('file', buffer, "1.jpg");
+                    await axios({
+                        method: "post",
+                        url: "https://www.kookapp.cn/api/v3/asset/create",
+                        data: bodyFormData,
+                        headers: {
+                            'Authorization': `Bot ${auth.assetUploadToken}`,
+                            ...bodyFormData.getHeaders()
+                        }
+                    }).then((res: any) => {
+                        rtLink = res.data.data.url
+                    }).catch((e: any) => {
+                        if (e) {
+                            console.error(e);
+                            session.sendCard(pixiv.cards.error(e, true));
+                        }
+                    });
                     pixiv.common.log(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
                     var uncensored = false;
                     var tyblur = 0;

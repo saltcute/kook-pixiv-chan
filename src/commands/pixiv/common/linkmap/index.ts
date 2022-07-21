@@ -89,16 +89,18 @@ export namespace linkmap {
         }
     }
 
-    export function isInDatabase(illustID: string): boolean {
+    export function isInDatabase(illustID: string, page: string): boolean {
         if (map.hasOwnProperty(illustID)) {
-            return true;
+            if (map[illustID].hasOwnProperty(page)) {
+                return true;
+            } else return false;
         } else {
             return false;
         }
     }
 
     export function getLink(illustID: string, page: string): string {
-        if (isInDatabase(illustID)) {
+        if (isInDatabase(illustID, page)) {
             return map[illustID][page].kookLink;
         } else {
             return "";
@@ -106,7 +108,7 @@ export namespace linkmap {
     }
 
     export function getDetection(illustID: string, page: string): type.detectionResult {
-        if (isInDatabase(illustID)) {
+        if (isInDatabase(illustID, page)) {
             return map[illustID][page].NSFWResult;
         } else {
             return {

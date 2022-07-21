@@ -7,6 +7,8 @@ class Detail extends AppCommand {
     trigger = 'detail'; // 用于触发的文字
     intro = 'Detail';
     func: AppFunc<BaseSession> = async (session) => {
+        pixiv.common.isReachRateLimit(session, 3, `.pixiv ${this.trigger}`);
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
             if (data.x_restrict !== 0) {
                 return session.sendCard(pixiv.cards.detail(data, pixiv.common.akarin));
@@ -32,10 +34,8 @@ class Detail extends AppCommand {
             session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(data, uploadResult.link)])
         }
         if (session.args.length === 0) {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
             return session.reply("使用 `.pixiv help detail` 查询指令详细用法")
         } else {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
                 method: "GET",
