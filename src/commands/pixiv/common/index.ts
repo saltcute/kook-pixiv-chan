@@ -94,7 +94,7 @@ export namespace common {
             if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
         } else {
             log("Detection failed, returned");
-            session.sendCard([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
+            session.sendCardTemp([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
             console.log(detectionResult);
         }
 
