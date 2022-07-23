@@ -13,7 +13,7 @@ class Notice extends AppCommand {
         if (session.args.length == 0) {
             return session.replyTemp("Please specified an action");
         }
-        pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+        pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
         switch (session.args[0]) {
             case "add":
                 pixiv.common.log("Added notification:")

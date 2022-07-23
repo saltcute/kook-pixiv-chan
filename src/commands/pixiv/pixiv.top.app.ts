@@ -38,7 +38,7 @@ class Top extends AppCommand {
             }).catch((e) => {
                 if (e) {
                     console.error(e);
-                    session.sendCard(pixiv.cards.error(e, true));
+                    session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
             for (var val of uploadResults) {
@@ -61,11 +61,10 @@ class Top extends AppCommand {
             }).catch((e: any) => {
                 if (e) {
                     console.error(e);
-                    session.sendCard(pixiv.cards.error(e, true));
+                    session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
         } else {
-            pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger} ${session.args[0]}"`);
             axios({
                 url: `http://pixiv.lolicon.ac.cn/topInTag`,
                 method: "GET",
@@ -83,7 +82,7 @@ class Top extends AppCommand {
             }).catch((e: any) => {
                 if (e) {
                     console.error(e);
-                    session.sendCard(pixiv.cards.error(e, true));
+                    session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
         }

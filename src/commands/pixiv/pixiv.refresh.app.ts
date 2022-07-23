@@ -51,88 +51,91 @@ class Refresh extends AppCommand {
                     if (detectionResult.success) {
                         blur = detectionResult.blur;
                         if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
+
+                        var bodyFormData = new FormData();
+                        bodyFormData.append('file', buffer, "1.jpg");
+                        await axios({
+                            method: "post",
+                            url: "https://www.kookapp.cn/api/v3/asset/create",
+                            data: bodyFormData,
+                            headers: {
+                                'Authorization': `Bot ${auth.assetUploadToken}`,
+                                ...bodyFormData.getHeaders()
+                            }
+                        }).then((res: any) => {
+                            rtLink = res.data.data.url
+                        }).catch((e: any) => {
+                            if (e) {
+                                console.error(e);
+                                session.sendCardTemp(pixiv.cards.error(e, true));
+                            }
+                        });
+                        pixiv.common.log(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
+                        var uncensored = false;
+                        var tyblur = 0;
+                        for (let i = 1; i <= 5; ++i) {
+                            await axios({
+                                url: rtLink,
+                                method: "GET"
+                            }).then(() => {
+                                pixiv.common.log(`Uncensoring success with ${tyblur}px of gaussian blur`);
+                                uncensored = true;
+                            }).catch(async () => {
+                                pixiv.common.log(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
+                                var bodyFormData = new FormData();
+                                bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
+                                tyblur = 7 * i;
+                                await axios({
+                                    method: "post",
+                                    url: "https://www.kookapp.cn/api/v3/asset/create",
+                                    data: bodyFormData,
+                                    headers: {
+                                        'Authorization': `Bot ${auth.assetUploadToken}`,
+                                        ...bodyFormData.getHeaders()
+                                    }
+                                }).then((res: any) => {
+                                    rtLink = res.data.data.url
+                                }).catch((e: any) => {
+                                    if (e) {
+                                        console.error(e);
+                                        session.sendCardTemp(pixiv.cards.error(e, true));
+                                    }
+                                });
+                            })
+                            if (uncensored) break;
+                        }
+                        pixiv.common.log(`Refreshing stage 2 ended with ${blur + tyblur}px of gaussian blur (trial & error)`);
+                        pixiv.common.log(`Process ended, presenting to user`);
+                        if (!uncensored) {
+                            session.updateMessage(loadingBarMessageID, [{
+                                "type": "card",
+                                "theme": "danger",
+                                "size": "lg",
+                                "modules": [
+                                    {
+                                        "type": "section",
+                                        "text": {
+                                            "type": "kmarkdown",
+                                            "content": `给 \`${val.id}_p0.jpg\` 施加了超过 100px 高斯模糊都救不回来…？属于是世间奇图了，请务必反馈到 Pixiv 酱的[交流服务器](https://kook.top/iOOsLu)中`
+                                        }
+                                    }
+                                ]
+                            }])
+                            if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
+                        } else {
+                            session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, rtLink)]);
+                            if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
+                        }
                     } else {
                         pixiv.common.log("Detection failed, returned");
                         session.sendCardTemp([pixiv.cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
                         console.log(detectionResult);
-                    }
-                    var bodyFormData = new FormData();
-                    bodyFormData.append('file', buffer, "1.jpg");
-                    await axios({
-                        method: "post",
-                        url: "https://www.kookapp.cn/api/v3/asset/create",
-                        data: bodyFormData,
-                        headers: {
-                            'Authorization': `Bot ${auth.assetUploadToken}`,
-                            ...bodyFormData.getHeaders()
-                        }
-                    }).then((res: any) => {
-                        rtLink = res.data.data.url
-                    }).catch((e: any) => {
-                        if (e) {
-                            console.error(e);
-                            session.sendCard(pixiv.cards.error(e, true));
-                        }
-                    });
-                    pixiv.common.log(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
-                    var uncensored = false;
-                    var tyblur = 0;
-                    for (let i = 1; i <= 5; ++i) {
-                        await axios({
-                            url: rtLink,
-                            method: "GET"
-                        }).then(() => {
-                            uncensored = true;
-                        }).catch(async () => {
-                            pixiv.common.log(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
-                            var bodyFormData = new FormData();
-                            bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
-                            tyblur = 7 * i;
-                            await axios({
-                                method: "post",
-                                url: "https://www.kookapp.cn/api/v3/asset/create",
-                                data: bodyFormData,
-                                headers: {
-                                    'Authorization': `Bot ${auth.assetUploadToken}`,
-                                    ...bodyFormData.getHeaders()
-                                }
-                            }).then((res: any) => {
-                                rtLink = res.data.data.url
-                            }).catch((e: any) => {
-                                if (e) {
-                                    console.error(e);
-                                    session.sendCard(pixiv.cards.error(e, true));
-                                }
-                            });
-                        })
-                        if (uncensored) break;
-                    }
-                    pixiv.common.log(`Refreshing stage 2 ended with ${tyblur}px of gaussian blur (trial & error)`);
-                    pixiv.common.log(`Process ended, presenting to user`);
-                    if (!uncensored) {
-                        session.updateMessage(loadingBarMessageID, [{
-                            "type": "card",
-                            "theme": "danger",
-                            "size": "lg",
-                            "modules": [
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "kmarkdown",
-                                        "content": `给 \`${val.id}_p0.jpg\` 施加了超过 100px 高斯模糊都救不回来…？属于是世间奇图了，请务必反馈到 Pixiv 酱的[交流服务器](https://kook.top/iOOsLu)中`
-                                    }
-                                }
-                            ]
-                        }])
-                        if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
-                    } else {
-                        session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, rtLink)]);
-                        if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
+                        session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, pixiv.common.akarin)]);
                     }
                 }).catch((e: any) => {
                     if (e) {
                         console.error(e);
-                        session.sendCard(pixiv.cards.error(e, true));
+                        session.sendCardTemp(pixiv.cards.error(e, true));
                     }
                 });
             } else {

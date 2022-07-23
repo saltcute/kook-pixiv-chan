@@ -54,7 +54,7 @@ export namespace common {
         console.error(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
     }
     export function logInvoke(command: string, session: BaseSession) {
-        log(`From ${session.user.nickname} (ID ${session.user.id}), invoke "${command} ${session.args.join(" ")}"`);
+        log(`From ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke "${command} ${session.args.join(" ")}"`);
 
     }
 
@@ -86,41 +86,40 @@ export namespace common {
         log(`Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
-        log(`Download ${val.id} success, starts blurring`);
         var buffer = await sharp(await stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
         var blur = 0;
         if (detectionResult.success) {
             blur = detectionResult.blur;
             if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
+            log(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
+            bodyFormData.append('file', buffer, "1.jpg");
+            var rtLink = "";
+            //Upload image to KOOK's server
+            await axios({
+                method: "post",
+                url: "https://www.kookapp.cn/api/v3/asset/create",
+                data: bodyFormData,
+                headers: {
+                    'Authorization': `Bot ${auth.assetUploadToken} `,
+                    ...bodyFormData.getHeaders()
+                }
+            }).then((res: any) => {
+                log(`Upload ${val.id} success`);
+                rtLink = res.data.data.url
+            }).catch((e: any) => {
+                log(`Upload ${val.id} failed`);
+                if (e) {
+                    session.sendCard(cards.error(e, true),);
+                }
+            });
+            if (detectionResult.success) linkmap.addMap(val.id, "0", rtLink, detectionResult);
+            return { link: rtLink, pid: val.id };
         } else {
-            log("Detection failed, returned");
+            log("Detection failed, returned Akarin");
             session.sendCardTemp([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
             console.log(detectionResult);
+            return { link: akarin, pid: val.id };
         }
-
-        log(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
-        bodyFormData.append('file', buffer, "1.jpg");
-        var rtLink = "";
-        //Upload image to KOOK's server
-        await axios({
-            method: "post",
-            url: "https://www.kookapp.cn/api/v3/asset/create",
-            data: bodyFormData,
-            headers: {
-                'Authorization': `Bot ${auth.assetUploadToken} `,
-                ...bodyFormData.getHeaders()
-            }
-        }).then((res: any) => {
-            log(`Upload ${val.id} success`);
-            rtLink = res.data.data.url
-        }).catch((e: any) => {
-            log(`Upload ${val.id} failed`);
-            if (e) {
-                session.sendCard(cards.error(e, true),);
-            }
-        });
-        if (detectionResult.success) linkmap.addMap(val.id, "0", rtLink, detectionResult);
-        return { link: rtLink, pid: val.id };
     }
 
     //================Notification================

@@ -6,7 +6,7 @@ class Credit extends AppCommand {
     trigger = 'credit'; // 用于触发的文字
     intro = 'Credits';
     func: AppFunc<BaseSession> = async (session) => {
-        pixiv.common.log(`From ${session.user.nickname} (ID ${session.user.id}), invoke ".pixiv ${this.trigger}"`);
+        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         return session.sendCard([pixiv.cards.credit()]);
     }
 }

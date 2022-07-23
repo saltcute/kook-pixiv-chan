@@ -39,7 +39,7 @@ class Author extends AppCommand {
             }).catch((e) => {
                 if (e) {
                     console.error(e);
-                    session.sendCard(pixiv.cards.error(e, true));
+                    session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
             for (var val of uploadResults) {
@@ -74,7 +74,7 @@ class Author extends AppCommand {
             }).catch((e: any) => {
                 if (e) {
                     console.error(e);
-                    session.sendCard(pixiv.cards.error(e, true));
+                    session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
         }

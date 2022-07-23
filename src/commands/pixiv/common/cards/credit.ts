@@ -1,4 +1,7 @@
 import { Card } from "kbotify"
+import fs from 'fs';
+
+const pak = JSON.parse(fs.readFileSync("package.json", { encoding: "utf-8", flag: "r" }));
 
 export default () => {
     return new Card({
@@ -10,7 +13,7 @@ export default () => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "您可以在[爱发电](https://afdian.net/@potatopotat0)支持 Pixiv酱的开发！"
+                    "content": "您可以在[爱发电](https://afdian.net/@potatopotat0)支持 Pixiv酱的开发！\nYou can help me develop Pixiv Chan on [Patreon](https://www.patreon.com/potatopotat0)!"
                 }
             },
             {
@@ -55,7 +58,7 @@ export default () => {
                 "elements": [
                     {
                         "type": "plain-text",
-                        "content": "Copyright © 2022 potatopotat0. All rights reserved."
+                        "content": `${pak.name} v${pak.version}\nCopyright © 2022 potatopotat0. All rights reserved.`
                     }
                 ]
             }

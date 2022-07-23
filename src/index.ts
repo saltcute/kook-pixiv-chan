@@ -31,6 +31,13 @@ if (config.useAliyunGreen === false) {
 }
 
 /**
+ * Aliyun green initilization
+ */
+if (config.useAliyunGreen) {
+    pixiv.aligreen.setServerRegion("Singapore");
+}
+
+/**
  * Bot Market Initializatiojn
  */
 if (config.enableBotMarket) {
