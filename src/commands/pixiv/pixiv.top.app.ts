@@ -68,19 +68,19 @@ class Top extends AppCommand {
                 }
             });
         } else {
-            const duration = session.args.length > 1 ? undefined : "LAST_WEEK"
+            const duration = session.args.length > 1 ? undefined : "LAST_WEEK";
             axios({
                 url: `http://pixiv.lolicon.ac.cn/topInTag`,
                 method: "GET",
                 params: {
-                    keyword: encodeURI(session.args.join(" ")),
+                    keyword: session.args.join(" "),
                     duration: duration
                 }
             }).then((res: any) => {
                 if (res.data.length == 0) {
-                    return session.reply(`没有找到任何关于标签**「${session.args[0]}」**的插画……可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助\n如确定使用方式无误，则没有关于此标签**「${session.args[0]}」**的任何插画，请更换关键词再试一遍`);
+                    return session.reply(`没有找到任何${session.args.length > 1 ? "同时拥有" : "关于"}标签${session.args.map(str => `「${str}」`).join("、")}的插画……可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助\n如确定使用方式无误，则${session.args.length > 1 ? "" : "本周"}没有${session.args.length > 1 ? "同时拥有" : "关于"}标签${session.args.map(str => `「${str}」`).join("、")} 的任何插画，请更换关键词再试一遍`);
                 } else if (res.data.length <= 10) {
-                    session.replyTemp(`关于标签**「${session.args[0]}」**的插画数量极少（小于十张）……这有可能是正常现象（\`.pixiv top\` 只会返回本周发表的插画）\n但也可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助`);
+                    session.replyTemp(`关于标签 **「${session.args[0]}」** 的插画数量极少（小于十张）……这有可能是正常现象（\`.pixiv top\` 只会返回本周发表的插画）\n但也可能是命令使用方式错误，输入 \`.pixiv help top\` 查看详细使用帮助`);
                 }
                 if (res.data.hasOwnProperty("code") && res.data.code == 500) {
                     return session.reply("Pixiv官方服务器不可用，请稍后再试");
