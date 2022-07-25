@@ -13,6 +13,7 @@ function trace(containTrace: boolean) {
 }
 
 export default (e: any, containTrace: boolean) => {
+    containTrace = false; // Maybe do not show trace to user
     return new Card({
         "type": "card",
         "theme": "danger",

@@ -22,9 +22,6 @@ class Refresh extends AppCommand {
             if (pixiv.linkmap.isInDatabase(illust_id, "0")) {
                 pixiv.common.getNotifications(session);
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
-                if (rtLink == pixiv.common.akarin) {
-                    return session.reply("插画因为 R-18/R-18G 无法刷新缓存");
-                }
                 pixiv.common.log(`Refreshing ${illust_id}_0.jpg`);
                 axios({
                     url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
@@ -35,13 +32,19 @@ class Refresh extends AppCommand {
                     if (res.data.hasOwnProperty("status") && res.data.status === 404) {
                         return session.reply("插画不存在或已被删除！")
                     }
+                    if (res.data.hasOwnProperty("status") && res.data.status == 400) {
+                        return session.reply("插画ID不合法！")
+                    }
+                    if (res.data.hasOwnProperty("code") && res.data.code == 500) {
+                        return session.reply("Pixiv官方服务器不可用，请稍后再试");
+                    }
                     const val = res.data;
                     if (val.x_restrict > 0) {
-                        return session.reply("插画因为 R-18/R-18G 无法刷新缓存");
+                        return session.reply("无法刷新 R-18/R-18G 插画的缓存");
                     }
                     var loadingBarMessageID: string | undefined = (await session.sendCard([pixiv.cards.resaving(`\`${val.id}_p0.jpg\``)])).msgSent?.msgId;
                     if (loadingBarMessageID == undefined) {
-                        pixiv.common.log("Send message failed");
+                        pixiv.common.log("Message sending failed");
                         return;
                     }
                     pixiv.common.getNotifications(session);

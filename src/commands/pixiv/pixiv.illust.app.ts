@@ -15,7 +15,7 @@ class Illust extends AppCommand {
             }
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving(`\`${data.id}_p0.jpg\``))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
-                return pixiv.common.log("Send message failed");
+                return pixiv.common.log("Message sending failed");
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
             var uploadResult: {
@@ -36,6 +36,9 @@ class Illust extends AppCommand {
         if (session.args.length === 0) {
             return session.reply("使用 `.pixiv help illust` 查询指令详细用法")
         } else {
+            if (isNaN(parseInt(session.args[0]))) {
+                return session.reply(`插画ID必须是纯数字！请输入一个合法的插画ID（收到 ${session.args[0]}）\n（使用 \`.pixiv help detail\` 查询指令详细用法）`)
+            }
             axios({
                 url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
                 method: "GET",
@@ -46,8 +49,11 @@ class Illust extends AppCommand {
                 if (res.data.hasOwnProperty("status") && res.data.status === 404) {
                     return session.reply("插画不存在或已被删除！")
                 }
-                if (res.data.hasOwnProperty("code") && res.data.code == 400) {
-                    return session.reply("请输入一个合法的插画ID（使用 `.pixiv help illust` 查询指令详细用法）")
+                if (res.data.hasOwnProperty("status") && res.data.status == 400) {
+                    return session.reply("插画ID不合法！")
+                }
+                if (res.data.hasOwnProperty("code") && res.data.code == 500) {
+                    return session.reply("Pixiv官方服务器不可用，请稍后再试");
                 }
                 pixiv.common.getNotifications(session);
                 sendCard(res.data);

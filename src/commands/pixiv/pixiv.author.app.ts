@@ -12,7 +12,7 @@ class Author extends AppCommand {
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
-                return pixiv.common.log("Send message failed");
+                return pixiv.common.log("Message sending failed");
             }
             var r18: number = 0;
             var link: string[] = [];
@@ -68,6 +68,9 @@ class Author extends AppCommand {
                 }
                 if (res.data.hasOwnProperty("code") && res.data.code == 400) {
                     return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）")
+                }
+                if (res.data.hasOwnProperty("code") && res.data.code == 500) {
+                    return session.reply("Pixiv官方服务器不可用，请稍后再试");
                 }
                 pixiv.common.getNotifications(session);
                 sendCard(res.data);

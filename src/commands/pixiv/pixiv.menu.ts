@@ -40,7 +40,7 @@ class PixivMenu extends MenuCommand {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "输入 `.pixiv help` 查询详细指令用法"
+                    "content": "请输入 `.pixiv help` 查询详细指令用法"
                 }
             },
             {
@@ -57,7 +57,7 @@ class PixivMenu extends MenuCommand {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv top [标签]` 获取本周 [标签] 标签的人气前九的图片，若不提供 [标签] 则为全站排名"
+                    "content": "`.pixiv top [标签]...` 获取本周 [标签] 标签的人气前九的图片，若不提供 [标签] 则为全站排名"
                 }
             },
             {

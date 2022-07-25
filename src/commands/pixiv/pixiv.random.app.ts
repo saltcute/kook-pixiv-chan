@@ -13,7 +13,7 @@ class Random extends AppCommand {
         async function sendCard(data: any) {
             const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
             if (loadingBarMessageID == undefined) {
-                return pixiv.common.log("Send message failed");
+                return pixiv.common.log("Message sending failed");
             }
             var link: string[] = [];
             var pid: string[] = [];
@@ -57,6 +57,9 @@ class Random extends AppCommand {
             url: `http://pixiv.lolicon.ac.cn/recommend`,
             method: "GET"
         }).then((res: any) => {
+            if (res.data.hasOwnProperty("code") && res.data.code == 500) {
+                return session.reply("Pixiv官方服务器不可用，请稍后再试");
+            }
             pixiv.common.getNotifications(session);
             sendCard(res.data);
         }).catch((e: any) => {

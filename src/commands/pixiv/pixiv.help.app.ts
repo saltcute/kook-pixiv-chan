@@ -46,40 +46,63 @@ class Help extends AppCommand {
         } else {
             switch (session.args[0]) {
                 case "top":
-                    return session.sendCard([{
-                        "type": "card",
-                        "theme": "warning",
-                        "size": "lg",
-                        "modules": [
-                            {
-                                "type": "header",
-                                "text": {
-                                    "type": "plain-text",
-                                    "content": ".pixiv top"
+                    return session.sendCard([
+                        {
+                            "type": "card",
+                            "theme": "warning",
+                            "size": "lg",
+                            "modules": [
+                                {
+                                    "type": "header",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": ".pixiv top"
+                                    }
+                                },
+                                {
+                                    "type": "divider"
+                                },
+                                {
+                                    "type": "section",
+                                    "text": {
+                                        "type": "kmarkdown",
+                                        "content": "`.pixiv top [标签]...` 获取本周 [标签] 标签的人气前九的图片，若 [标签] 缺省则为全站排名"
+                                    }
+                                },
+                                {
+                                    "type": "context",
+                                    "elements": [
+                                        {
+                                            "type": "kmarkdown",
+                                            "content": "我正在考虑将 .pixiv top [标签] 拆分至其他命令（如 .pixiv tag），愿意的话，请来[服务器](https://kook.top/iOOsLu)投上一票或是表达自己的想法"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "divider"
+                                },
+                                {
+                                    "type": "section",
+                                    "text": {
+                                        "type": "kmarkdown",
+                                        "content": "**部分标签可以使用中文搜索，但最好使用原文（日文汉字/假名/英文）**\n搜索内容不能包含方括号（`[]`）\n每个不同的标签将以空格隔开\n**由空格分隔的英文词组将被视作两个标签！**\n  例：\n    发送`.pixiv top`，获取全站前九的插画/漫画\n    发送`.pixiv top VOCALOID`，获取`VOCALOID`标签前九的插画\n    发送`.pixiv top ゆるゆり`，获取`ゆるゆり`标签前九的插画\n    发送`.pixiv top 初音未来`，获取拥有`初音未来`标签或`初音ミク`标签的前九的插画\n    发送`.pixiv top オリジナル けもみみ`，获取同时拥有`オリジナル`标签与`けもみみ `标签的前九的插画"
+                                    }
+                                },
+                                {
+                                    "type": "divider"
+                                },
+                                {
+                                    "type": "context",
+                                    "elements": [
+                                        {
+                                            "type": "plain-text",
+                                            "content": "为避免内容过少，在使用多个标签作为关键词时，.pixiv top 的返回内容将不具有“本周”的时间限制"
+                                        }
+                                    ]
                                 }
-                            },
-                            {
-                                "type": "divider"
-                            },
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "kmarkdown",
-                                    "content": "`.pixiv top [标签]` 获取本周 [标签] 标签的人气前九的图片，若 [标签] 缺省则为全站排名"
-                                }
-                            },
-                            {
-                                "type": "divider"
-                            },
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "kmarkdown",
-                                    "content": "**部分标签可以使用中文搜索，但最好使用原文（日文汉字/假名/英文）\n搜索内容不能包含空格、括号（[]）\n空格后的文字将被忽略（后面可能会支持多标签搜索，敬请期待）\n**部分作品可能能由不同的标签指代，如**「ドールズフロントライン（少女前线）」**及**「ドルフロ（少前）」**均指向同一作品。搜索这样的两个标签并不会得到相对应的另一个标签的结果。\n  例：\n    发送`.pixiv top`，获取全站前九的插画/漫画\n    发送`.pixiv top VOCALOID`，获取`VOCALOID`标签前九的插画\n    发送`.pixiv top ゆるゆり`，获取`ゆるゆり`标签前九的插画"
-                                }
-                            }
-                        ]
-                    }]);
+                            ]
+                        }
+                    ]);
                 case "author":
                     return session.sendCard([{
                         "type": "card",
