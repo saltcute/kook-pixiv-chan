@@ -11,9 +11,7 @@ git clone https://github.com/potatopotat0/kook-pixiv-chan
 npm install
 ```
 
-Note: the node module `sharp` may not be currectly installed in Mainland China. Please consider using a proxy.
-
-Copy `./src/configs/template-auth.ts` to `./src/configs/auth.ts` and fill in your KOOK bot token. 
+Copy `./src/configs/template-auth.ts` to `./src/configs/auth.ts`. Fill in your KOOK bot token, Aliyun ID and secret. 
 
 Copy `./src/configs/template-config.ts` to `./src/configs/config.ts` and set as you need. 
 
@@ -23,26 +21,127 @@ Start `kook-pixiv-chan` with
 npm start
 ```
 
+or with
+
+```
+npm run pm2
+```
+
+to start using pm2
+
 ## TODO
 
-- `.pixiv`
-    - [ ] Ability to change illustration ranklist time period.
-    - [x] Aliyun image detection.
-    - [x] ~~NSFW.js image detection.~~
-        - [ ] Remove NSFW.js / Fix NSFW.js
-        - This method is broken and won't be fixed due to its unreliability. It's just not worth the effort.
-        - `config.useAliyunGreen`, `config.customNSFWModel` and `config.customNSFWLink` have no use and effects now.
-        - Even when `config.useAliyunGreen` is set to `false`, Pixiv chan will still try to use Aliyun image detection.
-    - [x] Refresh linkmap of a certain illustration.
-    - [x] (sort of) Maybe a better way of censoring NSFW.
-        - NSFW illustrations will be attempted to add gaussian blur for up to 35px before falling back to Akarin.
+- [ ] Ability to change illustration ranklist time period.
+- [x] Aliyun image detection.
+- [x] ~~NSFW.js image detection.~~
+    - [ ] Remove NSFW.js / Fix NSFW.js
+    - This method is broken and won't be fixed due to its unreliability. It's just not worth the effort.
+    - `config.useAliyunGreen`, `config.customNSFWModel` and `config.customNSFWLink` have no use and effects now.
+      Even when `config.useAliyunGreen` is set to `false`, Pixiv chan will still try to use Aliyun image detection.
+- [x] Refresh the linkmap of a certain illustration.
+
 
 ---
 
-## Avaliable command
+## Avaliable commands
 
-Use `.pixiv help` to see a list of command.
+Use `.pixiv` to see a list of command.
 
+Use `.pixiv help [command]` to get detailed help for using the command.
+
+## About `linkmap`
+
+The `linkmap` was originally a simple json file to save the link to the file of its corresponding illustration ID on kook's server.
+
+Now, `linkmap` contains even more informations, and its structure can be shown as such:
+
+```
+{
+    [illust_id: string]: {
+        [page_number: string]: {
+            kookLink: string
+            NSFWResult: {
+                status: number,
+                success: boolean,
+                blur: number,
+                reason: {
+                    porn?: {
+                        ban: boolean
+                        label: string
+                        probability: number
+                    }
+                    terrorism?: {
+                        ban: boolean
+                        label: string
+                        probability: number
+                    }
+                    live?: {
+                        ban: boolean
+                        label: string
+                        probability: number
+                    }
+                    ad?: {
+                        ban: boolean
+                        label: string
+                        probability: number
+                    }
+                },
+                suggestion: {
+                    ban: boolean
+                    blurAmount: number
+                }
+            }
+        }
+    }
+}
+```
+
+The `porn`, `terrorism`, `live` and `ad` will appear in `reason` only if they contribute to the total blur amount. That is ONLY when the image is NSFW in that certain category (sexual content, terrorism/politics/violence, smoking/gambling or advertising).
+
+Below is a example of linkmap, but you can also send a `GET` request to `http://pixiv.lolicon.ac.cn/linkmap` to get an updated linkmap (around 6000 illustrations as of 07/27/2022).
+
+```
+{
+    "98941448":{
+        "0":{
+            "kookLink":"https://img.kookapp.cn/assets/2022-07/21/iZJakMhLwv0e8080.jpg",
+            "NSFWResult":{
+                "status":200,
+                "success":true,
+                "blur":0,
+                "reason":{
+                    
+                }
+            },
+            "suggestion":{
+                "ban":false,
+                "blurAmount":0
+            }
+        }
+    },
+    "98012090":{
+        "0":{
+            "kookLink":"https://img.kookapp.cn/assets/2022-07/16/NUBJMKwKGu0e808k.jpg",
+            "NSFWResult":{
+                "status":200,
+                "success":true,
+                "blur":28,
+                "reason":{
+                    "porn":{
+                        "ban":true,
+                        "label":"porn",
+                        "probability":99.94
+                    }
+                }
+            },
+            "suggestion":{
+                "ban":true,
+                "blurAmount":28
+            }
+        }
+    }
+}
+```
 
 ## Censorship
 
@@ -50,7 +149,7 @@ Every illustration needs to be uploaded to KOOK's server before sending. R-18 an
 
 In regard of server bandwidth and load time, original image will be resize to 512px in width before uploading.
 
-`kook-pixiv-chan` will take use of nsfwjs or Aliyun (set in `config.ts`) to detect whether the image is NSFW or not and amount of blur to apply.
+`kook-pixiv-chan` will make use of ~~nsfwjs or~~ Aliyun ~~(set in `config.ts`)~~ to detect whether the image is NSFW or not and amount of blur to apply.
 
 ~~Some illustrations may be censored by KOOK after uploading to their servers. The bot will first try to apply gaussian plur to those image for up to 35px. If those image are still censored, they will be replaced by the same picture as well.~~
 
