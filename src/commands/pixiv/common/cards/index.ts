@@ -8,6 +8,7 @@ import ResavingCard from './resaving'
 import CreditCard from './credit'
 import RandomCard from './random'
 import NotificationCard from './notification'
+import TagCard from './tag'
 
 export namespace cards {
     export const error = ErrorCard;
@@ -20,4 +21,5 @@ export namespace cards {
     export const credit = CreditCard;
     export const random = RandomCard;
     export const notification = NotificationCard;
+    export const tag = TagCard;
 }

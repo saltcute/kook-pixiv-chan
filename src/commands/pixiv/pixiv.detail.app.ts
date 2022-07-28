@@ -1,6 +1,7 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
 import axios from 'axios';
+import config from 'configs/config';
 
 class Detail extends AppCommand {
     code = 'detail'; // 只是用作标记
@@ -40,7 +41,7 @@ class Detail extends AppCommand {
                 return session.reply(`插画ID必须是纯数字！请输入一个合法的插画ID（收到 ${session.args[0]}）\n（使用 \`.pixiv help detail\` 查询指令详细用法）`)
             }
             axios({
-                url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
+                url: `${config.pixivAPIBaseURL}/illustrationDetail`,
                 method: "GET",
                 params: {
                     keyword: session.args[0]

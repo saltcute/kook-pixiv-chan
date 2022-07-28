@@ -67,7 +67,7 @@ function nsfws(nsfw: boolean, id: string) {
     } else return [];
 }
 
-export default (link: string[], pid: string[], { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
+export default (link: string[], pid: string[], tags: string[], durationName: string, { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
     return new Card({
         "type": "card",
         "theme": "info",
@@ -77,7 +77,7 @@ export default (link: string[], pid: string[], { resave = false, nsfw = false, i
                 "type": "header",
                 "text": {
                     "type": "plain-text",
-                    "content": `随机推荐`
+                    "content": `${durationName}${tags.length > 1 ? "同时拥有" : "关于"}${tags.slice(0, 2).map(str => `「${str}」`).join("、")}${tags.length > 2 ? "等" : ""}标签的热门插画`
                 }
             },
             {
@@ -85,7 +85,7 @@ export default (link: string[], pid: string[], { resave = false, nsfw = false, i
                 "elements": [
                     {
                         "type": "kmarkdown",
-                        "content": "随机推荐由于受到API所登录账号之影响，出现涩图的概率会比较高，您可能会发现较多图片被模糊。\nご迷惑をおかけして申し訳ございません。"
+                        "content": "没有找到想要的插画？发送 `.pixiv help tag` 查询帮助"
                     }
                 ]
             },

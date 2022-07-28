@@ -96,7 +96,7 @@ export async function detect(imageURL: string[]) {
     requestHeaders.Authorization = 'acs ' + accessKeyId + ':' + authorization;
 
     return axios({
-        url: `http://${hostname}${encodeURI(path + '?clientInfo=' + JSON.stringify(clientInfo))}`,
+        url: `https://${hostname}${encodeURI(path + '?clientInfo=' + JSON.stringify(clientInfo))}`,
         method: "POST",
         headers: requestHeaders,
         data: requestBody

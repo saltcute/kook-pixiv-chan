@@ -7,6 +7,7 @@ import { illust } from './pixiv.illust.app';
 import { refresh } from './pixiv.refresh.app';
 import { top } from './pixiv.top.app';
 import { random } from './pixiv.random.app';
+import { tag } from './pixiv.tag.app';
 class PixivMenu extends MenuCommand {
     code = 'pixiv';
     trigger = 'pixiv';
@@ -21,27 +22,26 @@ class PixivMenu extends MenuCommand {
                 "type": "header",
                 "text": {
                     "type": "plain-text",
-                    "content": "Pixiv 命令"
+                    "content": "Pixiv酱命令列表"
                 }
-            },
-            {
-                "type": "divider"
             },
             {
                 "type": "context",
                 "elements": [
                     {
                         "type": "kmarkdown",
-                        "content": "所有命令皆不需要方括号（[]）"
+                        "content": "所有命令皆不需要括号（<>, (), [], {}）"
                     }
                 ]
             },
             {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "请输入 `.pixiv help` 查询详细指令用法"
-                }
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "kmarkdown",
+                        "content": "请输入 .pixiv help 查询详细指令用法"
+                    }
+                ]
             },
             {
                 "type": "divider"
@@ -50,49 +50,56 @@ class PixivMenu extends MenuCommand {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv random` 获取⑨张随机插画"
+                    "content": "```\n.pixiv tag [{day|week|month}] <tag>...```\n 获取所给标签人气前九的图片"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv top [标签]...` 获取本周 [标签] 标签的人气前九的图片，若不提供 [标签] 则为全站排名"
+                    "content": "```\n.pixiv random```\n 获取⑨张随机插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv author [用户 ID]` 获取用户的最新九张插画"
+                    "content": "```\n.pixiv top [option]```\n 获取本日/周/月等的全站最热插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv illust [插画 ID]` 获取 Pixiv 上对应 ID 的插画"
+                    "content": "```\n.pixiv author <Illustration ID>```\n 获取用户的最新九张插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv detail [插画 ID]` 获取对应 ID 插画的详细信息（作品名、作者、标签等）"
+                    "content": "```\n.pixiv illust <Illustration ID>```\n 获取 Pixiv 上对应 ID 的插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv refresh [插画 ID]` 刷新对应 ID 插画的缓存。（当图片显示不正常时，可以在几分钟后运行此命令）"
+                    "content": "```\n.pixiv detail <Illustration ID>```\n 获取对应 ID 插画的详细信息（作品名、作者、标签等）"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "`.pixiv credit` 查看赞助与感谢列表"
+                    "content": "```\n.pixiv refresh <Illustration ID>```\n 刷新对应 ID 插画的缓存。"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "kmarkdown",
+                    "content": "```\n.pixiv credit```\n 查看赞助与感谢列表"
                 }
             },
             {
@@ -103,10 +110,10 @@ class PixivMenu extends MenuCommand {
                         "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
                     }
                 ]
-            },
+            }
         ]
     }).toString();
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivMenu = new PixivMenu(top, illust, detail, author, refresh, help, credit, random);
+export const pixivMenu = new PixivMenu(top, tag, illust, detail, author, refresh, help, credit, random);

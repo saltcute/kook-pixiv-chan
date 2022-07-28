@@ -24,7 +24,7 @@ class Refresh extends AppCommand {
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
                 pixiv.common.log(`Refreshing ${illust_id}_0.jpg`);
                 axios({
-                    url: `http://pixiv.lolicon.ac.cn/illustrationDetail`,
+                    url: `${config.pixivAPIBaseURL}/illustrationDetail`,
                     params: {
                         keyword: illust_id
                     }
@@ -49,7 +49,7 @@ class Refresh extends AppCommand {
                     }
                     pixiv.common.getNotifications(session);
                     const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];
-                    var buffer: Buffer = await sharp(await pixiv.common.stream2buffer(got.stream(val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname)))).resize(512).jpeg().toBuffer();
+                    var buffer: Buffer = await sharp(await pixiv.common.stream2buffer(got.stream(pixiv.common.getProxiedImageLink(val.image_urls.large.replace(/\/c\/[a-zA-z0-9]+/gm, ""))))).resize(config.resizeWidth, config.resizeHeight, { fit: "outside" }).jpeg().toBuffer();
                     var blur = 0;
                     if (detectionResult.success) {
                         blur = detectionResult.blur;

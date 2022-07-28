@@ -4,6 +4,8 @@ Based on [kbotify](https://github.com/fi6/kBotify), this is the Pixiv-only repo 
 
 ## Deploying
 
+> You MUST have access to Aliyun image detection service to deploy `kook-pixiv-chan` (for now)
+
 To deploy on your own, first clone this repo and install dependencies with
 
 ```
@@ -47,7 +49,7 @@ to start using pm2
 
 Use `.pixiv` to see a list of command.
 
-Use `.pixiv help [command]` to get detailed help for using the command.
+Use `.pixiv help <command>` to get detailed help for using the command.
 
 ## About `linkmap`
 
@@ -96,9 +98,7 @@ Now, `linkmap` contains even more informations, and its structure can be shown a
 }
 ```
 
-The `porn`, `terrorism`, `live` and `ad` will appear in `reason` only if they contribute to the total blur amount. That is ONLY when the image is NSFW in that certain category (sexual content, terrorism/politics/violence, smoking/gambling or advertising).
-
-Below is a example of linkmap, but you can also send a `GET` request to `http://pixiv.lolicon.ac.cn/linkmap` to get an updated linkmap (around 6000 illustrations as of 07/27/2022).
+The `porn`, `terrorism`, `live` and `ad` part will appear in `reason` only if they contribute to the total blur amount. That is, ONLY when the image is NSFW in that certain category (sexual content, terrorism/politics/violence, smoking/gambling or advertising).
 
 ```
 {

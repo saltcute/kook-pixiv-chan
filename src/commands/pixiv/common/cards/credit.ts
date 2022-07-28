@@ -13,7 +13,7 @@ export default () => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "您可以在[爱发电](https://afdian.net/@potatopotat0)支持 Pixiv酱的开发！\nYou can help me develop Pixiv Chan on [Patreon](https://www.patreon.com/potatopotat0)!"
+                    "content": "您可以在[爱发电](https://afdian.net/@potatopotat0)支持 Pixiv酱的开发与运营！\nYou can help me to continue developing Pixiv Chan on [Patreon](https://www.patreon.com/potatopotat0)!"
                 }
             },
             {
@@ -30,7 +30,7 @@ export default () => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "[potatopotat0](https://lolicon.ac.cn/) - [kook-pixiv-chan](https://github.com/potatopotat0/kook-pixiv-chan) 与 [pix-node](https://github.com/potatopotat0/pix-node)\n[fi6](https://github.com/fi6) - [kBotify](https://github.com/fi6/kBotify) & [shugen002](https://github.com/shugen002) - [BotRoot](https://github.com/shugen002/BotRoot)\n[Microsoft](https://github.com/microsoft) - [Visual Studio Code](https://github.com/microsoft/vscode) 与 [Typescript](https://github.com/microsoft/TypeScript)\n我爸我妈 - 支持我搞这些又耗时间又花钱的东西"
+                    "content": "[potatopotat0](https://lolicon.ac.cn/) - [kook-pixiv-chan](https://github.com/potatopotat0/kook-pixiv-chan) 与 [pix-node](https://github.com/potatopotat0/pix-node)\n[fi6](https://github.com/fi6) - [kBotify](https://github.com/fi6/kBotify) & [shugen002](https://github.com/shugen002) - [BotRoot](https://github.com/shugen002/BotRoot)\n[Microsoft](https://github.com/microsoft) - [Visual Studio Code](https://github.com/microsoft/vscode) 与 [Typescript](https://github.com/microsoft/TypeScript)"
                 }
             },
             {

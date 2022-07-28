@@ -28,7 +28,7 @@ export namespace linkmap {
     export async function download() {
         if (config.useRemoteLinkmap) {
             await axios({
-                url: `https://${config.remoteLinkmapHostname}/linkmap`,
+                url: `${config.remoteLinkmapBaseURL}/linkmap`,
                 method: "GET",
                 headers: {
                     'uuid': auth.remoteLinkmapUUID
@@ -41,9 +41,9 @@ export namespace linkmap {
                 }
                 common.log("Downloaded linkmap from remote");
             }).catch((e) => {
-                load();
                 common.log("Linkmap download failed, loading local");
                 common.log(e);
+                load();
             })
         }
     }
@@ -51,7 +51,7 @@ export namespace linkmap {
     export async function upload() {
         if (config.maintainingRemoteLinkmap) {
             axios({
-                url: `https://${config.remoteLinkmapHostname}/updateLinkmap`,
+                url: `${config.remoteLinkmapBaseURL}/updateLinkmap`,
                 method: "POST",
                 headers: {
                     'Authorization': `Bearer ${auth.remoteLinkmapToken}`,

@@ -1,6 +1,5 @@
 import * as greenNodejs from './aligreen';
 import { common, linkmap, type } from '../'
-import config from 'configs/config';
 
 export namespace aligreen {
     export const addDetectScene = greenNodejs.addScene;
@@ -18,7 +17,7 @@ export namespace aligreen {
                 empty = false;
                 imageURL = {
                     ...imageURL,
-                    [val.id]: val.image_urls.medium.replace("i.pximg.net", config.pixivProxyHostname)
+                    [val.id]: common.getProxiedImageLink(val.image_urls.medium)
                 }
             }
         }

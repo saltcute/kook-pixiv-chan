@@ -1,7 +1,7 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
-import * as pixivadmin from './admin/common';
 import axios from 'axios';
+import config from 'configs/config';
 
 class Random extends AppCommand {
     code = 'random'; // 只是用作标记
@@ -54,7 +54,7 @@ class Random extends AppCommand {
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.random(link, pid, {})]);
         }
         axios({
-            url: `http://pixiv.lolicon.ac.cn/recommend`,
+            url: `${config.pixivAPIBaseURL}/recommend`,
             method: "GET"
         }).then((res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {

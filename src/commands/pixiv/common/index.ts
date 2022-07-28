@@ -37,12 +37,20 @@ export namespace type {
 export namespace common {
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
 
+    export function isObjKey<T>(key: PropertyKey, obj: T): key is keyof T {
+        return key in obj;
+    }
+
     export function pid2Markdown(pid: string) {
         if (isNaN(parseInt(pid))) {
             return pid;
         } else {
             return `[${pid}](https://www.pixiv.net/artworks/${pid})`;
         }
+    }
+
+    export function getProxiedImageLink(original: string): string {
+        return original.replace("https://i.pximg.net", config.pixivImageProxyBaseURL)
     }
 
 
@@ -54,7 +62,7 @@ export namespace common {
         console.error(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
     }
     export function logInvoke(command: string, session: BaseSession) {
-        log(`From ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke "${command} ${session.args.join(" ")}"`);
+        log(`From ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
 
     }
 
@@ -82,11 +90,11 @@ export namespace common {
             return { link: linkmap.getLink(val.id, "0"), pid: val.id };
         }
 
-        const master1200 = val.image_urls.large.replace("i.pximg.net", config.pixivProxyHostname); // Get image link
+        const master1200 = common.getProxiedImageLink(val.image_urls.large.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
         log(`Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
-        var buffer = await sharp(await stream2buffer(stream)).resize(512).jpeg().toBuffer(); // Resize stream and convert to buffer
+        var buffer = await sharp(await stream2buffer(stream)).resize(config.resizeWidth, config.resizeHeight, { fit: "outside" }).jpeg().toBuffer(); // Resize stream and convert to buffer
         var blur = 0;
         if (detectionResult.success) {
             blur = detectionResult.blur;

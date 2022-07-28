@@ -67,7 +67,7 @@ function nsfws(nsfw: boolean, id: string) {
     } else return [];
 }
 
-export default (link: string[], pid: string[], session: BaseSession, { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
+export default (link: string[], pid: string[], durationName: string, { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
     return new Card({
         "type": "card",
         "theme": "info",
@@ -77,7 +77,7 @@ export default (link: string[], pid: string[], session: BaseSession, { resave = 
                 "type": "header",
                 "text": {
                     "type": "plain-text",
-                    "content": `${session.args.length == 0 ? "全站热门插画" : `「${session.args[0]}」的热门插画`}`
+                    "content": `${durationName}热门`
                 }
             },
             {
