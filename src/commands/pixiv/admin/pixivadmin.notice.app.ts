@@ -1,3 +1,4 @@
+import { bot } from 'init/client';
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from '../common';
 import * as pixivadmin from './common';
@@ -16,19 +17,19 @@ class Notice extends AppCommand {
         pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
         switch (session.args[0]) {
             case "add":
-                pixiv.common.log("Added notification:")
+                bot.logger.info("Added notification:")
                 const content = session.args.slice(1).join(" ");
-                pixiv.common.log(content);
+                bot.logger.info(content);
                 session.replyCardTemp([pixiv.cards.notification(content)]);
                 pixiv.common.addNotifications(content);
                 break;
             case "delete":
-                pixiv.common.log("Deleted current notification");
+                bot.logger.info("Deleted current notification");
                 session.replyTemp("Deleted");
                 pixiv.common.deleteNotifications();
                 break;
             default:
-                pixiv.common.log("Action invalid");
+                bot.logger.warn("Action invalid");
                 return session.replyTemp("Action invalid");
         }
     }

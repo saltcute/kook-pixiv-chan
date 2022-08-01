@@ -1,4 +1,5 @@
 import config from "configs/config";
+import { bot } from "init/client";
 import { type, common } from "../";
 import auth from '../../../../configs/auth'
 const nsfw = require('nsfwjs')
@@ -10,10 +11,10 @@ export namespace nsfwjs {
     export async function init() {
         if (config.useAliyunGreen == false) {
             if (config.customNSFWModel) {
-                common.log(`Loaded custom nsfwjs model at ${config.customNSFWLink}`);
+                bot.logger.info(`Loaded custom nsfwjs model at ${config.customNSFWLink}`);
                 model = await nsfw.load(config.customNSFWLink, { size: 299 });
             } else {
-                common.log(`Loaded default nsfwjs model`);
+                bot.logger.info(`Loaded default nsfwjs model`);
                 model = await nsfw.load();
             }
         }

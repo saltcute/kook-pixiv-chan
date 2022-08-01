@@ -2,6 +2,7 @@ import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
 import axios from 'axios';
 import config from 'configs/config';
+import { bot } from 'init/client';
 
 class Tag extends AppCommand {
     code = 'tag'; // 只是用作标记
@@ -14,8 +15,8 @@ class Tag extends AppCommand {
             const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
             const loadingBarMessageID = sendResult.msgSent?.msgId;
             if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                console.log(sendResult.detail);
-                return pixiv.common.log("Message sending failed");
+                bot.logger.error(sendResult.detail);
+                return bot.logger.error("Message sending failed");
             }
             var link: string[] = [];
             var pid: string[] = [];
@@ -52,7 +53,7 @@ class Tag extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            pixiv.common.log(`Process ended, presenting to user`);
+            bot.logger.info(`Process ended, presenting to user`);
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.tag(link, pid, tags, durationName, {})]);
         }
         if (session.args.length === 0) {

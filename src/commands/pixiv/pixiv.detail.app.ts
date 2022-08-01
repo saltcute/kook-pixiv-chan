@@ -2,6 +2,7 @@ import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
 import axios from 'axios';
 import config from 'configs/config';
+import { bot } from 'init/client';
 
 class Detail extends AppCommand {
     code = 'detail'; // 只是用作标记
@@ -17,8 +18,8 @@ class Detail extends AppCommand {
             const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
             const loadingBarMessageID = sendResult.msgSent?.msgId;
             if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                console.log(sendResult.detail);
-                return pixiv.common.log("Message sending failed");
+                bot.logger.error(sendResult.detail);
+                return bot.logger.error("Message sending failed");
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id]
             var uploadResult: {
@@ -33,7 +34,7 @@ class Detail extends AppCommand {
                     session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
-            pixiv.common.log(`Process ended, presenting to user`);
+            bot.logger.info(`Process ended, presenting to user`);
             session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(data, uploadResult.link)])
         }
         if (session.args.length === 0) {

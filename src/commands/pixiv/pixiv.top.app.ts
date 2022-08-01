@@ -2,6 +2,7 @@ import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
 import axios from 'axios';
 import config from 'configs/config';
+import { bot } from 'init/client';
 
 class Top extends AppCommand {
     code = 'top'; // 只是用作标记
@@ -14,8 +15,8 @@ class Top extends AppCommand {
             const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
             const loadingBarMessageID = sendResult.msgSent?.msgId;
             if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                console.log(sendResult.detail);
-                return pixiv.common.log("Message sending failed");
+                bot.logger.error(sendResult.detail);
+                return bot.logger.error("Message sending failed");
             }
             var link: string[] = [];
             var pid: string[] = [];
@@ -52,7 +53,7 @@ class Top extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            pixiv.common.log(`Process ended, presenting to user`);
+            bot.logger.info(`Process ended, presenting to user`);
             await session.updateMessage(loadingBarMessageID, [pixiv.cards.top(link, pid, durationName, {})]);
         }
         const durationList = {
@@ -94,10 +95,10 @@ class Top extends AppCommand {
             }
         }).then((res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {
-                return session.reply("Pixiv官方服务器不可用，请稍后再试");
+                return session.replyTemp("Pixiv官方服务器不可用，请稍后再试");
             }
             if (res.data.length == 0) {
-                return session.reply(`无法找到任何插画，这多半是出错了`);
+                return session.replyTemp(`无法找到任何插画，这多半是出错了`);
             }
             pixiv.common.getNotifications(session);
             sendCard(res.data, durationName);

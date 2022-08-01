@@ -7,6 +7,7 @@ import config from '../../configs/config';
 import FormData from 'form-data';
 import sharp from 'sharp';
 import got from 'got';
+import { bot } from 'init/client';
 
 class Refresh extends AppCommand {
     code = 'refresh'; // 只是用作标记
@@ -22,7 +23,7 @@ class Refresh extends AppCommand {
             if (pixiv.linkmap.isInDatabase(illust_id, "0")) {
                 pixiv.common.getNotifications(session);
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
-                pixiv.common.log(`Refreshing ${illust_id}_0.jpg`);
+                bot.logger.info(`Refreshing ${illust_id}_0.jpg`);
                 axios({
                     url: `${config.pixivAPIBaseURL}/illustrationDetail`,
                     params: {
@@ -45,8 +46,8 @@ class Refresh extends AppCommand {
                     const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
                     const loadingBarMessageID = sendResult.msgSent?.msgId;
                     if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                        console.log(sendResult.detail);
-                        return pixiv.common.log("Message sending failed");
+                        bot.logger.error(sendResult.detail);
+                        return bot.logger.error("Message sending failed");
                     }
                     pixiv.common.getNotifications(session);
                     const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];
@@ -57,7 +58,7 @@ class Refresh extends AppCommand {
                         if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
 
                         var bodyFormData = new FormData();
-                        bodyFormData.append('file', buffer, "1.jpg");
+                        bodyFormData.append('file', buffer, "image.jpg");
                         await axios({
                             method: "post",
                             url: "https://www.kookapp.cn/api/v3/asset/create",
@@ -74,7 +75,7 @@ class Refresh extends AppCommand {
                                 session.sendCardTemp(pixiv.cards.error(e, true));
                             }
                         });
-                        pixiv.common.log(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
+                        bot.logger.info(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
                         var uncensored = false;
                         var tyblur = 0;
                         for (let i = 1; i <= 5; ++i) {
@@ -82,10 +83,10 @@ class Refresh extends AppCommand {
                                 url: rtLink,
                                 method: "GET"
                             }).then(() => {
-                                pixiv.common.log(`Uncensoring success with ${tyblur}px of gaussian blur`);
+                                bot.logger.info(`Uncensoring success with ${tyblur}px of gaussian blur`);
                                 uncensored = true;
                             }).catch(async () => {
-                                pixiv.common.log(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
+                                bot.logger.warn(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
                                 var bodyFormData = new FormData();
                                 bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
                                 tyblur = 7 * i;
@@ -108,8 +109,8 @@ class Refresh extends AppCommand {
                             })
                             if (uncensored) break;
                         }
-                        pixiv.common.log(`Refreshing stage 2 ended with ${blur + tyblur}px of gaussian blur (trial & error)`);
-                        pixiv.common.log(`Process ended, presenting to user`);
+                        bot.logger.info(`Refreshing stage 2 ended with ${blur + tyblur}px of gaussian blur (trial & error)`);
+                        bot.logger.info(`Process ended, presenting to user`);
                         if (!uncensored) {
                             session.updateMessage(loadingBarMessageID, [{
                                 "type": "card",
@@ -131,9 +132,9 @@ class Refresh extends AppCommand {
                             if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
                         }
                     } else {
-                        pixiv.common.log("Detection failed, returned");
+                        bot.logger.error("Detection failed, remote returning");
+                        bot.logger.error(detectionResult);
                         session.sendCardTemp([pixiv.cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
-                        console.log(detectionResult);
                         session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, pixiv.common.akarin)]);
                     }
                 }).catch((e: any) => {

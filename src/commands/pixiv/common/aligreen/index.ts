@@ -1,5 +1,6 @@
 import * as greenNodejs from './aligreen';
 import { common, linkmap, type } from '../'
+import { bot } from 'init/client';
 
 export namespace aligreen {
     export const addDetectScene = greenNodejs.addScene;
@@ -24,7 +25,7 @@ export namespace aligreen {
         if (empty) {
             return {};
         }
-        common.log(`Aliyun image censoring started for:\n${Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", ")}`);
+        bot.logger.info(`Aliyun image censoring started for:\n${Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", ")}`);
         function blur(v: any, block: number, censor: number, hide: number, blur: number, dodge: number) {
             switch (v.suggestion) {
                 case "block":
@@ -107,8 +108,8 @@ export namespace aligreen {
                             }
                         }
                     } else {
-                        common.log("Aliyun returned error:");
-                        console.log(val);
+                        bot.logger.error("Aliyun returned error:");
+                        bot.logger.error(val);
                         result[Object.keys(imageURL)[parseInt(key)]] = {
                             status: val.code,
                             success: false,

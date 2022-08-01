@@ -12,6 +12,7 @@ import axios from 'axios';
 import auth from 'configs/auth';
 import { cards } from './cards';
 import * as pixivadmin from '../admin/common'
+import { bot } from 'init/client';
 const sharp = require('sharp');
 
 export namespace type {
@@ -55,15 +56,8 @@ export namespace common {
 
 
     //======================Logging======================
-    export function log(output: string) {
-        console.log(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
-    }
-    export function err(output: string) {
-        console.error(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
-    }
     export function logInvoke(command: string, session: BaseSession) {
-        log(`From ${session.user.nickname}#${session.user.identifyNum} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
-
+        bot.logger.info(`From ${session.user.nickname}#${session.user.identifyNum} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
     }
 
     export function isForbittedTag(tag: string) {
@@ -86,12 +80,12 @@ export namespace common {
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
         if (linkmap.isInDatabase(val.id, "0")) {
-            log(`${val.id} in database, skipped`);
+            bot.logger.info(`${val.id} in database, skipped`);
             return { link: linkmap.getLink(val.id, "0"), pid: val.id };
         }
 
         const master1200 = common.getProxiedImageLink(val.image_urls.large.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
-        log(`Downloading ${master1200}`);
+        bot.logger.info(`Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
         var buffer = await sharp(await stream2buffer(stream)).resize(config.resizeWidth, config.resizeHeight, { fit: "outside" }).jpeg().toBuffer(); // Resize stream and convert to buffer
@@ -99,8 +93,8 @@ export namespace common {
         if (detectionResult.success) {
             blur = detectionResult.blur;
             if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
-            log(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
-            bodyFormData.append('file', buffer, "1.jpg");
+            bot.logger.info(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
+            bodyFormData.append('file', buffer, "image.jpg");
             var rtLink = "";
             //Upload image to KOOK's server
             await axios({
@@ -112,20 +106,21 @@ export namespace common {
                     ...bodyFormData.getHeaders()
                 }
             }).then((res: any) => {
-                log(`Upload ${val.id} success`);
+                bot.logger.info(`Upload ${val.id} success`);
                 rtLink = res.data.data.url
             }).catch((e: any) => {
-                log(`Upload ${val.id} failed`);
+                bot.logger.error(`Upload ${val.id} failed`);
                 if (e) {
+                    bot.logger.error(e);
                     session.sendCard(cards.error(e, true),);
                 }
             });
             if (detectionResult.success) linkmap.addMap(val.id, "0", rtLink, detectionResult);
             return { link: rtLink, pid: val.id };
         } else {
-            log("Detection failed, returned Akarin");
+            bot.logger.error("Detection failed, returned Akarin");
+            bot.logger.error(detectionResult);
             session.sendCardTemp([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
-            console.log(detectionResult);
             return { link: akarin, pid: val.id };
         }
     }

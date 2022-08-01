@@ -2,6 +2,7 @@ import axios from 'axios';
 import auth from 'configs/auth';
 import config from 'configs/config';
 import fs from 'fs';
+import { bot } from 'init/client';
 import upath from 'upath';
 import { common, type } from '..';
 
@@ -39,10 +40,10 @@ export namespace linkmap {
                         linkmap.addMap(key, page, res.data[key][page].kookLink, res.data[key][page].NSFWResult)
                     }
                 }
-                common.log("Downloaded linkmap from remote");
+                bot.logger.info("Downloaded linkmap from remote");
             }).catch((e) => {
-                common.log("Linkmap download failed, loading local");
-                common.log(e);
+                bot.logger.warn("Linkmap download failed, loading local");
+                bot.logger.warn(e);
                 load();
             })
         }
@@ -60,12 +61,12 @@ export namespace linkmap {
                 data: diff,
                 maxContentLength: Infinity
             }).then(() => {
-                common.log("Linkmap uploaded");
+                bot.logger.info("Linkmap uploaded");
                 diff = {};
             }).catch((e) => {
-                common.log("Linkmap upload failed");
+                bot.logger.warn("Linkmap upload failed");
                 if (e) {
-                    common.err(e);
+                    bot.logger.warn(e);
                 }
             });
         }
@@ -83,10 +84,10 @@ export namespace linkmap {
     export async function load() {
         if (fs.existsSync(upath.join(__dirname, "map.json"))) {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
-            common.log(`Loaded linkmap from local`);
+            bot.logger.info(`Loaded linkmap from local`);
         } else {
             save();
-            common.log(`Linkmap not found, creating new`);
+            bot.logger.warn(`Linkmap not found, creating new`);
         }
     }
 
@@ -150,13 +151,13 @@ export namespace linkmap {
     }
 
     export function save() {
-        fs.writeFile(upath.join(__dirname, "map.json"), JSON.stringify(map), (err) => {
-            if (err) {
-                common.log(`Saving linkmap failed, error message: `);
-                console.log(err);
+        fs.writeFile(upath.join(__dirname, "map.json"), JSON.stringify(map), (e) => {
+            if (e) {
+                bot.logger.warn(`Saving linkmap failed, error message: `);
+                bot.logger.warn(e);
             }
             else {
-                common.log(`Saved linkmap`);
+                bot.logger.info(`Saved linkmap`);
             }
         });
     }

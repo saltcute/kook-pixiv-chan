@@ -8,6 +8,7 @@ import { refresh } from './pixiv.refresh.app';
 import { top } from './pixiv.top.app';
 import { random } from './pixiv.random.app';
 import { tag } from './pixiv.tag.app';
+import { bot } from 'init/client';
 class PixivMenu extends MenuCommand {
     code = 'pixiv';
     trigger = 'pixiv';
