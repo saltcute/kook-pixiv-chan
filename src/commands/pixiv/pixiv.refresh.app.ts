@@ -42,10 +42,11 @@ class Refresh extends AppCommand {
                     if (val.x_restrict > 0) {
                         return session.reply("无法刷新 R-18/R-18G 插画的缓存");
                     }
-                    var loadingBarMessageID: string | undefined = (await session.sendCard([pixiv.cards.resaving(`\`${val.id}_p0.jpg\``)])).msgSent?.msgId;
-                    if (loadingBarMessageID == undefined) {
-                        pixiv.common.log("Message sending failed");
-                        return;
+                    const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
+                    const loadingBarMessageID = sendResult.msgSent?.msgId;
+                    if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
+                        console.log(sendResult.detail);
+                        return pixiv.common.log("Message sending failed");
                     }
                     pixiv.common.getNotifications(session);
                     const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];

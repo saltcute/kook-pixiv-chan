@@ -14,8 +14,10 @@ class Detail extends AppCommand {
             if (data.x_restrict !== 0) {
                 return session.sendCard(pixiv.cards.detail(data, pixiv.common.akarin));
             }
-            const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving(`\`${data.id}_p0.jpg\``))).msgSent?.msgId
-            if (loadingBarMessageID == undefined) {
+            const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
+            const loadingBarMessageID = sendResult.msgSent?.msgId;
+            if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
+                console.log(sendResult.detail);
                 return pixiv.common.log("Message sending failed");
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id]

@@ -11,8 +11,10 @@ class Tag extends AppCommand {
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any, tags: string[], durationName: string) {
-            const loadingBarMessageID = (await session.sendCard(pixiv.cards.resaving("多张图片"))).msgSent?.msgId
-            if (loadingBarMessageID == undefined) {
+            const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
+            const loadingBarMessageID = sendResult.msgSent?.msgId;
+            if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
+                console.log(sendResult.detail);
                 return pixiv.common.log("Message sending failed");
             }
             var link: string[] = [];
