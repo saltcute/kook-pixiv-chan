@@ -62,7 +62,7 @@ export namespace common {
         console.error(`[${new Date().toLocaleTimeString()}] ${output.toString().replaceAll("\n", `\n[${new Date().toLocaleTimeString()}] `)}`);
     }
     export function logInvoke(command: string, session: BaseSession) {
-        log(`From ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
+        log(`From ${session.user.nickname}#${session.user.identifyNum} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
 
     }
 
