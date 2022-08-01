@@ -57,7 +57,8 @@ export namespace linkmap {
                     'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
                     'uuid': auth.remoteLinkmapUUID
                 },
-                data: diff
+                data: diff,
+                maxContentLength: Infinity
             }).then(() => {
                 common.log("Linkmap uploaded");
                 diff = {};
