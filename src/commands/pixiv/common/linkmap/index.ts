@@ -66,7 +66,7 @@ export namespace linkmap {
             }).catch((e) => {
                 bot.logger.warn("Linkmap upload failed");
                 if (e) {
-                    bot.logger.warn(e);
+                    bot.logger.warn(e.message);
                 }
             });
         }
