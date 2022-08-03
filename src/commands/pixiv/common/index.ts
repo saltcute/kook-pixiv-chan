@@ -2,7 +2,7 @@ export * from './cards';
 export * from './linkmap';
 export * from './nsfwjs'
 export * from './aligreen'
-import { tagBanList } from './tagBanList';
+import tagBanList from './tagBanList';
 import FormData, { Stream } from 'form-data';
 import { BaseSession } from 'kbotify';
 import { linkmap } from './linkmap';
@@ -153,7 +153,7 @@ export namespace common {
         }
     }
     export function isRateLimited(session: BaseSession, limit: number, trigger: string): boolean {
-        const lastExecutionTimestamp = common.lastExecutionTimestamp(session.userId, trigger);
+        const lastExecutionTimestamp = common.getLastExecutionTimestamp(session.userId, trigger);
         if (!pixivadmin.common.isAdmin(session.userId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
             session.replyTemp(`您已达到速率限制。每个用户每 ${limit} 秒内只能发起一次 \`.pixiv ${trigger}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
             return true;
@@ -167,9 +167,44 @@ export namespace common {
      * @param id User id
      * @returns Timestamp of last execution if exist. If not, returns `-1`
      */
-    export function lastExecutionTimestamp(id: string, trigger: string): number {
+    export function getLastExecutionTimestamp(id: string, trigger: string): number {
         if (rateControl.hasOwnProperty(id))
             if (rateControl[id].hasOwnProperty(trigger)) return rateControl[id][trigger];
+            else return -1
+        else return -1;
+    }
+
+    // Bad actor ban
+    var ban: { [key: string]: { [key: string]: number } } = {};
+    /**
+     * Ban a user from using a command
+     * @param id User Id
+     * @param trigger Trigger of command
+     * @param time Total time of the ban in seconds
+     */
+    export function registerBan(id: string, trigger: string, time: number) {
+        ban[id] = {
+            ...ban[id],
+            [trigger]: Date.now() + time * 1000
+        }
+    }
+    export function isBanned(session: BaseSession, trigger: string): boolean {
+        const banEndTimestamp = common.getBanEndTimestamp(session.userId, trigger);
+        if (!pixivadmin.common.isAdmin(session.userId) && Date.now() < banEndTimestamp) {
+            session.replyTemp(`您已被禁止使用 \`.pixiv ${trigger}\` 指令至 ${new Date(banEndTimestamp).toLocaleString("zh-cn")}，请于 ${Math.round((banEndTimestamp - Date.now()) / 1000)} 秒后再试`);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Get timestamp of the last execution of a user 
+     * @param id User id
+     * @returns Timestamp of last execution if exist. If not, returns `-1`
+     */
+    export function getBanEndTimestamp(id: string, trigger: string): number {
+        if (ban.hasOwnProperty(id))
+            if (ban[id].hasOwnProperty(trigger)) return ban[id][trigger];
             else return -1
         else return -1;
     }

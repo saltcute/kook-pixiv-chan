@@ -9,6 +9,7 @@ class Tag extends AppCommand {
     trigger = 'tag'; // 用于触发的文字
     intro = 'Search tags';
     func: AppFunc<BaseSession> = async (session) => {
+        if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any, tags: string[], durationName: string) {
@@ -86,6 +87,14 @@ class Tag extends AppCommand {
                     durationName = durationNameList.week;
                 }
                 tags = session.args;
+            }
+            for (const tag of tags) {
+                if (pixiv.common.isForbittedTag(tag)) {
+                    bot.logger.info(`Violating tag blacklist: ${tag}, banned the user for 30 seconds`);
+                    pixiv.common.registerBan(session.userId, this.trigger, 30);
+                    session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
+                    return;
+                }
             }
             axios({
                 url: `${config.pixivAPIBaseURL}/topInTag`,

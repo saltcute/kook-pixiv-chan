@@ -17,11 +17,6 @@ bot.logger.info("kook-pixiv-chan initialization start");
  * Linkmap initialization
  */
 pixiv.linkmap.init();
-if (config.useRemoteLinkmap) {
-    schedule.scheduleJob('30 * * * *', async () => {
-        await pixiv.linkmap.download();
-    });
-}
 schedule.scheduleJob('15 * * * *', async () => {
     pixiv.linkmap.save();
     await pixiv.linkmap.upload();
