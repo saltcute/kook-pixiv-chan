@@ -1,6 +1,6 @@
 {
   "name": "kook-pixiv-chan",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Get trending illustrations or illustration detail",
   "main": "src/index.ts",
   "scripts": {
@@ -15,7 +15,8 @@
     "kbotify",
     "kaiheila",
     "KOOK",
-    "bot"
+    "bot",
+    "pixiv"
   ],
   "author": "potatopotat0",
   "license": "MIT",
