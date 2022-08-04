@@ -15,11 +15,23 @@ class Illust extends AppCommand {
             if (data.x_restrict !== 0) {
                 return session.sendCard(pixiv.cards.illust(data, pixiv.common.akarin));
             }
-            const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
-            const loadingBarMessageID = sendResult.msgSent?.msgId;
-            if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                bot.logger.error(sendResult.detail);
-                return bot.logger.error("Message sending failed");
+            var sendSuccess = false;
+            var mainCardMessageID = "";
+            if (session.guild) {
+                await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
+                    if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
+                        bot.logger.error("Send message failed");
+                        bot.logger.error(res.detail);
+                        sendSuccess = false;
+                    } else {
+                        sendSuccess = true;
+                        mainCardMessageID = res.msgSent?.msgId;
+                    }
+                }).catch((e) => {
+                    if (e) bot.logger.error(e);
+                    sendSuccess = false;
+                });
+                if (!sendSuccess) return;
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
             var uploadResult: {
@@ -35,7 +47,17 @@ class Illust extends AppCommand {
                 }
             });
             bot.logger.info(`Process ended, presenting to user`);
-            session.updateMessage(loadingBarMessageID, [pixiv.cards.illust(data, uploadResult.link)])
+            if (session.guild) {
+                session.updateMessage(mainCardMessageID, [pixiv.cards.illust(data, uploadResult.link)]).catch((e) => {
+                    bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                    if (e) bot.logger.error(e);
+                });
+            } else {
+                session.sendCard([pixiv.cards.illust(data, uploadResult.link)]).catch((e) => {
+                    bot.logger.error(`Send message failed!`);
+                    if (e) bot.logger.error(e);
+                });
+            }
         }
         if (session.args.length === 0) {
             return session.reply("使用 `.pixiv help illust` 查询指令详细用法")

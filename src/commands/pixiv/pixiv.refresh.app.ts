@@ -43,11 +43,23 @@ class Refresh extends AppCommand {
                     if (val.x_restrict > 0) {
                         return session.reply("无法刷新 R-18/R-18G 插画的缓存");
                     }
-                    const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
-                    const loadingBarMessageID = sendResult.msgSent?.msgId;
-                    if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                        bot.logger.error(sendResult.detail);
-                        return bot.logger.error("Message sending failed");
+                    var sendSuccess = false;
+                    var mainCardMessageID = "";
+                    if (session.guild) {
+                        await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
+                            if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
+                                bot.logger.error("Send message failed");
+                                bot.logger.error(res.detail);
+                                sendSuccess = false;
+                            } else {
+                                sendSuccess = true;
+                                mainCardMessageID = res.msgSent?.msgId;
+                            }
+                        }).catch((e) => {
+                            if (e) bot.logger.error(e);
+                            sendSuccess = false;
+                        });
+                        if (!sendSuccess) return;
                     }
                     pixiv.common.getNotifications(session);
                     const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];
@@ -112,30 +124,41 @@ class Refresh extends AppCommand {
                         bot.logger.info(`Refreshing stage 2 ended with ${blur + tyblur}px of gaussian blur (trial & error)`);
                         bot.logger.info(`Process ended, presenting to user`);
                         if (!uncensored) {
-                            session.updateMessage(loadingBarMessageID, [{
-                                "type": "card",
-                                "theme": "danger",
-                                "size": "lg",
-                                "modules": [
-                                    {
-                                        "type": "section",
-                                        "text": {
-                                            "type": "kmarkdown",
-                                            "content": `给 \`${val.id}_p0.jpg\` 施加了超过 100px 高斯模糊都救不回来…？属于是世间奇图了，请务必反馈到 Pixiv 酱的[交流服务器](https://kook.top/iOOsLu)中`
+                            if (session.guild) {
+                                session.updateMessage(mainCardMessageID, [{
+                                    "type": "card",
+                                    "theme": "danger",
+                                    "size": "lg",
+                                    "modules": [
+                                        {
+                                            "type": "section",
+                                            "text": {
+                                                "type": "kmarkdown",
+                                                "content": `给 \`${val.id}_p0.jpg\` 施加了超过 100px 高斯模糊都救不回来…？属于是世间奇图了，请务必反馈到 Pixiv 酱的[交流服务器](https://kook.top/iOOsLu)中`
+                                            }
                                         }
-                                    }
-                                ]
-                            }])
+                                    ]
+                                }])
+                            }
                             if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
                         } else {
-                            session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, rtLink)]);
+                            if (session.guild) {
+                                session.updateMessage(mainCardMessageID, [pixiv.cards.detail(val, rtLink)]).catch((e) => {
+                                    bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                                    if (e) bot.logger.error(e);
+                                });
+                            } else {
+                                session.sendCard([pixiv.cards.detail(val, rtLink)]).catch((e) => {
+                                    bot.logger.error(`Send message failed!`);
+                                    if (e) bot.logger.error(e);
+                                });
+                            }
                             if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
                         }
                     } else {
                         bot.logger.error("Detection failed, remote returning");
                         bot.logger.error(detectionResult);
-                        session.sendCardTemp([pixiv.cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
-                        session.updateMessage(loadingBarMessageID, [pixiv.cards.detail(val, pixiv.common.akarin)]);
+                        session.sendCardTemp([pixiv.cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
                     }
                 }).catch((e: any) => {
                     if (e) {

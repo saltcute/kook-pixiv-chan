@@ -13,11 +13,23 @@ class Tag extends AppCommand {
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any, tags: string[], durationName: string) {
-            const sendResult = (await session.sendCard(pixiv.cards.resaving("多张图片")));
-            const loadingBarMessageID = sendResult.msgSent?.msgId;
-            if (sendResult.resultType != "SUCCESS" || loadingBarMessageID == undefined) {
-                bot.logger.error(sendResult.detail);
-                return bot.logger.error("Message sending failed");
+            var sendSuccess = false;
+            var mainCardMessageID = "";
+            if (session.guild) {
+                await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
+                    if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
+                        bot.logger.error("Send message failed");
+                        bot.logger.error(res.detail);
+                        sendSuccess = false;
+                    } else {
+                        sendSuccess = true;
+                        mainCardMessageID = res.msgSent?.msgId;
+                    }
+                }).catch((e) => {
+                    if (e) bot.logger.error(e);
+                    sendSuccess = false;
+                });
+                if (!sendSuccess) return;
             }
             var link: string[] = [];
             var pid: string[] = [];
@@ -55,7 +67,17 @@ class Tag extends AppCommand {
                 pid.push("没有了");
             }
             bot.logger.info(`Process ended, presenting to user`);
-            await session.updateMessage(loadingBarMessageID, [pixiv.cards.tag(link, pid, tags, durationName, {})]);
+            if (session.guild) {
+                session.updateMessage(mainCardMessageID, [pixiv.cards.tag(link, pid, tags, durationName, {})]).catch((e) => {
+                    bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                    if (e) bot.logger.error(e);
+                });
+            } else {
+                session.sendCard([pixiv.cards.tag(link, pid, tags, durationName, {})]).catch((e) => {
+                    bot.logger.error(`Send message failed!`);
+                    if (e) bot.logger.error(e);
+                });
+            }
         }
         if (session.args.length === 0) {
             return session.reply("使用 `.pixiv help tag` 查询指令详细用法")
