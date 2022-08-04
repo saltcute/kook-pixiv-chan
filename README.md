@@ -1,6 +1,6 @@
 # kook-pixiv-chan
 
-Based on [kbotify](https://github.com/fi6/kBotify), this is the Pixiv-only repo of [potato-chatbot](https://github.com/potatopotat0/potato-chatbot).
+Based on [`kbotify`](https://github.com/fi6/kBotify), `kook-pixiv-chan` is a somewhat powerful KOOK bot for [Pixiv](https://www.pixiv.net).
 
 ## Deploying
 
@@ -15,7 +15,7 @@ npm install
 
 Copy `./src/configs/template-auth.ts` to `./src/configs/auth.ts`. Fill in your KOOK bot token, Aliyun ID and secret. 
 
-Copy `./src/configs/template-config.ts` to `./src/configs/config.ts` and set as you need. 
+Copy `./src/configs/template-config.ts` to `./src/configs/config.ts` and set as you need (generally you don't have to change anything here). 
 
 Start `kook-pixiv-chan` with
 
@@ -26,7 +26,7 @@ npm start
 or with
 
 ```
-npm run pm2
+npm run pm2 -- --name="Pixiv Chan"
 ```
 
 to start using pm2
@@ -50,6 +50,8 @@ to start using pm2
 Use `.pixiv` to see a list of command.
 
 Use `.pixiv help <command>` to get detailed help for using the command.
+
+Please join our [official KOOK server](https://kook.top/iOOsLu) and try it out!
 
 ## About `linkmap`
 
@@ -99,6 +101,8 @@ Now, `linkmap` contains even more informations, and its structure can be shown a
 ```
 
 The `porn`, `terrorism`, `live` and `ad` part will appear in `reason` only if they contribute to the total blur amount. That is, ONLY when the image is NSFW in that certain category (sexual content, terrorism/politics/violence, smoking/gambling or advertising).
+
+Following is an example of a valid linkmap
 
 ```
 {
