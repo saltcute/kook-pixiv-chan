@@ -108,6 +108,7 @@ src/configs/config*
 
 test/
 package-lock.json
-src/commands/pixiv/common/linkmap/map.json
-src/commands/pixiv/common/linkmap/map.json.bak
 model/
+
+ban.json
+map.json
