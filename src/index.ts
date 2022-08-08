@@ -2,6 +2,7 @@ import { bot } from 'init/client';
 import { pixivMenu } from 'commands/pixiv/pixiv.menu';
 import { pixivAdminMenu } from 'commands/pixiv/admin/pixivadmin.menu';
 import * as pixiv from 'commands/pixiv/common'
+import * as pixivadmin from 'commands/pixiv/admin/common'
 import axios from 'axios';
 import auth from 'configs/auth';
 import config from './configs/config';
@@ -17,8 +18,10 @@ bot.logger.info("kook-pixiv-chan initialization start");
  * Linkmap initialization
  */
 pixiv.linkmap.init();
+pixivadmin.common.load();
 schedule.scheduleJob('15 * * * *', async () => {
     pixiv.linkmap.save();
+    pixivadmin.common.save();
     await pixiv.linkmap.upload();
 })
 
