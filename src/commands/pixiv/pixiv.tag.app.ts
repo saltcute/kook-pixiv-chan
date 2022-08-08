@@ -17,16 +17,18 @@ class Tag extends AppCommand {
             var mainCardMessageID = "";
             if (session.guild) {
                 await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                    if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
-                        bot.logger.error("Send message failed");
-                        bot.logger.error(res.detail);
-                        sendSuccess = false;
-                    } else {
+                    if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
                         sendSuccess = true;
                         mainCardMessageID = res.msgSent?.msgId;
                     }
                 }).catch((e) => {
-                    if (e) bot.logger.error(e);
+                    if (e) {
+                        if (e.code == 40012) { // Slow-mode limit
+                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                        } else {
+                            bot.logger.error(e);
+                        }
+                    }
                     sendSuccess = false;
                 });
                 if (!sendSuccess) return;
@@ -38,6 +40,12 @@ class Tag extends AppCommand {
             for (const k in data) {
                 if (data[k].x_restrict !== 0) {
                     continue;
+                }
+                for (const val of data[k].tags) {
+                    const tag = val.name;
+                    if (pixiv.common.isForbittedTag(tag)) {
+                        continue;
+                    }
                 }
                 datas.push(data[k]);
                 if (datas.length >= 9) break;
@@ -114,8 +122,7 @@ class Tag extends AppCommand {
                 if (pixiv.common.isForbittedTag(tag)) {
                     bot.logger.info(`Violating tag blacklist: ${tag}, banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.userId, this.trigger, 30);
-                    session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
-                    return;
+                    return session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
                 }
             }
             axios({

@@ -8,41 +8,39 @@ class Help extends AppCommand {
     func: AppFunc<BaseSession> = async (session) => {
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         if (session.args.length == 0) {
-            return session.sendCardTemp([
-                {
-                    "type": "card",
-                    "theme": "warning",
-                    "size": "lg",
-                    "modules": [
-                        {
-                            "type": "header",
-                            "text": {
-                                "type": "plain-text",
-                                "content": ".pixiv help"
-                            }
-                        },
-                        {
-                            "type": "context",
-                            "elements": [
-                                {
-                                    "type": "kmarkdown",
-                                    "content": "发送 `.pixiv` 查看所有指令列表"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "divider"
-                        },
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "kmarkdown",
-                                "content": "`.pixiv help <command>` 查询指令的详细用法\n  例：\n        `.pixiv help top`\n        `.pixiv help detail`\n        `.pixiv help refresh`"
-                            }
+            return session.sendCardTemp([{
+                "type": "card",
+                "theme": "warning",
+                "size": "lg",
+                "modules": [
+                    {
+                        "type": "header",
+                        "text": {
+                            "type": "plain-text",
+                            "content": ".pixiv help"
                         }
-                    ]
-                }
-            ]);
+                    },
+                    {
+                        "type": "context",
+                        "elements": [
+                            {
+                                "type": "kmarkdown",
+                                "content": "发送 `.pixiv` 查看所有指令列表"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "kmarkdown",
+                            "content": "`.pixiv help <command>` 查询指令的详细用法\n  例：\n```plain\n.pixiv help top\n```\n```plain\n.pixiv help tag\n```\n```plain\n.pixiv help author\n```\n```plain\n.pixiv help detail\n```\n```plain\n.pixiv help illust\n```\n```plain\n.pixiv help refresh\n```\n```plain\n.pixiv help random\n```\n```plain\n.pixiv help credit\n```\n"
+                        }
+                    }
+                ]
+            }]);
         } else {
             switch (session.args[0]) {
                 case "top":

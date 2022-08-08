@@ -14,6 +14,7 @@ class Refresh extends AppCommand {
     trigger = 'refresh'; // 用于触发的文字
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
+        if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 15, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         if (session.args.length === 0) {
@@ -39,6 +40,14 @@ class Refresh extends AppCommand {
                     if (res.data.hasOwnProperty("code") && res.data.code == 500) {
                         return session.reply("Pixiv官方服务器不可用，请稍后再试");
                     }
+                    for (const val of res.data.tags) {
+                        const tag = val.name;
+                        if (pixiv.common.isForbittedTag(tag)) {
+                            bot.logger.info(`Violating tag blacklist: ${tag}, banned the user for 30 seconds`);
+                            pixiv.common.registerBan(session.userId, this.trigger, 30);
+                            return session.reply(`此插画包含标签黑名单中的标签，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
+                        }
+                    }
                     const val = res.data;
                     if (val.x_restrict > 0) {
                         return session.reply("无法刷新 R-18/R-18G 插画的缓存");
@@ -46,17 +55,19 @@ class Refresh extends AppCommand {
                     var sendSuccess = false;
                     var mainCardMessageID = "";
                     if (session.guild) {
-                        await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                            if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
-                                bot.logger.error("Send message failed");
-                                bot.logger.error(res.detail);
-                                sendSuccess = false;
-                            } else {
+                        await session.sendCard(pixiv.cards.resaving(val.id)).then((res) => {
+                            if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
                                 sendSuccess = true;
                                 mainCardMessageID = res.msgSent?.msgId;
                             }
                         }).catch((e) => {
-                            if (e) bot.logger.error(e);
+                            if (e) {
+                                if (e.code == 40012) { // Slow-mode limit
+                                    bot.logger.warn("Limited by slow-mode, no operation was done");
+                                } else {
+                                    bot.logger.error(e);
+                                }
+                            }
                             sendSuccess = false;
                         });
                         if (!sendSuccess) return;

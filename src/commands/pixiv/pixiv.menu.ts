@@ -36,13 +36,11 @@ class PixivMenu extends MenuCommand {
                 ]
             },
             {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "kmarkdown",
-                        "content": "请输入 .pixiv help 查询详细指令用法"
-                    }
-                ]
+                "type": "section",
+                "text": {
+                    "type": "kmarkdown",
+                    "content": "**请输入 `.pixiv help` 查询详细指令用法与使用示例**"
+                }
             },
             {
                 "type": "divider"
@@ -51,56 +49,56 @@ class PixivMenu extends MenuCommand {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv tag [{day|week|month}] <tag>...```\n 获取所给标签人气前九的图片"
+                    "content": "```plain\n.pixiv tag [{day|week|month}] <tag>...```\n 获取所给标签人气前九的图片"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv random```\n 获取⑨张随机插画"
+                    "content": "```plain\n.pixiv random```\n 获取⑨张随机插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv top [option]```\n 获取本日/周/月等的全站最热插画"
+                    "content": "```plain\n.pixiv top [option]```\n 获取本日/周/月等的全站最热插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv author <Illustration ID>```\n 获取用户的最新九张插画"
+                    "content": "```plain\n.pixiv author <Illustration ID>```\n 获取用户的最新九张插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv illust <Illustration ID>```\n 获取 Pixiv 上对应 ID 的插画"
+                    "content": "```plain\n.pixiv illust <Illustration ID>```\n 获取 Pixiv 上对应 ID 的插画"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv detail <Illustration ID>```\n 获取对应 ID 插画的详细信息（作品名、作者、标签等）"
+                    "content": "```plain\n.pixiv detail <Illustration ID>```\n 获取对应 ID 插画的详细信息（作品名、作者、标签等）"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv refresh <Illustration ID>```\n 刷新对应 ID 插画的缓存。"
+                    "content": "```plain\n.pixiv refresh <Illustration ID>```\n 刷新对应 ID 插画的缓存。"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": "```\n.pixiv credit```\n 查看赞助与感谢列表"
+                    "content": "```plain\n.pixiv credit```\n 查看赞助与感谢列表"
                 }
             },
             {

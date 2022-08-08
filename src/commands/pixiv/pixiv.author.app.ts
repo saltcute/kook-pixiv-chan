@@ -9,6 +9,7 @@ class Author extends AppCommand {
     trigger = 'author'; // 用于触发的文字
     intro = 'Author';
     func: AppFunc<BaseSession> = async (session) => {
+        if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any) {
@@ -16,16 +17,18 @@ class Author extends AppCommand {
             var mainCardMessageID = "";
             if (session.guild) {
                 await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                    if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
-                        bot.logger.error("Send message failed");
-                        bot.logger.error(res.detail);
-                        sendSuccess = false;
-                    } else {
+                    if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
                         sendSuccess = true;
                         mainCardMessageID = res.msgSent?.msgId;
                     }
                 }).catch((e) => {
-                    if (e) bot.logger.error(e);
+                    if (e) {
+                        if (e.code == 40012) { // Slow-mode limit
+                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                        } else {
+                            bot.logger.error(e);
+                        }
+                    }
                     sendSuccess = false;
                 });
                 if (!sendSuccess) return;
@@ -36,6 +39,12 @@ class Author extends AppCommand {
             var datas: any[] = [];
             var promises: Promise<any>[] = [];
             for (const k in data) {
+                for (const val of data[k].tags) {
+                    const tag = val.name;
+                    if (pixiv.common.isForbittedTag(tag)) {
+                        continue;
+                    }
+                }
                 if (data[k].x_restrict !== 0) {
                     continue;
                 }
@@ -75,6 +84,11 @@ class Author extends AppCommand {
         if (session.args.length === 0) {
             return session.reply("使用 `.pixiv help author` 查询指令详细用法")
         } else {
+            if (pixiv.common.isForbittedUser(session.args[0])) {
+                bot.logger.info(`Violating user blacklist: ${session.args[0]}, banned the user for 30 seconds`);
+                pixiv.common.registerBan(session.userId, this.trigger, 30);
+                return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
+            }
             axios({
                 url: `${config.pixivAPIBaseURL}/creatorIllustrations`,
                 method: "GET",

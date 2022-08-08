@@ -1,5 +1,6 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
+import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
@@ -9,6 +10,8 @@ class Top extends AppCommand {
     trigger = 'top'; // 用于触发的文字
     intro = 'Top illustrations';
     func: AppFunc<BaseSession> = async (session) => {
+        if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
+        if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         async function sendCard(data: any, durationName: string) {
@@ -16,16 +19,18 @@ class Top extends AppCommand {
             var mainCardMessageID = "";
             if (session.guild) {
                 await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                    if (res.resultType != "SUCCESS" || res.msgSent?.msgId == undefined) {
-                        bot.logger.error("Send message failed");
-                        bot.logger.error(res.detail);
-                        sendSuccess = false;
-                    } else {
+                    if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
                         sendSuccess = true;
                         mainCardMessageID = res.msgSent?.msgId;
                     }
                 }).catch((e) => {
-                    if (e) bot.logger.error(e);
+                    if (e) {
+                        if (e.code == 40012) { // Slow-mode limit
+                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                        } else {
+                            bot.logger.error(e);
+                        }
+                    }
                     sendSuccess = false;
                 });
                 if (!sendSuccess) return;
@@ -37,6 +42,12 @@ class Top extends AppCommand {
             for (const k in data) {
                 if (data[k].x_restrict !== 0) {
                     continue;
+                }
+                for (const val of data[k].tags) {
+                    const tag = val.name;
+                    if (pixiv.common.isForbittedTag(tag)) {
+                        continue;
+                    }
                 }
                 datas.push(data[k]);
                 if (datas.length >= 9) break;
