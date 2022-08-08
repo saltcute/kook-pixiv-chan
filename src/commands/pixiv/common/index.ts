@@ -13,6 +13,7 @@ import auth from 'configs/auth';
 import { cards } from './cards';
 import * as pixivadmin from '../admin/common'
 import { bot } from 'init/client';
+import userBanList from './userBanList';
 const sharp = require('sharp');
 
 export namespace type {
@@ -57,11 +58,21 @@ export namespace common {
 
     //======================Logging======================
     export function logInvoke(command: string, session: BaseSession) {
-        bot.logger.info(`From ${session.user.nickname}#${session.user.identifyNum} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
+        bot.logger.info(`From ${session.user.username}#${session.user.identifyNum} as ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
     }
 
     export function isForbittedTag(tag: string) {
         if (tagBanList.includes(tag)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    export function isForbittedUser(userid: string) {
+        const id = parseInt(userid);
+        if (isNaN(id)) return true;
+        if (userBanList.includes(id)) {
             return true;
         } else {
             return false;
