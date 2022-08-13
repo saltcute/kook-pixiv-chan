@@ -1,5 +1,6 @@
 import { AppCommand, AppFunc, BaseSession } from 'kbotify';
 import * as pixiv from './common';
+import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
@@ -9,6 +10,7 @@ class Author extends AppCommand {
     trigger = 'author'; // 用于触发的文字
     intro = 'Author';
     func: AppFunc<BaseSession> = async (session) => {
+        if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
@@ -88,6 +90,9 @@ class Author extends AppCommand {
                 bot.logger.info(`Violating user blacklist: ${session.args[0]}, banned the user for 30 seconds`);
                 pixiv.common.registerBan(session.userId, this.trigger, 30);
                 return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
+            }
+            if (isNaN(parseInt(session.args[0]))) {
+                return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）");
             }
             axios({
                 url: `${config.pixivAPIBaseURL}/creatorIllustrations`,

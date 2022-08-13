@@ -71,7 +71,7 @@ export namespace common {
 
     export function isForbittedUser(userid: string) {
         const id = parseInt(userid);
-        if (isNaN(id)) return true;
+        if (isNaN(id)) return false;
         if (userBanList.includes(id)) {
             return true;
         } else {
