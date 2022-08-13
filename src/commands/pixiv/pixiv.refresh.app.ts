@@ -14,6 +14,7 @@ class Refresh extends AppCommand {
     trigger = 'refresh'; // 用于触发的文字
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
+        if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 15, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
