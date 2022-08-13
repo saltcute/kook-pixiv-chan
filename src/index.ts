@@ -62,11 +62,11 @@ bot.addAlias(pixivMenu, "p站", "P站");
 pixivMenu.addAlias(top, "热门");
 pixivMenu.addAlias(random, "随机");
 pixivMenu.addAlias(detail, "插画");
-pixivMenu.addAlias(author, "作者");
+pixivMenu.addAlias(author, "作者", "画师");
 bot.addAlias(top, "p站热门", "P站热门", "pixiv热门");
 bot.addAlias(random, "p站随机", "P站随机", "pixiv随机");
 bot.addAlias(detail, "p站插画", "P站插画", "pixiv插画");
-bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "pixiv画师");
+bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P站画师", "pixiv画师");
 
 /**
  * Add quick hand alias for .pixiv random and .pixiv top
