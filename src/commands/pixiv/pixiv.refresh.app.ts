@@ -83,22 +83,7 @@ class Refresh extends AppCommand {
 
                         var bodyFormData = new FormData();
                         bodyFormData.append('file', buffer, "image.jpg");
-                        await axios({
-                            method: "post",
-                            url: "https://www.kookapp.cn/api/v3/asset/create",
-                            data: bodyFormData,
-                            headers: {
-                                'Authorization': `Bot ${pixiv.common.getNextToken()}`,
-                                ...bodyFormData.getHeaders()
-                            }
-                        }).then((res: any) => {
-                            rtLink = res.data.data.url
-                        }).catch((e: any) => {
-                            if (e) {
-                                console.error(e);
-                                session.sendCardTemp(pixiv.cards.error(e, true));
-                            }
-                        });
+                        rtLink = await pixiv.common.uploadFile(session, val, bodyFormData)
                         bot.logger.info(`Refreshing stage 1 ended with ${blur}px of gaussian blur (Aliyun)`);
                         var uncensored = false;
                         var tyblur = 0;
@@ -114,22 +99,7 @@ class Refresh extends AppCommand {
                                 var bodyFormData = new FormData();
                                 bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
                                 tyblur = 7 * i;
-                                await axios({
-                                    method: "post",
-                                    url: "https://www.kookapp.cn/api/v3/asset/create",
-                                    data: bodyFormData,
-                                    headers: {
-                                        'Authorization': `Bot ${pixiv.common.getNextToken()}`,
-                                        ...bodyFormData.getHeaders()
-                                    }
-                                }).then((res: any) => {
-                                    rtLink = res.data.data.url
-                                }).catch((e: any) => {
-                                    if (e) {
-                                        console.error(e);
-                                        session.sendCardTemp(pixiv.cards.error(e, true));
-                                    }
-                                });
+                                rtLink = await pixiv.common.uploadFile(session, val, bodyFormData)
                             })
                             if (uncensored) break;
                         }
