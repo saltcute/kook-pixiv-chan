@@ -88,6 +88,52 @@ export namespace common {
         });
     }
 
+    /**
+     * Check every asset token and mark active ones
+     */
+    export function tokenPoolInit() {
+        bot.logger.info("Checking uploader availibility");
+        for (const idx in auth.assetUploadTokens) {
+            const val = auth.assetUploadTokens[idx].token;
+            axios({
+                url: "https://www.kookapp.cn/api/v3/message/create",
+                method: "POST",
+                data: {
+                    type: 9,
+                    content: `Uploader node #${parseInt(idx) + 1} out of ${auth.assetUploadTokens.length} goes online`,
+                    target_id: config.uploaderOnlineMessageDestination
+                },
+                headers: {
+                    'Authorization': `Bot ${val}`
+                }
+            }).then((res) => {
+                if (res.data.code == 0) {
+                    auth.assetUploadTokens[idx].active = true;
+                } else {
+                    auth.assetUploadTokens[idx].active = false;
+                    bot.logger.warn(res.data);
+                }
+            }).catch((e) => {
+                auth.assetUploadTokens[idx].active = false;
+                bot.logger.warn(e);
+            })
+        }
+    }
+    var currentIndex = 0;
+    export function getNextToken() {
+        const lastIndex = currentIndex;
+        while (!auth.assetUploadTokens[currentIndex].active) {
+            currentIndex++;
+            if (currentIndex >= auth.assetUploadTokens.length) {
+                currentIndex = 0;
+            }
+            if (lastIndex == currentIndex) {
+                bot.logger.error("No uploader nodes availiable");
+                return "";
+            }
+        }
+        return auth.assetUploadTokens[currentIndex].token;
+    }
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
         if (linkmap.isInDatabase(val.id, "0")) {
@@ -113,7 +159,7 @@ export namespace common {
                 url: "https://www.kookapp.cn/api/v3/asset/create",
                 data: bodyFormData,
                 headers: {
-                    'Authorization': `Bot ${auth.assetUploadToken} `,
+                    'Authorization': `Bot ${getNextToken()}`,
                     ...bodyFormData.getHeaders()
                 }
             }).then((res: any) => {

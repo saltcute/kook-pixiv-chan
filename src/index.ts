@@ -17,6 +17,8 @@ bot.logger.addStream({ level: bot.logger.INFO, stream: process.stdout });
 // bot.logger.addStream({ level: bot.logger.DEBUG, stream: process.stdout }); // DEBUG
 bot.logger.info("kook-pixiv-chan initialization start");
 
+pixiv.common.tokenPoolInit();
+
 /**
  * Linkmap initialization
  */

@@ -88,7 +88,7 @@ class Refresh extends AppCommand {
                             url: "https://www.kookapp.cn/api/v3/asset/create",
                             data: bodyFormData,
                             headers: {
-                                'Authorization': `Bot ${auth.assetUploadToken}`,
+                                'Authorization': `Bot ${pixiv.common.getNextToken()}`,
                                 ...bodyFormData.getHeaders()
                             }
                         }).then((res: any) => {
@@ -119,7 +119,7 @@ class Refresh extends AppCommand {
                                     url: "https://www.kookapp.cn/api/v3/asset/create",
                                     data: bodyFormData,
                                     headers: {
-                                        'Authorization': `Bot ${auth.assetUploadToken}`,
+                                        'Authorization': `Bot ${pixiv.common.getNextToken()}`,
                                         ...bodyFormData.getHeaders()
                                     }
                                 }).then((res: any) => {
