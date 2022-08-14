@@ -4,7 +4,7 @@ export * from './nsfwjs'
 export * from './aligreen'
 import tagBanList from './tagBanList';
 import FormData, { Stream } from 'form-data';
-import { BaseSession } from 'kbotify';
+import { BaseSession, Card } from 'kbotify';
 import { linkmap } from './linkmap';
 import config from 'configs/config';
 import got from 'got/dist/source';
@@ -91,36 +91,47 @@ export namespace common {
     /**
      * Check every asset token and mark active ones
      */
-    export function tokenPoolInit() {
+    export async function tokenPoolInit() {
         bot.logger.info("Checking uploader availibility");
+        var promises: Promise<any>[] = [];
         for (const idx in auth.assetUploadTokens) {
             const val = auth.assetUploadTokens[idx].token;
-            axios({
-                url: "https://www.kookapp.cn/api/v3/message/create",
-                method: "POST",
-                data: {
-                    type: 9,
-                    content: `Uploader node #${parseInt(idx) + 1} out of ${auth.assetUploadTokens.length} goes online`,
-                    target_id: config.uploaderOnlineMessageDestination
-                },
-                headers: {
-                    'Authorization': `Bot ${val}`
-                }
-            }).then((res) => {
-                if (res.data.code == 0) {
-                    auth.assetUploadTokens[idx].active = true;
-                } else {
+            promises.push(
+                axios({
+                    url: "https://www.kookapp.cn/api/v3/message/create",
+                    method: "POST",
+                    data: {
+                        type: 9,
+                        content: `Uploader node #${parseInt(idx) + 1} out of ${auth.assetUploadTokens.length} goes online for ${config.appname}`,
+                        target_id: config.uploaderOnlineMessageDestination
+                    },
+                    headers: {
+                        'Authorization': `Bot ${val}`
+                    }
+                }).then((res) => {
+                    if (res.data.code == 0) {
+                        auth.assetUploadTokens[idx].active = true;
+                        bot.logger.info(`Uploader #${parseInt(idx) + 1} is going online`)
+                    } else {
+                        auth.assetUploadTokens[idx].active = false;
+                        bot.logger.warn(`Uploader #${parseInt(idx) + 1} unavailable, message: ${res.data.message}`);
+                    }
+                }).catch((e) => {
                     auth.assetUploadTokens[idx].active = false;
-                    bot.logger.warn(res.data);
-                }
-            }).catch((e) => {
-                auth.assetUploadTokens[idx].active = false;
-                bot.logger.warn(e);
-            })
+                    bot.logger.warn(`Uploader #${parseInt(idx) + 1} unavailable, message: ${e.message}`);
+                })
+            );
         }
+        await Promise.all(promises).then(async () => {
+            await getNextToken();
+        }).catch((e) => {
+            bot.logger.FATAL("Checking uploader availibility failed. Error message:");
+            bot.logger.FATAL(e);
+            process.exit();
+        })
     }
     var currentIndex = 0;
-    export function getNextToken() {
+    export async function cycleThroughTokens() {
         const lastIndex = currentIndex;
         while (!auth.assetUploadTokens[currentIndex].active) {
             currentIndex++;
@@ -128,11 +139,53 @@ export namespace common {
                 currentIndex = 0;
             }
             if (lastIndex == currentIndex) {
-                bot.logger.error("No uploader nodes availiable");
-                return "";
+                return true;
             }
         }
+        return false;
+    }
+    export async function getNextToken() {
+        if (await cycleThroughTokens()) {
+            await bot.API.message.create(9, config.uploaderOnlineMessageDestination, `${config.adminList.map(str => `(met)${str}(met)`).join(" ")} FATAL: NO UPLOADER AVAILABLE. PIXIV CHAN IS GOING OFFLINE IMMEDIATELY`)
+                .catch(() => {
+                    bot.logger.error("Cannot send offline notifications to admins. The application is still going down.");
+                });
+            bot.logger.fatal("NO UPLOADER AVAILABLE. PIXIV CHAN IS GOING OFFLINE IMMEDIATELY");
+            process.exit();
+        }
         return auth.assetUploadTokens[currentIndex].token;
+    }
+    export function deactiveCurrentToken() {
+        auth.assetUploadTokens[currentIndex].active = false;
+    }
+    export async function uploadFile(session: BaseSession, val: any, bodyFormData: FormData) {
+        var rtLink = "";
+        await axios({
+            method: "post",
+            url: "https://www.kookapp.cn/api/v3/asset/create",
+            data: bodyFormData,
+            headers: {
+                'Authorization': `Bot ${await getNextToken()}`,
+                ...bodyFormData.getHeaders()
+            }
+        }).then((res: any) => {
+            bot.logger.info(`Upload ${val.id} success`);
+            rtLink = res.data.data.url
+        }).catch(async () => {
+            bot.logger.error(`Upload ${val.id} failed, forcing token offline`);
+            bot.logger.info(`Retrying with another token`);
+            deactiveCurrentToken();
+            if (await cycleThroughTokens()) {
+                await session.replyCard(new Card()
+                    .addTitle("FATAL ERROR | 致命错误")
+                    .addDivider()
+                    .addText("**所有**图片上传机器人均不可用！Pixiv酱将立即下线并通知管理员修复。请耐心等待，通常情况下下，这个问题可以被很快解决。")
+                )
+                process.exit();
+            }
+            uploadFile(session, val, bodyFormData);
+        });
+        return rtLink;
     }
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
@@ -152,26 +205,8 @@ export namespace common {
             if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
             bot.logger.info(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
             bodyFormData.append('file', buffer, "image.jpg");
-            var rtLink = "";
+            var rtLink = await uploadFile(session, val, bodyFormData);
             //Upload image to KOOK's server
-            await axios({
-                method: "post",
-                url: "https://www.kookapp.cn/api/v3/asset/create",
-                data: bodyFormData,
-                headers: {
-                    'Authorization': `Bot ${getNextToken()}`,
-                    ...bodyFormData.getHeaders()
-                }
-            }).then((res: any) => {
-                bot.logger.info(`Upload ${val.id} success`);
-                rtLink = res.data.data.url
-            }).catch((e: any) => {
-                bot.logger.error(`Upload ${val.id} failed`);
-                if (e) {
-                    bot.logger.error(e);
-                    session.sendCard(cards.error(e, true),);
-                }
-            });
             if (detectionResult.success) linkmap.addMap(val.id, "0", rtLink, detectionResult);
             return { link: rtLink, pid: val.id };
         } else {
