@@ -7,7 +7,7 @@ export default {
     assetUploadTokens: [
         {
             active: false,
-            token: 'token here',                //
+            token: 'token here',                // You need at least one uploader token, this can be the same as khltoken
         }
     ],                                          // Use multiple token if need
     /**

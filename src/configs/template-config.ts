@@ -1,4 +1,5 @@
 export default {
+    appname: "Pixiv Chan", // This is the name of your robot. It can be anything you want.
     resizeWidth: 512,
     resizeHeight: 512,
     enableBotMarket: false,
@@ -10,9 +11,10 @@ export default {
     useRemoteLinkmap: false,
     remoteLinkmapBaseURL: "",
     maintainingRemoteLinkmap: false,
-    adminList: [ // Administrator users list, contains an array of user ID
-        "1854484583"
-    ],
-    uploaderOnlineMessageDestination: "1145141919810"   // Channel ID for testing if the token is banned and recieve online status message
-    // Make sure the bot have the premission to view and send message to this channel
+    adminList: ["1854484583"], // Administrator users list, an array of user ID
+    /**
+     * Channel ID for testing if the token is banned or not, and recieving online status message
+     * Make sure the bot have the premission to view, and to send message to, this channel
+     */
+    uploaderOnlineMessageDestination: "1145141919810"
 }
