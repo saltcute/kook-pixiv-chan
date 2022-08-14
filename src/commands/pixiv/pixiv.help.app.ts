@@ -36,7 +36,17 @@ class Help extends AppCommand {
                         "type": "section",
                         "text": {
                             "type": "kmarkdown",
-                            "content": "`.pixiv help <command>` 查询指令的详细用法\n  例：\n```plain\n.pixiv help top\n```\n```plain\n.pixiv help tag\n```\n```plain\n.pixiv help author\n```\n```plain\n.pixiv help detail\n```\n```plain\n.pixiv help illust\n```\n```plain\n.pixiv help refresh\n```\n```plain\n.pixiv help random\n```\n```plain\n.pixiv help credit\n```\n"
+                            "content": "```plain\n.pixiv help <command>\n```\n查询指令的详细用法\n  指令列表：\n```plain\n.pixiv help top\n```\n```plain\n.pixiv help tag\n```\n```plain\n.pixiv help author\n```\n```plain\n.pixiv help detail\n```\n```plain\n.pixiv help illust\n```\n```plain\n.pixiv help refresh\n```\n```plain\n.pixiv help random\n```\n```plain\n.pixiv help credit\n```\n"
+                        }
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "kmarkdown",
+                            "content": "查询部分指令的中文别名\n```plain\n.pixiv help 中文命令\n```\n"
                         }
                     }
                 ]
@@ -162,7 +172,7 @@ class Help extends AppCommand {
                                 "type": "section",
                                 "text": {
                                     "type": "kmarkdown",
-                                    "content": "```\n.pixiv author <user ID>\n```\n获取用户的最新九张插画\n  **必须是用户ID！用户名将无法正常得出结果**\n  例：\n    发送`.pixiv author 6657532 `，获取来自 [QuAn_](https://www.pixiv.net/users/6657532)様 的插画\n    发送`.pixiv author 14112962`，获取来自 [あやみ](https://www.pixiv.net/users/14112962)様 的插画"
+                                    "content": "```\n.pixiv author <user ID>\n```\n获取用户的最新九张插画\n  **必须是用户ID！用户名将无法正常得出结果**\n  例：\n    发送`.pixiv author 6657532 `，获取来自 [QuAn_](https://www.pixiv.net/users/6657532)さん 的插画\n    发送`.pixiv author 14112962`，获取来自 [あやみ](https://www.pixiv.net/users/14112962)さん 的插画"
                                 }
                             }
                         ]
@@ -187,7 +197,7 @@ class Help extends AppCommand {
                                 "type": "section",
                                 "text": {
                                     "type": "kmarkdown",
-                                    "content": "```\n.pixiv illust <illustration ID>\n```\n获取 Pixiv 上对应 ID 的插画\n  **必须是插画 ID！插画标题、简介将无法正常得出结果**\n  例：\n    发送`.pixiv illust 86034756`，获取[雪璐](https://www.pixiv.net/users/30634099)様的插画[「湊あくあ」](https://www.pixiv.net/artworks/86034756) \n    发送`.pixiv illust 84091231`，获取[あやみ](https://www.pixiv.net/users/14112962)様的插画[「鹿乃」](https://www.pixiv.net/artworks/84091231) "
+                                    "content": "```\n.pixiv illust <illustration ID>\n```\n获取 Pixiv 上对应 ID 的插画\n  **必须是插画 ID！插画标题、简介将无法正常得出结果**\n  例：\n    发送`.pixiv illust 86034756`，获取[雪璐](https://www.pixiv.net/users/30634099)さん的插画[「湊あくあ」](https://www.pixiv.net/artworks/86034756) \n    发送`.pixiv illust 84091231`，获取[あやみ](https://www.pixiv.net/users/14112962)さん的插画[「鹿乃」](https://www.pixiv.net/artworks/84091231) "
                                 }
                             }
                         ]
@@ -212,7 +222,7 @@ class Help extends AppCommand {
                                 "type": "section",
                                 "text": {
                                     "type": "kmarkdown",
-                                    "content": "```\n.pixiv detail <illustration ID>\n```\n获取对应 ID 插画的详细信息（作品名、作者、标签等）\n  **必须是插画 ID！插画标题、简介将无法正常得出结果**\n  用法与 `.pixiv illust` 基本相同，例：\n    发送`.pixiv detail 86034756`，获取[雪璐](https://www.pixiv.net/users/30634099)様的插画[「湊あくあ」](https://www.pixiv.net/artworks/86034756) \n    发送`.pixiv detail 84091231`，获取[あやみ](https://www.pixiv.net/users/14112962)様的插画[「鹿乃」](https://www.pixiv.net/artworks/84091231) "
+                                    "content": "```\n.pixiv detail <illustration ID>\n```\n获取对应 ID 插画的详细信息（作品名、作者、标签等）\n  **必须是插画 ID！插画标题、简介将无法正常得出结果**\n  用法与 `.pixiv illust` 基本相同，例：\n    发送`.pixiv detail 86034756`，获取[雪璐](https://www.pixiv.net/users/30634099)さん的插画[「湊あくあ」](https://www.pixiv.net/artworks/86034756) \n    发送`.pixiv detail 84091231`，获取[あやみ](https://www.pixiv.net/users/14112962)さん的插画[「鹿乃」](https://www.pixiv.net/artworks/84091231) "
                                 }
                             }
                         ]
@@ -237,7 +247,7 @@ class Help extends AppCommand {
                                 "type": "section",
                                 "text": {
                                     "type": "kmarkdown",
-                                    "content": "```\n.pixiv refresh <illustration ID>\n```\n刷新对应 ID 插画的缓存。（当图片显示不正常时，可以在几分钟后运行此命令）\n  **必须是插画 ID！插画标题、简介将无法正常得出结果**\n**  当插画显示正常时，此命令没有任何作用，请不要滥用此命令**\n**  如发现有严重滥用行为，您可能会被剥夺使用 `.pixiv refresh` 命令的权力**\n  用法与 `.pixiv illust` 基本相同，例：\n    发送`.pixiv refresh 86034756`，刷新[雪璐](https://www.pixiv.net/users/30634099)様的插画[「湊あくあ」](https://www.pixiv.net/artworks/86034756)的缓存\n    发送`.pixiv refresh 84091231`，刷新[あやみ](https://www.pixiv.net/users/14112962)様的插画[「鹿乃」](https://www.pixiv.net/artworks/84091231)的缓存"
+                                    "content": "```\n.pixiv refresh <illustration ID>\n```\n刷新对应 ID 插画的缓存。（当图片显示不正常时，可以在几分钟后运行此命令）\n  **必须是插画 ID！插画标题、简介将无法正常得出结果**\n**  当插画显示正常时，此命令没有任何作用，请不要滥用此命令**\n**  如发现有严重滥用行为，您可能会被剥夺使用 `.pixiv refresh` 命令的权力**\n  用法与 `.pixiv illust` 基本相同，例：\n    发送`.pixiv refresh 86034756`，刷新[雪璐](https://www.pixiv.net/users/30634099)さん的插画[「湊あくあ」](https://www.pixiv.net/artworks/86034756)的缓存\n    发送`.pixiv refresh 84091231`，刷新[あやみ](https://www.pixiv.net/users/14112962)さん的插画[「鹿乃」](https://www.pixiv.net/artworks/84091231)的缓存"
                                 }
                             }
                         ]
@@ -304,6 +314,10 @@ class Help extends AppCommand {
                             }
                         ]
                     }]);
+                case "中文帮助":
+                case "中文命令":
+                case "中文":
+                    return session.sendCard(pixiv.cards.chineseCommandMapping());
                 default:
                     return session.replyTemp("没有这个指令！输入 `.pixiv` 查看指令列表。");
             }

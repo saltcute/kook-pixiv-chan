@@ -9,6 +9,7 @@ import CreditCard from './credit'
 import RandomCard from './random'
 import NotificationCard from './notification'
 import TagCard from './tag'
+import ChineseCommandMapping from './chineseCommandMapping'
 
 export namespace cards {
     export const error = ErrorCard;
@@ -22,4 +23,5 @@ export namespace cards {
     export const random = RandomCard;
     export const notification = NotificationCard;
     export const tag = TagCard;
+    export const chineseCommandMapping = ChineseCommandMapping;
 }
