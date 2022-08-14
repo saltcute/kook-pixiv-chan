@@ -60,8 +60,8 @@ export namespace aligreen {
                             switch (v.scene) {
                                 case "porn":
                                     switch (v.label) {
-                                        case "porn": blurAmount += blur(v, 35, 28, 18, 14, 10); porn = { ban: true, label: v.label, probability: v.rate }; break;
-                                        case "sexy": blurAmount += blur(v, 7, 7, 4, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                        case "porn": blurAmount += blur(v, 35, 28, 16, 11, 7); porn = { ban: true, label: v.label, probability: v.rate }; break;
+                                        case "sexy": blurAmount += blur(v, 12, 10, 8, 0, 0); porn = { ban: true, label: v.label, probability: v.rate }; break;
                                     }
                                     break;
                                 case "terrorism":
