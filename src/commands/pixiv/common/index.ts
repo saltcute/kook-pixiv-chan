@@ -93,6 +93,7 @@ export namespace common {
      */
     export async function tokenPoolInit() {
         bot.logger.info("Checking uploader availibility");
+        await bot.API.message.create(9, config.uploaderOnlineMessageDestination, "----------------------Uploader Check Started---------------------");
         var promises: Promise<any>[] = [];
         for (const idx in auth.assetUploadTokens) {
             const val = auth.assetUploadTokens[idx].token;
@@ -124,9 +125,11 @@ export namespace common {
         }
         await Promise.all(promises).then(async () => {
             await getNextToken();
+            await bot.API.message.create(9, config.uploaderOnlineMessageDestination, "---------------------Uploader Check Finished---------------------");
+            bot.logger.info("Uploader check passed");
         }).catch((e) => {
-            bot.logger.FATAL("Checking uploader availibility failed. Error message:");
-            bot.logger.FATAL(e);
+            bot.logger.fatal("Checking uploader availibility failed. Error message:");
+            bot.logger.fatal(e);
             process.exit();
         })
     }
