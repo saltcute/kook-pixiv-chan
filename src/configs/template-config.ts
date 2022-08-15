@@ -6,6 +6,7 @@ export default {
     customNSFWModel: false,
     customNSFWLink: ``,
     useAliyunGreen: true,
+    useAliyunChina: true, // Note that Aliyun international is generally a lot more expensive
     pixivAPIBaseURL: "http://pixiv.lolicon.ac.cn",
     pixivImageProxyBaseURL: "http://i.pixiv.lolicon.ac.cn",
     useRemoteLinkmap: false,

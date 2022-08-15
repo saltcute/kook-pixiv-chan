@@ -41,7 +41,11 @@ if (config.useAliyunGreen === false) {
  * Aliyun green initilization
  */
 if (config.useAliyunGreen) {
-    pixiv.aligreen.setServerRegion("Singapore");
+    if (config.useAliyunChina) {
+        pixiv.aligreen.setServerRegion("Shenzhen");
+    } else {
+        pixiv.aligreen.setServerRegion("Singapore");
+    }
 }
 
 /**
