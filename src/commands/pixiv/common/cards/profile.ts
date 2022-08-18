@@ -1,0 +1,148 @@
+import { Card } from "kbotify"
+import { users } from "../users";
+
+export default (user: users.user) => {
+    return new Card({
+        "type": "card",
+        "theme": "info",
+        "size": "lg",
+        "modules": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "kmarkdown",
+                    "content": `**${user.kook.username}#${user.kook.identityNum}**\n级别: [${user.pixiv.tier}](https://img.kookapp.cn/attachments/2022-08/18/LkP2PH7Zoa5xc3c0.png)`
+                },
+                "mode": "left",
+                "accessory": {
+                    "type": "image",
+                    "src": user.kook.avatarLink,
+                    "size": "sm"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "paragraph",
+                    "cols": 2,
+                    "fields": [
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **活跃订阅**\n${user.pixiv.tier}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **订阅到期**\n${user.pixiv.tier == "Standard" ? "永不到期" : new Date(user.pixiv.expire).toLocaleDateString("zh-cn")}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **开始使用Pixiv酱**\n${new Date(user.pixiv.register).toLocaleDateString("zh-cn")}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **节操值**\n69"
+                        }
+                    ]
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain-text",
+                    "content": "命令可用次数（北京时间每天 04:00 重置）"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "paragraph",
+                    "cols": 3,
+                    "fields": [
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **top**\n无限"
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **tag**\n剩余 114 次"
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **author**\n剩余 514 次"
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **detail/illust**\n剩余 19 次"
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **random**\n剩余 19 次"
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": "> **其他**\n无限"
+                        }
+                    ]
+                }
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain-text",
+                    "content": "统计信息"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "paragraph",
+                    "cols": 2,
+                    "fields": [
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **总请求次数**\n${user.pixiv.statistics.total_requests_counter}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **最常使用的命令**\n \`.pixiv ${(() => {
+                                const cnt = user.pixiv.statistics.command_requests_counter;
+                                var maxKey = "", maxVal = -1;
+                                for (const key in cnt) {
+                                    const val = cnt[<keyof typeof cnt>key];
+                                    if (val > maxVal) {
+                                        maxKey = key;
+                                        maxVal = val;
+                                    }
+                                }
+                                return maxKey;
+                            })()}\``
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **看过的总插画数量**\n${user.pixiv.statistics.total_illustration_requested}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **探索出的插画数量**\n${user.pixiv.statistics.new_illustration_requested}`
+                        }
+                    ]
+                }
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "plain-text",
+                        "content": "统计信息从 2022/08/20 开始"
+                    }
+                ]
+            }
+        ]
+    });
+}

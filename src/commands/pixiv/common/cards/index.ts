@@ -10,6 +10,7 @@ import RandomCard from './random'
 import NotificationCard from './notification'
 import TagCard from './tag'
 import ChineseCommandMapping from './chineseCommandMapping'
+import ProfileCard from './profile'
 
 export namespace cards {
     export const error = ErrorCard;
@@ -24,4 +25,5 @@ export namespace cards {
     export const notification = NotificationCard;
     export const tag = TagCard;
     export const chineseCommandMapping = ChineseCommandMapping;
+    export const profile = ProfileCard;
 }
