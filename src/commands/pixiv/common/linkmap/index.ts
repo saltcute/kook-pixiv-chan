@@ -4,7 +4,7 @@ import config from 'configs/config';
 import fs from 'fs';
 import { bot } from 'init/client';
 import upath from 'upath';
-import { common, type } from '..';
+import { type } from '..';
 
 export namespace linkmap {
     var map: {

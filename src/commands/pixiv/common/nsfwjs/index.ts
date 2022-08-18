@@ -5,9 +5,8 @@ import auth from '../../../../configs/auth'
 const nsfw = require('nsfwjs')
 const tf = require('@tensorflow/tfjs-node');
 
-var model: any;
-
 export namespace nsfwjs {
+    var model: any;
     export async function init() {
         if (config.useAliyunGreen == false) {
             if (config.customNSFWModel) {
