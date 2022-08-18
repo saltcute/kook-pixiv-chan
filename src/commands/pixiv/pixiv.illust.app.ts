@@ -71,10 +71,12 @@ class Illust extends AppCommand {
                 return session.reply(`插画ID必须是纯数字！请输入一个合法的插画ID（收到 ${session.args[0]}）\n（使用 \`.pixiv help detail\` 查询指令详细用法）`)
             }
             axios({
-                url: `${config.pixivAPIBaseURL}/illustrationDetail`,
+                baseURL: config.pixivAPIBaseURL,
+                url: "/illustration/detail",
                 method: "GET",
                 params: {
-                    keyword: session.args[0]
+                    keyword: session.args[0],
+                    user: session.userId
                 }
             }).then((res: any) => {
                 if (res.data.hasOwnProperty("status") && res.data.status === 404) {

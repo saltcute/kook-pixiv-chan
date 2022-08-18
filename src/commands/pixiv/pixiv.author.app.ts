@@ -95,10 +95,12 @@ class Author extends AppCommand {
                 return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）");
             }
             axios({
-                url: `${config.pixivAPIBaseURL}/creatorIllustrations`,
+                baseURL: config.pixivAPIBaseURL,
+                url: "/illustration/creator",
                 method: "GET",
                 params: {
-                    keyword: session.args[0]
+                    keyword: session.args[0],
+                    user: session.userId
                 }
             }).then((res: any) => {
                 if (res.data.length === 0) {

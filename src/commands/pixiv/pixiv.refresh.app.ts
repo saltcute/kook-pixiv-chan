@@ -27,9 +27,12 @@ class Refresh extends AppCommand {
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
                 bot.logger.info(`Refreshing ${illust_id}_0.jpg`);
                 axios({
-                    url: `${config.pixivAPIBaseURL}/illustrationDetail`,
+                    baseURL: config.pixivAPIBaseURL,
+                    url: "/illustration/detail",
+                    method: "GET",
                     params: {
-                        keyword: illust_id
+                        keyword: illust_id,
+                        user: session.userId
                     }
                 }).then(async (res: any) => {
                     if (res.data.hasOwnProperty("status") && res.data.status === 404) {

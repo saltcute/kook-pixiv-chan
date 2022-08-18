@@ -85,7 +85,7 @@ export default (link: string[], pid: string[], { resave = false, nsfw = false, i
                 "elements": [
                     {
                         "type": "kmarkdown",
-                        "content": "随机推荐由于受到API所登录账号之影响，出现涩图的概率会比较高，您可能会发现较多图片被模糊。\nご迷惑をおかけして申し訳ございません。"
+                        "content": "图片若出现模糊属于正常现象"
                     }
                 ]
             },

@@ -90,8 +90,12 @@ class Random extends AppCommand {
             }
         }
         axios({
-            url: `${config.pixivAPIBaseURL}/recommend`,
-            method: "GET"
+            baseURL: config.pixivAPIBaseURL,
+            url: "/illustration/recommend",
+            method: "GET",
+            params: {
+                user: session.userId
+            }
         }).then((res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {
                 return session.reply("Pixiv官方服务器不可用，请稍后再试");

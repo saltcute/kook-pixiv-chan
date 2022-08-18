@@ -128,11 +128,13 @@ class Tag extends AppCommand {
                 }
             }
             axios({
-                url: `${config.pixivAPIBaseURL}/topInTag`,
+                baseURL: config.pixivAPIBaseURL,
+                url: "/illustration/tag",
                 method: "GET",
                 params: {
                     keyword: tags.join(" "),
-                    duration: duration
+                    duration: duration,
+                    user: session.userId
                 }
             }).then(async (res: any) => {
                 if (res.data.length == 0) {

@@ -121,10 +121,12 @@ class Top extends AppCommand {
             durationName = durationNameList.week;
         }
         axios({
-            url: `${config.pixivAPIBaseURL}/ranklist`,
+            baseURL: config.pixivAPIBaseURL,
+            url: "/illustration/ranklist",
             method: "GET",
             params: {
-                duration: duration
+                duration: duration,
+                user: session.userId
             }
         }).then((res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {
