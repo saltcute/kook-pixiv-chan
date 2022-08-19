@@ -11,11 +11,12 @@ export default (user: users.user) => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": `**${user.kook.username}#${user.kook.identityNum}**\n级别: [${user.pixiv.tier}](https://img.kookapp.cn/attachments/2022-08/18/LkP2PH7Zoa5xc3c0.png)`
+                    "content": `**${user.kook.username}#${user.kook.identifyNum}**\n级别: [${user.pixiv.tier}](https://img.kookapp.cn/attachments/2022-08/18/LkP2PH7Zoa5xc3c0.png)`
                 },
                 "mode": "left",
                 "accessory": {
                     "type": "image",
+                    "circle": true,
                     "src": user.kook.avatarLink,
                     "size": "sm"
                 }
@@ -66,27 +67,27 @@ export default (user: users.user) => {
                     "fields": [
                         {
                             "type": "kmarkdown",
-                            "content": "> **top**\n无限"
+                            "content": `> **top**\n${users.tiersCommandLimitLeft(user, "top") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "top")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": "> **tag**\n剩余 114 次"
+                            "content": `> **tag**\n${users.tiersCommandLimitLeft(user, "tag") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "tag")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": "> **author**\n剩余 514 次"
+                            "content": `> **author**\n${users.tiersCommandLimitLeft(user, "author") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "author")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": "> **detail/illust**\n剩余 19 次"
+                            "content": `> **detail/illust**\n${users.tiersCommandLimitLeft(user, "detail") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "detail")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": "> **random**\n剩余 19 次"
+                            "content": `> **random**\n${users.tiersCommandLimitLeft(user, "random") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "random")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": "> **其他**\n无限"
+                            "content": `> **Quantum组合包**\n${user.pixiv.quantum_pack_capacity > 0 ? `剩余 ${user.pixiv.quantum_pack_capacity} 张` : "无"}`
                         }
                     ]
                 }
@@ -125,11 +126,11 @@ export default (user: users.user) => {
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `> **看过的总插画数量**\n${user.pixiv.statistics.total_illustration_requested}`
+                            "content": `> **看过的插画数量**\n${user.pixiv.statistics.total_illustration_requested}`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `> **探索出的插画数量**\n${user.pixiv.statistics.new_illustration_requested}`
+                            "content": `> **探索的插画数量**\n${user.pixiv.statistics.new_illustration_requested}`
                         }
                     ]
                 }

@@ -29,11 +29,9 @@ export namespace linkmap {
     export async function download() {
         if (config.useRemoteLinkmap) {
             await axios({
-                url: `${config.remoteLinkmapBaseURL}/linkmap`,
-                method: "GET",
-                headers: {
-                    'uuid': auth.remoteLinkmapUUID
-                }
+                baseURL: config.remoteLinkmapBaseURL,
+                url: "/linkmap",
+                method: "GET"
             }).then((res) => {
                 for (const key in res.data) {
                     for (const page in res.data[key]) {
@@ -52,7 +50,8 @@ export namespace linkmap {
     export async function upload() {
         if (config.maintainingRemoteLinkmap) {
             axios({
-                url: `${config.remoteLinkmapBaseURL}/updateLinkmap`,
+                baseURL: config.remoteLinkmapBaseURL,
+                url: "/linkmap/update",
                 method: "POST",
                 headers: {
                     'Authorization': `Bearer ${auth.remoteLinkmapToken}`,

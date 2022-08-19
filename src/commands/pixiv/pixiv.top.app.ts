@@ -10,11 +10,12 @@ class Top extends AppCommand {
     trigger = 'top'; // 用于触发的文字
     intro = 'Top illustrations';
     func: AppFunc<BaseSession> = async (session) => {
+        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        async function sendCard(data: any, durationName: string) {
+        const sendCard = async (data: any, durationName: string) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
             if (session.guild) {
@@ -35,6 +36,7 @@ class Top extends AppCommand {
                 });
                 if (!sendSuccess) return;
             }
+            var detection: number = 0;
             var link: string[] = [];
             var pid: string[] = [];
             var datas: any[] = [];
@@ -54,6 +56,7 @@ class Top extends AppCommand {
             }
             const detectionResults = await pixiv.aligreen.imageDetectionSync(datas)
             for (const val of datas) {
+                if (!pixiv.linkmap.isInDatabase(val.id, "0")) detection++;
                 promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
             }
             var uploadResults: {
@@ -78,15 +81,23 @@ class Top extends AppCommand {
             }
             bot.logger.info(`Process ended, presenting to user`);
             if (session.guild) {
-                session.updateMessage(mainCardMessageID, [pixiv.cards.top(link, pid, durationName, {})]).catch((e) => {
-                    bot.logger.error(`Update message ${mainCardMessageID} failed!`);
-                    if (e) bot.logger.error(e);
-                });
+                session.updateMessage(mainCardMessageID, [pixiv.cards.top(link, pid, durationName, {})])
+                    .then(() => {
+                        pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                    })
+                    .catch((e) => {
+                        bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                        if (e) bot.logger.error(e);
+                    });
             } else {
-                session.sendCard([pixiv.cards.top(link, pid, durationName, {})]).catch((e) => {
-                    bot.logger.error(`Send message failed!`);
-                    if (e) bot.logger.error(e);
-                });
+                session.sendCard([pixiv.cards.top(link, pid, durationName, {})])
+                    .then(() => {
+                        pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                    })
+                    .catch((e) => {
+                        bot.logger.error(`Send message failed!`);
+                        if (e) bot.logger.error(e);
+                    });
             }
         }
         const durationList = {
@@ -126,7 +137,12 @@ class Top extends AppCommand {
             method: "GET",
             params: {
                 duration: duration,
-                user: session.userId
+                user: {
+                    id: session.user.id,
+                    identifyNum: session.user.identifyNum,
+                    username: session.user.username,
+                    avatar: session.user.avatar
+                }
             }
         }).then((res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {

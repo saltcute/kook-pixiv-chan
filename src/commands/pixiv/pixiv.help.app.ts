@@ -36,7 +36,7 @@ class Help extends AppCommand {
                         "type": "section",
                         "text": {
                             "type": "kmarkdown",
-                            "content": "```plain\n.pixiv help <command>\n```\n查询指令的详细用法\n  指令列表：\n```plain\n.pixiv help top\n```\n```plain\n.pixiv help tag\n```\n```plain\n.pixiv help author\n```\n```plain\n.pixiv help detail\n```\n```plain\n.pixiv help illust\n```\n```plain\n.pixiv help refresh\n```\n```plain\n.pixiv help random\n```\n```plain\n.pixiv help credit\n```\n"
+                            "content": "```plain\n.pixiv help <command>\n```\n查询指令的详细用法\n  指令列表：\n```plain\n.pixiv help top\n```\n```plain\n.pixiv help tag\n```\n```plain\n.pixiv help author\n```\n```plain\n.pixiv help detail\n```\n```plain\n.pixiv help illust\n```\n```plain\n.pixiv help refresh\n```\n```plain\n.pixiv help random\n```\n```plain\n.pixiv help credit\n```\n```plain\n.pixiv help redeem\n```\n```plain\n.pixiv help profile\n```\n"
                         }
                     },
                     {
@@ -297,7 +297,7 @@ class Help extends AppCommand {
                                 "type": "section",
                                 "text": {
                                     "type": "kmarkdown",
-                                    "content": "```\n.pixiv credit\n```\n查看致谢列表\n例：\n    发送`.pixiv credit`，获取⑨张随机推荐的插画"
+                                    "content": "```\n.pixiv credit\n```\n查看致谢列表\n例：\n    发送`.pixiv credit`，查看致谢列表"
                                 }
                             },
                             {
@@ -318,6 +318,56 @@ class Help extends AppCommand {
                 case "中文命令":
                 case "中文":
                     return session.sendCard(pixiv.cards.chineseCommandMapping());
+                case "profile":
+                    return session.sendCard([{
+                        "type": "card",
+                        "theme": "warning",
+                        "size": "lg",
+                        "modules": [
+                            {
+                                "type": "header",
+                                "text": {
+                                    "type": "plain-text",
+                                    "content": ".pixiv profile"
+                                }
+                            },
+                            {
+                                "type": "divider"
+                            },
+                            {
+                                "type": "section",
+                                "text": {
+                                    "type": "kmarkdown",
+                                    "content": "```\n.pixiv profile\n```\n查看个人资料\n例：\n    发送`.pixiv profile`，查看自己的个人资料"
+                                }
+                            }
+                        ]
+                    }]);
+                case "redeem":
+                    return session.replyCard([{
+                        "type": "card",
+                        "theme": "warning",
+                        "size": "lg",
+                        "modules": [
+                            {
+                                "type": "header",
+                                "text": {
+                                    "type": "plain-text",
+                                    "content": ".pixiv redeem"
+                                }
+                            },
+                            {
+                                "type": "divider"
+                            },
+                            {
+                                "type": "section",
+                                "text": {
+                                    "type": "kmarkdown",
+                                    "content": "```\n.pixiv redeem <code>\n```\n兑换激活码\n例：\n    发送`.pixiv redeem KFCCR-AZYTH-URSDA-YOVME-FIFTY`，兑换激活码`KFCCR-AZYTH-URSDA-YOVME-FIFTY`"
+                                }
+                            }
+                        ]
+                    }]);
                 default:
                     return session.replyTemp("没有这个指令！输入 `.pixiv` 查看指令列表。");
             }

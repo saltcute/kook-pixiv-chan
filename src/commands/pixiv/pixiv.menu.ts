@@ -9,6 +9,7 @@ import { top } from './pixiv.top.app';
 import { random } from './pixiv.random.app';
 import { profile } from './pixiv.profile.app';
 import { tag } from './pixiv.tag.app';
+import { redeem } from './pixiv.redeem.app';
 class PixivMenu extends MenuCommand {
     code = 'pixiv';
     trigger = 'pixiv';
@@ -115,4 +116,4 @@ class PixivMenu extends MenuCommand {
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivMenu = new PixivMenu(top, tag, illust, detail, author, refresh, help, credit, random, profile);
+export const pixivMenu = new PixivMenu(top, tag, illust, detail, author, refresh, help, credit, random, profile, redeem);

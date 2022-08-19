@@ -10,14 +10,16 @@ class Illust extends AppCommand {
     trigger = 'illust'; // 用于触发的文字
     intro = 'Illustration';
     func: AppFunc<BaseSession> = async (session) => {
+        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 3, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        async function sendCard(data: any) {
+        const sendCard = async (data: any) => {
             if (data.x_restrict !== 0) {
                 return session.sendCard(pixiv.cards.illust(data, pixiv.common.akarin));
             }
+            var detection = 0;
             var sendSuccess = false;
             var mainCardMessageID = "";
             if (session.guild) {
@@ -43,6 +45,7 @@ class Illust extends AppCommand {
                 link: string;
                 pid: string;
             } = { link: pixiv.common.akarin, pid: "没有了" };
+            if (!pixiv.linkmap.isInDatabase(data.id, "0")) detection++;
             await pixiv.common.uploadImage(data, detectionResult, session).then((res) => {
                 uploadResult = res;
             }).catch((e) => {
@@ -53,15 +56,23 @@ class Illust extends AppCommand {
             });
             bot.logger.info(`Process ended, presenting to user`);
             if (session.guild) {
-                session.updateMessage(mainCardMessageID, [pixiv.cards.illust(data, uploadResult.link)]).catch((e) => {
-                    bot.logger.error(`Update message ${mainCardMessageID} failed!`);
-                    if (e) bot.logger.error(e);
-                });
+                session.updateMessage(mainCardMessageID, [pixiv.cards.illust(data, uploadResult.link)])
+                    .then(() => {
+                        pixiv.users.logInvoke(session, this.trigger, 1, detection)
+                    })
+                    .catch((e) => {
+                        bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                        if (e) bot.logger.error(e);
+                    });
             } else {
-                session.sendCard([pixiv.cards.illust(data, uploadResult.link)]).catch((e) => {
-                    bot.logger.error(`Send message failed!`);
-                    if (e) bot.logger.error(e);
-                });
+                session.sendCard([pixiv.cards.illust(data, uploadResult.link)])
+                    .then(() => {
+                        pixiv.users.logInvoke(session, this.trigger, 1, detection)
+                    })
+                    .catch((e) => {
+                        bot.logger.error(`Send message failed!`);
+                        if (e) bot.logger.error(e);
+                    });
             }
         }
         if (session.args.length === 0) {
@@ -76,7 +87,12 @@ class Illust extends AppCommand {
                 method: "GET",
                 params: {
                     keyword: session.args[0],
-                    user: session.userId
+                    user: {
+                        id: session.user.id,
+                        identifyNum: session.user.identifyNum,
+                        username: session.user.username,
+                        avatar: session.user.avatar
+                    }
                 }
             }).then((res: any) => {
                 if (res.data.hasOwnProperty("status") && res.data.status === 404) {
