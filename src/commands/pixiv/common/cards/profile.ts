@@ -79,11 +79,19 @@ export default (user: users.user) => {
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `> **detail/illust**\n${users.tiersCommandLimitLeft(user, "detail") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "detail")} 次`}`
+                            "content": `> **detail**\n${users.tiersCommandLimitLeft(user, "detail") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "detail")} 次`}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **detail**\n${users.tiersCommandLimitLeft(user, "illust") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "illust")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
                             "content": `> **random**\n${users.tiersCommandLimitLeft(user, "random") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "random")} 次`}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **可用插画**\n${users.tiersIllustLimitLeft(user) == "unlimited" ? "无限" : `剩余 ${users.tiersIllustLimitLeft(user)} 张`}`
                         },
                         {
                             "type": "kmarkdown",

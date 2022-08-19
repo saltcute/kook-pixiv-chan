@@ -142,6 +142,12 @@ export namespace users {
             return illustLimit[user.pixiv.tier];
         }
     }
+    export function tiersIllustLimitLeft(user: user): number | "unlimited" {
+        if (user.pixiv.quantum_pack_capacity > 0) return user.pixiv.quantum_pack_capacity;
+        const limit = tiersIllustLimit(user);
+        if (limit == "unlimited") return "unlimited";
+        else return limit - user.pixiv.statistics_today.new_illustration_requested;
+    }
     export function tiersCommandLimit(user: user, trigger: commands) {
         return commandLimit[user.pixiv.tier][trigger];
     }
