@@ -18,7 +18,7 @@ export namespace users {
         Sponser: "https://afdian.net/item?plan_id=27e624fa1ff611eda80a52540025c377",
         Quantum: "https://afdian.net/item?plan_id=72069e621ff511ed91f752540025c377"
     }
-    export const tiersListImageLink = "https://img.kookapp.cn/attachments/2022-08/19/ZTaQrHO8kj5xc3c0.png";
+    export const tiersListImageLink = "https://img.kookapp.cn/attachments/2022-08/20/IXpXVOzUF75xc3c0.png";
     export type commands = typeof Commands[number];
     export interface userMeta {
         id: string,
@@ -148,8 +148,13 @@ export namespace users {
     export function tiersCommandLimitLeft(user: user, trigger: commands): number | "unlimited" {
         if (user.pixiv.quantum_pack_capacity > 0) return "unlimited";
         const limit = tiersCommandLimit(user, trigger)
-        if (limit == "unlimited") return tiersCommandLimit(user, trigger);
-        else return limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+        if (trigger == "detail" || trigger == "illust") {
+            if (limit == "unlimited") return "unlimited";
+            else return limit - user.pixiv.statistics_today.command_requests_counter["detail"] - user.pixiv.statistics_today.command_requests_counter["illust"];
+        } else {
+            if (limit == "unlimited") return "unlimited";
+            else return limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+        }
     }
     export async function reachesCommandLimit(session: BaseSession, trigger: string): Promise<boolean> {
         var reached = false;
