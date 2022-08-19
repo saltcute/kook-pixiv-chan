@@ -11,7 +11,7 @@ class Detection extends AppCommand {
             return session.reply("You do not have the permission to use this command")
         }
         if (session.args.length == 0) {
-            return session.replyTemp("Please specified an action");
+            return session.replyTemp("Please specifiy an action");
         }
         pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
         switch (session.args[0]) {

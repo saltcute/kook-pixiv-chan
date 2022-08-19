@@ -11,7 +11,7 @@ class Ban extends AppCommand {
             return session.reply("You do not have the permission to use this command")
         }
         if (session.args.length == 0) {
-            return session.replyTemp("Please specified an action: `add`, `remove` ");
+            return session.replyTemp("Please specifiy an action: `add`, `remove` ");
         }
         pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
         const user = session.args[1];
