@@ -14,60 +14,64 @@ class Redeem extends AppCommand {
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 15, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        const key = session.args[0];
-        if (key == "KFCCR-AZYTH-URSDA-YOVME-FIFTY") {// EASTER EGG
-            return session.reply("~~兑换成功：在下个星期四V我50一份~~\n开玩笑的，用这个怎么可能换的出东西呢！");
-        }
-        if (pixiv.keygen.validate(key)) {
-            axios({
-                baseURL: config.remoteLinkmapBaseURL,
-                url: "/user/key/activate",
-                method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
-                    'uuid': auth.remoteLinkmapUUID
-                },
-                data: {
-                    key: key,
-                    user: {
-                        id: session.user.id,
-                        identifyNum: session.user.identifyNum,
-                        username: session.user.username,
-                        avatar: session.user.avatar
-                    }
-                }
-            }).then((res) => {
-                const data = res.data;
-                switch (data.code) {
-                    case '0':
-                        session.reply("兑换成功")
-                        // this.exec("profile", ["arg"], "msg");
-                        pixiv.users.detail({
+        if (session.args.length == 0) {
+            return session.reply("请输入激活码");
+        } else {
+            const key = session.args[0];
+            if (key == "KFCCR-AZYTH-URSDA-YOVME-FIFTY") {// EASTER EGG
+                return session.reply("~~兑换成功：在下个星期四V我50~~\n开玩笑的，用这个怎么可能换的出东西呢！");
+            }
+            if (pixiv.keygen.validate(key)) {
+                axios({
+                    baseURL: config.remoteLinkmapBaseURL,
+                    url: "/user/key/activate",
+                    method: "POST",
+                    headers: {
+                        'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
+                        'uuid': auth.remoteLinkmapUUID
+                    },
+                    data: {
+                        key: key,
+                        user: {
                             id: session.user.id,
                             identifyNum: session.user.identifyNum,
                             username: session.user.username,
                             avatar: session.user.avatar
-                        }).then((res) => {
-                            return session.sendCard([pixiv.cards.profile(res)]);
-                        }).catch((e) => {
-                            bot.logger.warn(e);
-                            return session.replyCardTemp([pixiv.cards.error(e)]);
-                        });
-                        break;
-                    case '40001': // Used or non-existence key
-                        session.reply("激活码不存在或已被使用！");
-                        break;
-                    case '40002': // Non-existence user
-                        session.reply("用户不存在！");
-                        break;
-                }
-            }).catch((e) => {
-                bot.logger.error("Activate key failed");
-                bot.logger.error(e);
-                session.sendCard([pixiv.cards.error(e, false)]);
-            })
-        } else {
-            session.reply("不是有效的激活码！");
+                        }
+                    }
+                }).then((res) => {
+                    const data = res.data;
+                    switch (data.code) {
+                        case '0':
+                            session.reply("兑换成功")
+                            // this.exec("profile", ["arg"], "msg");
+                            pixiv.users.detail({
+                                id: session.user.id,
+                                identifyNum: session.user.identifyNum,
+                                username: session.user.username,
+                                avatar: session.user.avatar
+                            }).then((res) => {
+                                return session.sendCard([pixiv.cards.profile(res)]);
+                            }).catch((e) => {
+                                bot.logger.warn(e);
+                                return session.replyCardTemp([pixiv.cards.error(e)]);
+                            });
+                            break;
+                        case '40001': // Used or non-existence key
+                            session.reply("激活码不存在或已被使用！");
+                            break;
+                        case '40002': // Non-existence user
+                            session.reply("用户不存在！");
+                            break;
+                    }
+                }).catch((e) => {
+                    bot.logger.error("Activate key failed");
+                    bot.logger.error(e);
+                    session.sendCard([pixiv.cards.error(e, false)]);
+                })
+            } else {
+                session.reply("不是有效的激活码！");
+            }
         }
     }
 }
