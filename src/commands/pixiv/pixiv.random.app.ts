@@ -10,6 +10,7 @@ class Random extends AppCommand {
     trigger = 'random'; // 用于触发的文字
     intro = 'Recommendation';
     func: AppFunc<BaseSession> = async (session) => {
+        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 10, this.trigger)) return;
