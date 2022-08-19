@@ -11,7 +11,7 @@ export default (user: users.user) => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": `**${user.kook.username}#${user.kook.identifyNum}**\n级别: [${user.pixiv.tier}](https://img.kookapp.cn/attachments/2022-08/18/LkP2PH7Zoa5xc3c0.png)`
+                    "content": `**${user.kook.username}#${user.kook.identifyNum}**\n级别: [${user.pixiv.tier}](${users.afdianTierLink[user.pixiv.tier]})`
                 },
                 "mode": "left",
                 "accessory": {
@@ -36,7 +36,7 @@ export default (user: users.user) => {
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `> **订阅到期**\n${user.pixiv.tier == "Standard" ? "永不到期" : new Date(user.pixiv.expire).toLocaleDateString("zh-cn")}`
+                            "content": `> **订阅到期**\n${user.pixiv.tier == "Standard" ? "永不" : new Date(user.pixiv.expire).toLocaleDateString("zh-cn")}`
                         },
                         {
                             "type": "kmarkdown",
@@ -56,7 +56,7 @@ export default (user: users.user) => {
                 "type": "header",
                 "text": {
                     "type": "plain-text",
-                    "content": "命令可用次数（北京时间每天 04:00 重置）"
+                    "content": "命令可用次数"
                 }
             },
             {
@@ -87,7 +87,7 @@ export default (user: users.user) => {
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `> **Quantum组合包**\n${user.pixiv.quantum_pack_capacity > 0 ? `剩余 ${user.pixiv.quantum_pack_capacity} 张` : "无"}`
+                            "content": `> **Quantum Pack**\n${user.pixiv.quantum_pack_capacity > 0 ? `剩余 ${user.pixiv.quantum_pack_capacity} 张` : "无"}`
                         }
                     ]
                 }

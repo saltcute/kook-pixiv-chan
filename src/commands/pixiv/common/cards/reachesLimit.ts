@@ -28,7 +28,7 @@ export default (user: users.user) => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": `如需继续使用，您可以：\n　　北京时间每天04:00自动刷新\n　　购买[更高等级订阅](${users.afdianTierLink[users.getHigherTier(user.pixiv.tier)]})\n　　购买[Quantum组合包](${users.afdianTierLink.Quantum})`
+                    "content": `如需继续使用，您可以：\n　　北京时间每天04:00自动刷新\n　　购买[更高等级订阅](${users.afdianTierLink[users.getHigherTier(user.pixiv.tier)]})\n　　购买[Quantum组合包](${users.afdianTierLink.Quantum})\n更多信息或问题咨询请至[Pixiv酱官方服务器](https://kook.top/iOOsLu)`
                 }
             },
             {
