@@ -15,6 +15,7 @@ class Refresh extends AppCommand {
     intro = 'Refresh';
     func: AppFunc<BaseSession> = async (session) => {
         if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
+        if (await pixiv.users.reachesIllustLimit(session)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 15, this.trigger)) return;

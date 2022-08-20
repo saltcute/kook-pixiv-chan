@@ -1,7 +1,7 @@
 import { Card } from "kbotify"
 import { users } from "../users";
 
-export default (user: users.user) => {
+export default (user: users.user, type: "command" | "illust", trigger: users.commands = "top") => {
     return new Card({
         "type": "card",
         "theme": "danger",
@@ -21,7 +21,7 @@ export default (user: users.user) => {
                 "type": "section",
                 "text": {
                     "type": "kmarkdown",
-                    "content": `您已达到当前级别（${user.pixiv.tier}）的使用限制。`
+                    "content": `您已达到当前级别（${user.pixiv.tier}）的[使用限制](${users.tiersListImageLink})\n（${type == "command" ? `${users.tiersCommandLimit(user, trigger)} 次 \`.pixiv ${trigger}\` 请求` : `${users.tiersIllustLimit(user)} 张插画`}）。`
                 }
             },
             {

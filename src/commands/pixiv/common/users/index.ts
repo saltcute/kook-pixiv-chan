@@ -178,12 +178,31 @@ export namespace users {
                 else if (tiersCommandLimitLeft(res, trigger) <= 0) reached = true;
                 else reached = false;
                 if (reached) {
-                    session.replyCard([cards.reachesLimit(res)]);
+                    session.replyCard([cards.reachesLimit(res, "command", trigger)]);
                 }
             }).catch((e) => {
                 bot.logger.error(e);
             })
         }
+        return reached;
+    }
+    export async function reachesIllustLimit(session: BaseSession): Promise<boolean> {
+        var reached = false;
+        await detail({
+            id: session.user.id,
+            identifyNum: session.user.identifyNum,
+            username: session.user.username,
+            avatar: session.user.avatar,
+        }).then((res) => {
+            if (tiersIllustLimitLeft(res) == "unlimited") reached = false;
+            else if (tiersIllustLimitLeft(res) > 0) reached = false;
+            else reached = true;
+            if (reached) {
+                session.replyCard([cards.reachesLimit(res, "illust")]);
+            }
+        }).catch((e) => {
+            bot.logger.error(e);
+        })
         return reached;
     }
     export async function update(user: user) {
@@ -245,7 +264,7 @@ export namespace users {
                     res.pixiv.quantum_pack_capacity = 0;
                 }
                 if (isCommand(trigger)) {
-                    if(trigger == "refresh") {
+                    if (trigger == "refresh") {
                         res.pixiv.statistics_today.command_requests_counter[trigger]++;
                     }
                     if (newIllust > 0) {
