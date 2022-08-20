@@ -62,7 +62,6 @@ class Refresh extends AppCommand {
                     if (val.x_restrict > 0) {
                         return session.reply("无法刷新 R-18/R-18G 插画的缓存");
                     }
-                    var detection: number = 0;
                     var sendSuccess = false;
                     var mainCardMessageID = "";
                     if (session.guild) {
@@ -85,7 +84,6 @@ class Refresh extends AppCommand {
                     }
                     pixiv.common.getNotifications(session);
                     const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];
-                    if (!pixiv.linkmap.isInDatabase(val.id, "0")) detection++;
                     var buffer: Buffer = await sharp(await pixiv.common.stream2buffer(got.stream(pixiv.common.getProxiedImageLink(val.image_urls.large.replace(/\/c\/[a-zA-z0-9]+/gm, ""))))).resize(config.resizeWidth, config.resizeHeight, { fit: "outside" }).jpeg().toBuffer();
                     var blur = 0;
                     if (detectionResult.success) {
@@ -106,7 +104,6 @@ class Refresh extends AppCommand {
                                 bot.logger.info(`Uncensoring success with ${tyblur}px of gaussian blur`);
                                 uncensored = true;
                             }).catch(async () => {
-                                if (!pixiv.linkmap.isInDatabase(val.id, "0")) detection++;
                                 bot.logger.warn(`Uncensoring failed, try ${7 * i}px of gaussian blur`);
                                 var bodyFormData = new FormData();
                                 bodyFormData.append('file', await sharp(buffer).blur(7 * i).jpeg().toBuffer(), "1.jpg");
@@ -139,7 +136,7 @@ class Refresh extends AppCommand {
                             if (session.guild) {
                                 session.updateMessage(mainCardMessageID, [pixiv.cards.detail(val, rtLink)])
                                     .then(() => {
-                                        pixiv.users.logInvoke(session, this.trigger, 0, detection)
+                                        pixiv.users.logInvoke(session, this.trigger, 0, 0)
                                     })
                                     .catch((e) => {
                                         bot.logger.error(`Update message ${mainCardMessageID} failed!`);
@@ -148,7 +145,7 @@ class Refresh extends AppCommand {
                             } else {
                                 session.sendCard([pixiv.cards.detail(val, rtLink)])
                                     .then(() => {
-                                        pixiv.users.logInvoke(session, this.trigger, 0, detection)
+                                        pixiv.users.logInvoke(session, this.trigger, 0, 0)
                                     })
                                     .catch((e) => {
                                         bot.logger.error(`Send message failed!`);
