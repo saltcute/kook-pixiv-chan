@@ -17,13 +17,14 @@ bot.logger.addStream({ level: bot.logger.INFO, stream: process.stdout });
 // bot.logger.addStream({ level: bot.logger.DEBUG, stream: process.stdout }); // DEBUG
 bot.logger.info("kook-pixiv-chan initialization start");
 
-pixiv.common.tokenPoolInit();
-
-/**
- * Linkmap initialization
- */
-pixiv.linkmap.init();
-pixivadmin.common.load();
+(async () => {
+    /**
+     * Linkmap initialization
+     */
+    await pixiv.linkmap.init();
+    await pixiv.common.tokenPoolInit();
+    await pixivadmin.common.load();
+})()
 schedule.scheduleJob('15 * * * *', async () => {
     pixiv.linkmap.save();
     pixivadmin.common.save();

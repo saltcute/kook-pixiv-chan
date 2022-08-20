@@ -1,13 +1,13 @@
 import axios from 'axios';
 import auth from 'configs/auth';
 import config from 'configs/config';
-import fs from 'fs';
+import fs, { link } from 'fs';
 import { bot } from 'init/client';
 import upath from 'upath';
 import { type } from '..';
 
 export namespace linkmap {
-    var map: {
+    export var map: {
         [key: string]: {
             [key: string]: linkmap
         }
@@ -33,11 +33,7 @@ export namespace linkmap {
                 url: "/linkmap",
                 method: "GET"
             }).then((res) => {
-                for (const key in res.data) {
-                    for (const page in res.data[key]) {
-                        linkmap.addMap(key, page, res.data[key][page].kookLink, res.data[key][page].NSFWResult)
-                    }
-                }
+                linkmap.map = res.data;
                 bot.logger.info("Downloaded linkmap from remote");
             }).catch((e) => {
                 bot.logger.warn("Linkmap download failed, loading local");
