@@ -46,7 +46,7 @@ class Detail extends AppCommand {
                 link: string;
                 pid: string;
             } = { link: pixiv.common.akarin, pid: "没有了" };
-            if (!pixiv.linkmap.isInDatabase(data.id, "0")) detection++;
+            if (!pixiv.linkmap.isInDatabase(data.id, "0") && detectionResult.success) detection++;
             await pixiv.common.uploadImage(data, detectionResult, session).then((res) => {
                 uploadResult = res;
             }).catch((e) => {

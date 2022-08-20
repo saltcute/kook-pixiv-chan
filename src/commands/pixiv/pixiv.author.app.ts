@@ -58,7 +58,7 @@ class Author extends AppCommand {
             }
             const detectionResults = await pixiv.aligreen.imageDetectionSync(datas)
             for (const val of datas) {
-                if (!pixiv.linkmap.isInDatabase(val.id, "0")) detection++;
+                if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
                 promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
             }
             var uploadResults: {
