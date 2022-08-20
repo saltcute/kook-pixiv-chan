@@ -152,15 +152,18 @@ export namespace users {
         return commandLimit[user.pixiv.tier][trigger];
     }
     export function tiersCommandLimitLeft(user: user, trigger: commands): number | "unlimited" {
-        if (user.pixiv.quantum_pack_capacity > 0) return "unlimited";
-        const limit = tiersCommandLimit(user, trigger)
-        if (trigger == "detail" || trigger == "illust") {
-            if (limit == "unlimited") return "unlimited";
-            else return limit - user.pixiv.statistics_today.command_requests_counter["detail"] - user.pixiv.statistics_today.command_requests_counter["illust"];
-        } else {
+        const limit = tiersCommandLimit(user, trigger);
+        if (trigger == "refresh") {
             if (limit == "unlimited") return "unlimited";
             else return limit - user.pixiv.statistics_today.command_requests_counter[trigger];
         }
+        if (user.pixiv.quantum_pack_capacity > 0) return "unlimited";
+        if (trigger == "detail" || trigger == "illust") {
+            if (limit == "unlimited") return "unlimited";
+            else return limit - user.pixiv.statistics_today.command_requests_counter["detail"] - user.pixiv.statistics_today.command_requests_counter["illust"];
+        }
+        if (limit == "unlimited") return "unlimited";
+        else return limit - user.pixiv.statistics_today.command_requests_counter[trigger];
     }
     export async function reachesCommandLimit(session: BaseSession, trigger: string): Promise<boolean> {
         var reached = false;
@@ -242,10 +245,13 @@ export namespace users {
                     res.pixiv.quantum_pack_capacity = 0;
                 }
                 if (isCommand(trigger)) {
-                    res.pixiv.statistics.command_requests_counter[trigger]++;
+                    if(trigger == "refresh") {
+                        res.pixiv.statistics_today.command_requests_counter[trigger]++;
+                    }
                     if (newIllust > 0) {
                         res.pixiv.statistics_today.command_requests_counter[trigger]++;
                     }
+                    res.pixiv.statistics.command_requests_counter[trigger]++;
                 }
                 update(res).catch((e) => {
                     bot.logger.warn("Bad request when updating profile");

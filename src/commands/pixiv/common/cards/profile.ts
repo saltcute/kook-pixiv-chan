@@ -83,11 +83,15 @@ export default (user: users.user) => {
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `> **detail**\n${users.tiersCommandLimitLeft(user, "illust") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "illust")} 次`}`
+                            "content": `> **illust**\n${users.tiersCommandLimitLeft(user, "illust") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "illust")} 次`}`
                         },
                         {
                             "type": "kmarkdown",
                             "content": `> **random**\n${users.tiersCommandLimitLeft(user, "random") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "random")} 次`}`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `> **refresh**\n${users.tiersCommandLimitLeft(user, "refresh") == "unlimited" ? "无限" : `剩余 ${users.tiersCommandLimitLeft(user, "refresh")} 张`}`
                         },
                         {
                             "type": "kmarkdown",
