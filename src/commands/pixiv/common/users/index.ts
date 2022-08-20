@@ -143,27 +143,29 @@ export namespace users {
         }
     }
     export function tiersIllustLimitLeft(user: user): number | "unlimited" {
-        if (user.pixiv.quantum_pack_capacity > 0) return user.pixiv.quantum_pack_capacity;
         const limit = tiersIllustLimit(user);
-        if (limit == "unlimited") return "unlimited";
-        else return limit - user.pixiv.statistics_today.new_illustration_requested;
+        var left: number | "unlimited";
+        if (user.pixiv.quantum_pack_capacity > 0) left = user.pixiv.quantum_pack_capacity;
+        else if (limit == "unlimited") left = "unlimited";
+        else left = limit - user.pixiv.statistics_today.new_illustration_requested;
+        return left < 0 ? 0 : left;
     }
     export function tiersCommandLimit(user: user, trigger: commands) {
         return commandLimit[user.pixiv.tier][trigger];
     }
     export function tiersCommandLimitLeft(user: user, trigger: commands): number | "unlimited" {
         const limit = tiersCommandLimit(user, trigger);
+        var left: number | "unlimited";
         if (trigger == "refresh") {
-            if (limit == "unlimited") return "unlimited";
-            else return limit - user.pixiv.statistics_today.command_requests_counter[trigger];
-        }
-        if (user.pixiv.quantum_pack_capacity > 0) return "unlimited";
-        if (trigger == "detail" || trigger == "illust") {
-            if (limit == "unlimited") return "unlimited";
-            else return limit - user.pixiv.statistics_today.command_requests_counter["detail"] - user.pixiv.statistics_today.command_requests_counter["illust"];
-        }
-        if (limit == "unlimited") return "unlimited";
-        else return limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+            if (limit == "unlimited") left = "unlimited";
+            else left = limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+        } else if (user.pixiv.quantum_pack_capacity > 0) left = "unlimited";
+        else if (trigger == "detail" || trigger == "illust") {
+            if (limit == "unlimited") left = "unlimited";
+            else left = limit - user.pixiv.statistics_today.command_requests_counter["detail"] - user.pixiv.statistics_today.command_requests_counter["illust"];
+        } else if (limit == "unlimited") left = "unlimited";
+        else left = limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+        return left < 0 ? 0 : left;
     }
     export async function reachesCommandLimit(session: BaseSession, trigger: string): Promise<boolean> {
         var reached = false;
