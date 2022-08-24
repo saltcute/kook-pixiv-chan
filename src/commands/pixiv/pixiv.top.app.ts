@@ -28,7 +28,7 @@ class Top extends AppCommand {
                 }).catch((e) => {
                     if (e) {
                         if (e.code == 40012) { // Slow-mode limit
-                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                            bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                         } else {
                             bot.logger.error(e);
                         }
@@ -80,14 +80,14 @@ class Top extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            bot.logger.info(`Process ended, presenting to user`);
+            bot.logger.info(`UserInterface: Presenting card to user`);
             if (session.guild) {
                 session.updateMessage(mainCardMessageID, [pixiv.cards.top(link, pid, durationName, {})])
                     .then(() => {
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                        bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
                         if (e) bot.logger.error(e);
                     });
             } else {
@@ -96,7 +96,7 @@ class Top extends AppCommand {
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Send message failed!`);
+                        bot.logger.error(`UserInterface: Failed sending message`);
                         if (e) bot.logger.error(e);
                     });
             }

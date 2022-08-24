@@ -32,7 +32,7 @@ class Illust extends AppCommand {
                 }).catch((e) => {
                     if (e) {
                         if (e.code == 40012) { // Slow-mode limit
-                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                            bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                         } else {
                             bot.logger.error(e);
                         }
@@ -55,14 +55,14 @@ class Illust extends AppCommand {
                     session.sendCardTemp(pixiv.cards.error(e, true));
                 }
             });
-            bot.logger.info(`Process ended, presenting to user`);
+            bot.logger.info(`UserInterface: Presenting card to user`);
             if (session.guild) {
                 session.updateMessage(mainCardMessageID, [pixiv.cards.illust(data, uploadResult.link)])
                     .then(() => {
                         pixiv.users.logInvoke(session, this.trigger, 1, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                        bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
                         if (e) bot.logger.error(e);
                     });
             } else {
@@ -71,7 +71,7 @@ class Illust extends AppCommand {
                         pixiv.users.logInvoke(session, this.trigger, 1, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Send message failed!`);
+                        bot.logger.error(`UserInterface: Failed sending message`);
                         if (e) bot.logger.error(e);
                     });
             }
@@ -106,14 +106,14 @@ class Illust extends AppCommand {
                     return session.reply("Pixiv官方服务器不可用，请稍后再试");
                 }
                 if (pixiv.common.isForbittedUser(res.data.user.uid)) {
-                    bot.logger.info(`Violating user blacklist: ${res.data.user.uid}, banned the user for 30 seconds`);
+                    bot.logger.info(`UserInterface: User violates tag blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.userId, this.trigger, 30);
                     return session.reply(`此插画来自用户黑名单中的用户，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                 }
                 for (const val of res.data.tags) {
                     const tag = val.name;
                     if (pixiv.common.isForbittedTag(tag)) {
-                        bot.logger.info(`Violating tag blacklist: ${tag}, banned the user for 30 seconds`);
+                        bot.logger.info(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                         pixiv.common.registerBan(session.userId, this.trigger, 30);
                         return session.reply(`此插画包含标签黑名单中的标签，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                     }

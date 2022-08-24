@@ -66,7 +66,7 @@ class Redeem extends AppCommand {
                             break;
                     }
                 }).catch((e) => {
-                    bot.logger.error("Activate key failed");
+                    bot.logger.error(`Subscription: Failed activating key ${key}`);
                     bot.logger.error(e);
                     session.sendCard([pixiv.cards.error(e, false)]);
                 })

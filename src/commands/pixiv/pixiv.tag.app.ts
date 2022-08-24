@@ -28,7 +28,7 @@ class Tag extends AppCommand {
                 }).catch((e) => {
                     if (e) {
                         if (e.code == 40012) { // Slow-mode limit
-                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                            bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                         } else {
                             bot.logger.error(e);
                         }
@@ -56,6 +56,10 @@ class Tag extends AppCommand {
                 if (datas.length >= 9) break;
             }
             const detectionResults = await pixiv.aligreen.imageDetectionSync(datas)
+            if(!detectionResults) {
+                bot.logger.error("ImageDetection: No detection result was returned");
+                return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
+            }
             for (const val of datas) {
                 if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
                 promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
@@ -80,14 +84,14 @@ class Tag extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            bot.logger.info(`Process ended, presenting to user`);
+            bot.logger.info(`UserInterface: Presenting card to user`);
             if (session.guild) {
                 session.updateMessage(mainCardMessageID, [pixiv.cards.tag(link, pid, tags, durationName, {})])
                     .then(() => {
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                        bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
                         if (e) bot.logger.error(e);
                     });
             } else {
@@ -96,7 +100,7 @@ class Tag extends AppCommand {
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Send message failed!`);
+                        bot.logger.error(`UserInterface: Failed sending message`);
                         if (e) bot.logger.error(e);
                     });
             }
@@ -134,7 +138,7 @@ class Tag extends AppCommand {
             }
             for (const tag of tags) {
                 if (pixiv.common.isForbittedTag(tag)) {
-                    bot.logger.info(`Violating tag blacklist: ${tag}, banned the user for 30 seconds`);
+                    bot.logger.info(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.userId, this.trigger, 30);
                     return session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
                 }

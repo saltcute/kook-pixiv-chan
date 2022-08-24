@@ -21,15 +21,15 @@ export namespace common {
     export async function load() {
         if (fs.existsSync(upath.join(__dirname, "ban.json"))) {
             ban = JSON.parse(fs.readFileSync(upath.join(__dirname, "ban.json"), { encoding: "utf-8", flag: "r" }));
-            bot.logger.info(`Loaded user blacklist from local`);
+            bot.logger.info(`Initialization: Loaded user blacklist from local`);
         } else {
             save();
-            bot.logger.warn(`User blacklist not found, creating new`);
+            bot.logger.warn(`Initialization: User blacklist not found, creating new`);
         }
     }
     export async function save() {
         fs.writeFileSync(upath.join(__dirname, "ban.json"), JSON.stringify(ban), { encoding: "utf-8", flag: "w" });
-        bot.logger.info(`Saved user blacklist`);
+        bot.logger.info(`AdminBan: Saved user blacklist`);
     }
     /**
      * Ban a user from using a command
@@ -38,7 +38,7 @@ export namespace common {
      * @param time Total time of the ban in seconds
      */
     export function banTrigger(id: string, trigger: string, time: number, message: string) {
-        bot.logger.debug(`Banned ${id} from ${trigger} until ${time} for ${message}`);
+        bot.logger.debug(`AdminBan: Banned ${id} from ${trigger} until ${time} for ${message}`);
         ban[id] = {
             ...ban[id],
             [trigger]: {

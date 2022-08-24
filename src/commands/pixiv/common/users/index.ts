@@ -275,12 +275,12 @@ export namespace users {
                     res.pixiv.statistics.command_requests_counter[trigger]++;
                 }
                 update(res).catch((e) => {
-                    bot.logger.warn("Bad request when updating profile");
+                    bot.logger.warn("UserProfile: Bad request when updating profile");
                     bot.logger.warn(e);
                 });
             }
         }).catch((e) => {
-            bot.logger.warn("Bad request when getting profile");
+            bot.logger.warn("UserProfile: Bad request when fetching profile");
             bot.logger.warn(e);
         })
     }

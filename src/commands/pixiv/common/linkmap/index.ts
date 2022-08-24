@@ -34,11 +34,12 @@ export namespace linkmap {
                 method: "GET"
             }).then((res) => {
                 linkmap.map = res.data;
-                bot.logger.info("Downloaded linkmap from remote");
-            }).catch((e) => {
-                bot.logger.warn("Linkmap download failed, loading local");
+                bot.logger.info("Initialization: Downloaded linkmap from remote");
+            }).catch(async (e) => {
+                bot.logger.warn("Initialization: Failed downloading linkmap.");
                 bot.logger.warn(e);
-                load();
+                await load();
+                bot.logger.warn("Initialization: Loaded local linkmap");
             })
         }
     }
@@ -56,10 +57,10 @@ export namespace linkmap {
                 data: diff,
                 maxContentLength: Infinity
             }).then(() => {
-                bot.logger.info("Linkmap uploaded");
+                bot.logger.info("Linkmap: Successfuly uploaded linkmap");
                 diff = {};
             }).catch((e) => {
-                bot.logger.warn("Linkmap upload failed");
+                bot.logger.warn("Linkmap: Failed uploading linkmap");
                 if (e) {
                     bot.logger.warn(e.message);
                 }
@@ -79,10 +80,10 @@ export namespace linkmap {
     export async function load() {
         if (fs.existsSync(upath.join(__dirname, "map.json"))) {
             map = JSON.parse(fs.readFileSync(upath.join(__dirname, "map.json"), { encoding: "utf-8", flag: "r" }));
-            bot.logger.info(`Loaded linkmap from local`);
+            bot.logger.info(`Initialization: Loaded local linkmap`);
         } else {
             save();
-            bot.logger.warn(`Linkmap not found, creating new`);
+            bot.logger.warn(`Initialization: Linkmap not found, creating new`);
         }
     }
 
@@ -148,11 +149,11 @@ export namespace linkmap {
     export function save() {
         fs.writeFile(upath.join(__dirname, "map.json"), JSON.stringify(map), (e) => {
             if (e) {
-                bot.logger.warn(`Saving linkmap failed, error message: `);
+                bot.logger.warn(`Linkmap: Failed saving linkmap`);
                 bot.logger.warn(e);
             }
             else {
-                bot.logger.info(`Saved linkmap`);
+                bot.logger.info(`Linkmap: Successfully saved linkmap`);
             }
         });
     }

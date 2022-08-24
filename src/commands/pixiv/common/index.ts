@@ -94,7 +94,7 @@ export namespace common {
      * Check every asset token and mark active ones
      */
     export async function tokenPoolInit() {
-        bot.logger.info("Checking uploader availibility");
+        bot.logger.info("Initialization: Checking uploader availibility");
         await bot.API.message.create(9, config.uploaderOnlineMessageDestination, "----------------------Uploader Check Started---------------------");
         var promises: Promise<any>[] = [];
         for (const idx in auth.assetUploadTokens) {
@@ -114,23 +114,23 @@ export namespace common {
                 }).then((res) => {
                     if (res.data.code == 0) {
                         auth.assetUploadTokens[idx].active = true;
-                        bot.logger.info(`Uploader #${parseInt(idx) + 1} is going online`)
+                        bot.logger.info(`Initialization: Uploader #${parseInt(idx) + 1} online`)
                     } else {
                         auth.assetUploadTokens[idx].active = false;
-                        bot.logger.warn(`Uploader #${parseInt(idx) + 1} unavailable, message: ${res.data.message}`);
+                        bot.logger.warn(`Initialization: Uploader #${parseInt(idx) + 1} is unavailable, message: ${res.data.message}`);
                     }
                 }).catch((e) => {
                     auth.assetUploadTokens[idx].active = false;
-                    bot.logger.warn(`Uploader #${parseInt(idx) + 1} unavailable, message: ${e.message}`);
+                    bot.logger.warn(`Initialization: Uploader #${parseInt(idx) + 1} unavailable, message: ${e.message}`);
                 })
             );
         }
         await Promise.all(promises).then(async () => {
             await getNextToken();
             await bot.API.message.create(9, config.uploaderOnlineMessageDestination, "---------------------Uploader Check Finished---------------------");
-            bot.logger.info("Uploader check passed");
+            bot.logger.info("Initialization: Uploader check passed");
         }).catch((e) => {
-            bot.logger.fatal("Checking uploader availibility failed. Error message:");
+            bot.logger.fatal("Initialization: Checking uploader availibility failed. Error message:");
             bot.logger.fatal(e);
             process.exit();
         })
@@ -153,9 +153,9 @@ export namespace common {
         if (await cycleThroughTokens()) {
             await bot.API.message.create(9, config.uploaderOnlineMessageDestination, `${config.adminList.map(str => `(met)${str}(met)`).join(" ")} FATAL: NO UPLOADER AVAILABLE. PIXIV CHAN IS GOING OFFLINE IMMEDIATELY`)
                 .catch(() => {
-                    bot.logger.error("Cannot send offline notifications to admins. The application is still going down.");
+                    bot.logger.error("Initialization: Cannot send offline notifications to admins. The application is going down anyways.");
                 });
-            bot.logger.fatal("NO UPLOADER AVAILABLE. PIXIV CHAN IS GOING OFFLINE IMMEDIATELY");
+            bot.logger.fatal("Initialization: NO UPLOADER AVAILABLE. PIXIV CHAN IS GOING OFFLINE IMMEDIATELY");
             process.exit();
         }
         return auth.assetUploadTokens[currentIndex].token;
@@ -174,11 +174,11 @@ export namespace common {
                 ...bodyFormData.getHeaders()
             }
         }).then((res: any) => {
-            bot.logger.info(`Upload ${val.id} success`);
+            bot.logger.info(`ImageProcessing: Upload ${val.id} success`);
             rtLink = res.data.data.url
         }).catch(async () => {
-            bot.logger.error(`Upload ${val.id} failed, forcing token offline`);
-            bot.logger.info(`Retrying with another token`);
+            bot.logger.error(`ImageProcessing: Upload ${val.id} failed, forcing token offline`);
+            bot.logger.info(`ImageProcessing: Retrying with another token`);
             deactiveCurrentToken();
             if (await cycleThroughTokens()) {
                 await session.replyCard(new Card()
@@ -195,12 +195,12 @@ export namespace common {
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
         if (linkmap.isInDatabase(val.id, "0")) {
-            bot.logger.info(`${val.id} in database, skipped`);
+            bot.logger.info(`ImageDetection: ${val.id} in database, skipped`);
             return { link: linkmap.getLink(val.id, "0"), pid: val.id };
         }
 
         const master1200 = common.getProxiedImageLink(val.image_urls.large.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
-        bot.logger.info(`Downloading ${master1200}`);
+        bot.logger.info(`ImageProcessing: Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
         var buffer = await sharp(await stream2buffer(stream)).resize(config.resizeWidth, config.resizeHeight, { fit: "outside" }).jpeg().toBuffer(); // Resize stream and convert to buffer
@@ -208,14 +208,14 @@ export namespace common {
         if (detectionResult.success) {
             blur = detectionResult.blur;
             if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
-            bot.logger.info(`Finished blurring ${val.id} with ${blur}px of gaussian blur, starts uploading`);
+            bot.logger.info(`ImageProcessing: Finished blurring ${val.id} with ${blur}px of gaussian blur`);
             bodyFormData.append('file', buffer, "image.jpg");
             var rtLink = await uploadFile(session, val, bodyFormData);
             //Upload image to KOOK's server
             if (detectionResult.success) linkmap.addMap(val.id, "0", rtLink, detectionResult);
             return { link: rtLink, pid: val.id };
         } else {
-            bot.logger.error("Detection failed, returned Akarin");
+            bot.logger.error("ImageDetection: Failed detecting the image. Replacing the image with Akarin");
             bot.logger.error(detectionResult);
             session.sendCardTemp([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
             return { link: akarin, pid: val.id };

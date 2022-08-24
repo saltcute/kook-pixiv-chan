@@ -15,7 +15,7 @@ import { author } from 'commands/pixiv/pixiv.author.app';
 bot.logger.fields.name = "kook-pixiv-chan";
 bot.logger.addStream({ level: bot.logger.INFO, stream: process.stdout });
 // bot.logger.addStream({ level: bot.logger.DEBUG, stream: process.stdout }); // DEBUG
-bot.logger.info("kook-pixiv-chan initialization start");
+bot.logger.info("Initialization: kook-pixiv-chan initialization start");
 
 (async () => {
     /**
@@ -56,9 +56,6 @@ if (config.enableBotMarket) {
     botMarketStayOnline();
 }
 
-bot.messageSource.on('message', (e) => {
-    bot.logger.debug(`received:`, e);
-});
 bot.addCommands(pixivMenu);
 bot.addCommands(pixivAdminMenu);
 
@@ -82,7 +79,6 @@ bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
 bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
 bot.connect();
-bot.logger.debug('system init success');
 
 function botMarketStayOnline() {
     axios({
@@ -93,17 +89,19 @@ function botMarketStayOnline() {
         }
     }).then((res) => {
         if (res.data.code == 0) {
-            bot.logger.info(`Bot Market online status updating success, remote returning: `);
+            bot.logger.info(`BotMarket: Successfully updated online status with remote returning: `);
             bot.logger.info(res.data);
             setTimeout(botMarketStayOnline, (res.data.data.onTime + 5) * 1000);
         } else if (res.data.code == -1) {
-            bot.logger.warn(`Bot Market online status updating failed. Retring in 30 minutes. Error message: `);
+            bot.logger.warn(`BotMarket: Failed updating online status with remote returning: `);
             bot.logger.warn(res.data);
+            bot.logger.warn(`BotMarket: Retries in 30 minutes`);
             setTimeout(botMarketStayOnline, 30 * 60 * 1000);
         }
     }).catch((e) => {
-        bot.logger.warn(`Bot Market heartbeat request failed. Retring in 30 minutes. Error message: `);
-        bot.logger.warn(e);
+        bot.logger.warn(`BotMarket: Failed updating online status with remote returning: `);
+        bot.logger.warn(e.message);
+        bot.logger.warn(`BotMarket: Retries in 30 minutes`);
         setTimeout(botMarketStayOnline, 30 * 60 * 1000);
     })
 }

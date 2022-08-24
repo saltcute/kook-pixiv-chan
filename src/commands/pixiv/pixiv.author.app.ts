@@ -28,7 +28,7 @@ class Author extends AppCommand {
                 }).catch((e) => {
                     if (e) {
                         if (e.code == 40012) { // Slow-mode limit
-                            bot.logger.warn("Limited by slow-mode, no operation was done");
+                            bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                         } else {
                             bot.logger.error(e);
                         }
@@ -81,14 +81,14 @@ class Author extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            bot.logger.info(`Process ended, presenting to user`);
+            bot.logger.info(`UserInterface: Presenting card to user`);
             if (session.guild) {
                 await session.updateMessage(mainCardMessageID, [pixiv.cards.author(data[0], r18, link, pid, session, {})])
                     .then(() => {
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Update message ${mainCardMessageID} failed!`);
+                        bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
                         if (e) bot.logger.error(e);
                     });
             } else {
@@ -97,7 +97,7 @@ class Author extends AppCommand {
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {
-                        bot.logger.error(`Send message failed!`);
+                        bot.logger.error(`UserInterface: Failed sending message`);
                         if (e) bot.logger.error(e);
                     });
             }
@@ -106,7 +106,7 @@ class Author extends AppCommand {
             return session.reply("使用 `.pixiv help author` 查询指令详细用法")
         } else {
             if (pixiv.common.isForbittedUser(session.args[0])) {
-                bot.logger.info(`Violating user blacklist: ${session.args[0]}, banned the user for 30 seconds`);
+                bot.logger.info(`UserInterface: User violates user blacklist: ${session.args[0]}. Banned the user for 30 seconds`);
                 pixiv.common.registerBan(session.userId, this.trigger, 30);
                 return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
             }
