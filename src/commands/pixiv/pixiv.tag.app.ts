@@ -55,7 +55,11 @@ class Tag extends AppCommand {
                 datas.push(data[k]);
                 if (datas.length >= 9) break;
             }
-            const detectionResults = await pixiv.aligreen.imageDetectionSync(datas)
+            const detectionResults = await pixiv.aligreen.imageDetectionSync(datas);
+            if(!detectionResults) {
+                bot.logger.error("ImageDetection: No detection result was returned");
+                return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
+            }
             if(!detectionResults) {
                 bot.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
