@@ -1,7 +1,6 @@
 export * from './cards';
 export * from './users';
 export * from './keygen';
-export * from './nsfwjs';
 export * from './linkmap';
 export * from './aligreen';
 import axios from 'axios';
@@ -16,6 +15,7 @@ import userBanList from './userBanList';
 import { BaseSession, Card } from 'kbotify';
 import FormData, { Stream } from 'form-data';
 import * as pixivadmin from '../admin/common';
+import { link } from 'fs';
 const sharp = require('sharp');
 
 export namespace type {
@@ -79,6 +79,17 @@ export namespace common {
         } else {
             return false;
         }
+    }
+
+    export async function getIllustDetail(illustID: string) {
+        return axios({
+            baseURL: config.pixivAPIBaseURL,
+            url: "/illustration/detail",
+            method: "GET",
+            params: {
+                keyword: illustID
+            }
+        })
     }
 
     export async function stream2buffer(stream: Stream): Promise<Buffer> {

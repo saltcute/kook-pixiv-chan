@@ -32,13 +32,6 @@ schedule.scheduleJob('15 * * * *', async () => {
 })
 
 /**
- * NSFW.js initialization
- */
-if (config.useAliyunGreen === false) {
-    pixiv.nsfwjs.init();
-}
-
-/**
  * Aliyun green initilization
  */
 if (config.useAliyunGreen) {
@@ -77,6 +70,35 @@ bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P
  */
 bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
 bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
+
+
+bot.on("buttonClick", (event) => {
+    const identifier = event.value.split("|")[0];
+    if (identifier == "view_detail") {
+        const idx = parseInt(event.value.split("|")[1]);
+        const illust = JSON.parse(event.value.split("|")[2]);
+        const crt_illust = illust[idx];
+        pixiv.common.getIllustDetail(crt_illust).then((res) => {
+            bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, pixiv.linkmap.getLink(crt_illust, "0"), idx, illust).toString(), undefined, event.userId);
+        })
+    } else if (identifier == "view_return") {
+        axios({
+            baseURL: "https://www.kookapp.cn/api/v3/",
+            url: "message/view",
+            method: "get",
+            params: {
+                msg_id: event.targetMsgId
+            },
+            headers: {
+                'Authorization': `Bot ${auth.khltoken}`
+            }
+        }).then((res) => {
+            const val = res.data;
+            bot.API.message.update(event.targetMsgId, val.data.content, undefined, event.userId);
+        })
+    }
+})
+
 
 bot.connect();
 

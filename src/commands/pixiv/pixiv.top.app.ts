@@ -56,7 +56,7 @@ class Top extends AppCommand {
                 if (datas.length >= 9) break;
             }
             const detectionResults = await pixiv.aligreen.imageDetectionSync(datas);
-            if(!detectionResults) {
+            if (!detectionResults) {
                 bot.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
@@ -87,8 +87,8 @@ class Top extends AppCommand {
             bot.logger.info(`UserInterface: Presenting card to user`);
             if (session.guild) {
                 session.updateMessage(mainCardMessageID, [pixiv.cards.top(link, pid, durationName, {})])
-                    .then(() => {
-                        pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                    .then(async () => {
+                        pixiv.users.logInvoke(session, this.trigger, datas.length, detection);
                     })
                     .catch((e) => {
                         bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
@@ -96,7 +96,8 @@ class Top extends AppCommand {
                     });
             } else {
                 session.sendCard([pixiv.cards.top(link, pid, durationName, {})])
-                    .then(() => {
+                    .then((res) => {
+                        const msgID = res.msgSent?.msgId;
                         pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                     })
                     .catch((e) => {

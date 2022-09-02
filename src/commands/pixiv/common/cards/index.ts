@@ -12,6 +12,7 @@ import TagCard from './tag'
 import ChineseCommandMapping from './chineseCommandMapping'
 import ProfileCard from './profile'
 import ReachesLimit from './reachesLimit'
+import MultiDetail from './multiDetail'
 
 export namespace cards {
     export const error = ErrorCard;
@@ -28,4 +29,5 @@ export namespace cards {
     export const chineseCommandMapping = ChineseCommandMapping;
     export const profile = ProfileCard;
     export const reachesLimit = ReachesLimit;
+    export const multiDetail = MultiDetail;
 }

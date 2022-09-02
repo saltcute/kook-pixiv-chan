@@ -93,6 +93,31 @@ export default (link: string[], pid: string[], durationName: string, { resave = 
                 "type": "divider"
             },
             {
+                "type": "action-group",
+                "elements": [
+                    {
+                        "type": "button",
+                        "theme": "info",
+                        "value": `view_detail|0|${JSON.stringify(pid)}`,
+                        "click": "return-val",
+                        "text": {
+                            "type": "plain-text",
+                            "content": "查看第一张"
+                        }
+                    },
+                    {
+                        "type": "button",
+                        "theme": "info",
+                        "value": `view_detail|8|${JSON.stringify(pid)}`,
+                        "click": "return-val",
+                        "text": {
+                            "type": "plain-text",
+                            "content": "查看最后一张"
+                        }
+                    }
+                ]
+            },
+            {
                 "type": "image-group",
                 "elements": (() => {
                     var images: object[] = [];
