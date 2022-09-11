@@ -12,6 +12,7 @@ export namespace aligreen {
     export async function imageDetectionSync(datas: any[], ignoreLinkmap: boolean = false): Promise<{ [key: string]: type.detectionResult }> {
         var imageURL: { [key: string]: string } = {};
         var empty: boolean = true;
+        var linkmapResults: { [key: string]: type.detectionResult } = {};
         for (const key in datas) {
             const val = datas[key];
             if (ignoreLinkmap || !linkmap.isInDatabase(val.id, "0")) {
@@ -20,12 +21,18 @@ export namespace aligreen {
                     ...imageURL,
                     [val.id]: common.getProxiedImageLink(val.image_urls.medium)
                 }
+            } else {
+                if (linkmap.isInDatabase(val.id, "0")) {
+                    linkmapResults[val.id] = linkmap.getDetection(val.id, "0");
+                }
             }
         }
         if (empty) {
-            return {};
+            bot.logger.info("ImageDetection: No detection needed for the given illustrations");
+            return linkmapResults;
         }
-        bot.logger.info(`Aliyun image censoring started for:\n${Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", ")}`);
+        bot.logger.info(`ImageDetection: Aliyun image detection started for:`);
+        bot.logger.info(Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", "));
         function blur(v: any, block: number, censor: number, hide: number, blur: number, dodge: number) {
             switch (v.suggestion) {
                 case "block":
