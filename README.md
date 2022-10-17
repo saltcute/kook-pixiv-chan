@@ -40,7 +40,7 @@ to start using pm2
 - [x] Ability to change illustration ranklist time period.
 - [x] Aliyun image detection.
 - [x] Refresh the linkmap of a certain illustration.
-- [ ] Allow running without any censorship on own risk
+- [ ] Allow running without any censorship at own risk
 
 
 ---
@@ -50,6 +50,8 @@ to start using pm2
 Use `.pixiv` to see a list of command.
 
 Use `.pixiv help <command>` to get detailed help for using the command.
+
+使用 `.pixiv help 中文命令` 查询部分指令的中文别名
 
 Please join our [official KOOK server](https://kook.top/iOOsLu) and try it out!
 
