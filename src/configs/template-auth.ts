@@ -1,26 +1,58 @@
 export default {
-    // Kbotify
+    /**
+     * kbotify setup
+     * 
+     * Refer to kbotify document for WebHook settings
+     */
     khlport: 6000,
-    khlkey: 'encrypt key here',
-    khltoken: 'token here',                     // Set the mode to WebSocket and fill in your token here
-    khlverify: 'verify token here',
+    khlkey: 'Nothing is required here',
+    khltoken: 'Put yor token here',
+    khlverify: 'Nothing is required here',
+
+    /**
+     * Array of tokens of asset uploader for load balancing and load shifting
+     * 
+     * Put the token of your main bot here if you do not wish to use a separate one
+     * 
+     * You will need at least one token for Pixiv Chan to function normally
+     * 
+     * At launch, all of the uploader will send a message to `uploaderOnlineMessageDestination` in `configs/config.ts`
+     * 
+     * to test the availability of each uploader
+     * k
+     * Pixiv Chan will tag every administrator (defined by `adminList` in `configs/config.ts`) in uploaderOnlineMessageDestination and automately terminate if no token is available
+     */
     assetUploadTokens: [
         {
             active: false,
-            token: 'token here',                // You need at least one uploader token, this can be the same as khltoken
+            token: 'Your assets uploading token here',
         }
-    ],                                          // Use multiple token if need
+    ],
     /**
-     * Bot Market
+     * UUID of Bot Market bot
+     * 
+     * If you don't know what it is, leave it as default.
+     * 
+     * This should not affects normal use.
      */
-    botMarketUUID: 'your bot market UUID',      // Set your Bot Market UUID if needed (no you don't)
+    botMarketUUID: 'Your bot market UUID here',
+
     /**
-     * Aliyun (NSFW detection on cloud)
+     * Aliyun Green (NSFW detection on cloud)
+     * 
+     * This is mandatory **for now**
+     * 
+     * TODO: allows no censorship runing at own risk
      */
     aliyunAccessKeyID: "Aliyun access key ID here",
     aliyunAccessKeySecret: "Aliyun access key secert here",
-    /** 
-     * Linkmap
+
+    /**
+     * If `maintainingRemoteLinkmap` in `configs/config.ts` is set to true, Pixiv Chan will update remote linkmap every 30 minutes
+     * 
+     * Which requires setting a UUID and token on your web API and here
+     * 
+     * Check https://github.com/Hexona69/pixiv-web-api
      */
     remoteLinkmapUUID: "",
     remoteLinkmapToken: "",

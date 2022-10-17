@@ -5,7 +5,7 @@ import * as pixiv from 'commands/pixiv/common'
 import * as pixivadmin from 'commands/pixiv/admin/common'
 import axios from 'axios';
 import auth from 'configs/auth';
-import config from './configs/config';
+import config from 'configs/config';
 import schedule from 'node-schedule';
 import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
@@ -34,12 +34,10 @@ schedule.scheduleJob('15 * * * *', async () => {
 /**
  * Aliyun green initilization
  */
-if (config.useAliyunGreen) {
-    if (config.useAliyunChina) {
-        pixiv.aligreen.setServerRegion("Shenzhen");
-    } else {
-        pixiv.aligreen.setServerRegion("Singapore");
-    }
+if (config.useAliyunChina) {
+    pixiv.aligreen.setServerRegion("Shenzhen");
+} else {
+    pixiv.aligreen.setServerRegion("Singapore");
 }
 
 /**
