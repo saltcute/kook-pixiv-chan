@@ -71,29 +71,57 @@ bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
 
 bot.on("buttonClick", (event) => {
-    const identifier = event.value.split("|")[0];
-    if (identifier == "view_detail") {
-        const idx = parseInt(event.value.split("|")[1]);
-        const illust = JSON.parse(event.value.split("|")[2]);
-        const crt_illust = illust[idx];
-        pixiv.common.getIllustDetail(crt_illust).then((res) => {
-            bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, pixiv.linkmap.getLink(crt_illust, "0"), idx, illust).toString(), undefined, event.userId);
-        })
-    } else if (identifier == "view_return") {
-        axios({
-            baseURL: "https://www.kookapp.cn/api/v3/",
-            url: "message/view",
-            method: "get",
-            params: {
-                msg_id: event.targetMsgId
-            },
-            headers: {
-                'Authorization': `Bot ${auth.khltoken}`
-            }
-        }).then((res) => {
-            const val = res.data;
-            bot.API.message.update(event.targetMsgId, val.data.content, undefined, event.userId);
-        })
+    console.log(event.value);
+    try {
+        const buttonValue = JSON.parse(event.value);
+        bot.logger.info(buttonValue);
+        switch (buttonValue.action) {
+            // TODO: convert legacy event
+            case "portal.view.detail":
+                break;
+            case "portal.view.return_from_detail":
+                break;
+
+            /**
+             * Main menu of GUI
+             */
+            case "GUI.view.command_list":
+                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command_list().toString(), undefined, event.userId);
+                break;
+            case "GUI.view.credit":
+                break;
+            case "GUI.view.profile":
+                break;
+            case "GUI.view.settings":
+                break;
+            default:
+                bot.logger.warn(`ButtonEvent: Unrecognized action: ${buttonValue.action}`);
+        }
+    } catch { // Compatibility
+        const identifier = event.value.split("|")[0];
+        if (identifier == "view_detail") {
+            const idx = parseInt(event.value.split("|")[1]);
+            const illust = JSON.parse(event.value.split("|")[2]);
+            const crt_illust = illust[idx];
+            pixiv.common.getIllustDetail(crt_illust).then((res) => {
+                bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, pixiv.linkmap.getLink(crt_illust, "0"), idx, illust).toString(), undefined, event.userId);
+            })
+        } else if (identifier == "view_return") {
+            axios({
+                baseURL: "https://www.kookapp.cn/api/v3/",
+                url: "message/view",
+                method: "get",
+                params: {
+                    msg_id: event.targetMsgId
+                },
+                headers: {
+                    'Authorization': `Bot ${auth.khltoken}`
+                }
+            }).then((res) => {
+                const val = res.data;
+                bot.API.message.update(event.targetMsgId, val.data.content, undefined, event.userId);
+            })
+        }
     }
 })
 

@@ -14,7 +14,14 @@ import ProfileCard from './profile'
 import ReachesLimit from './reachesLimit'
 import MultiDetail from './multiDetail'
 
+import GUIMain from './GUI/main'
+import GUICMDLST from './GUI/command_list'
+
 export namespace cards {
+    export namespace GUI {
+        export const main = GUIMain;
+        export const command_list = GUICMDLST;
+    }
     export const error = ErrorCard;
     export const nsfw = NSFWCard;
     export const top = TopCard;
