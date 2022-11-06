@@ -160,15 +160,14 @@ async function getRandomStatus(): Promise<[string, string]> {
         switch (crypto.randomInt(6)) {
             case 0:
                 const serverCount = (await bot.API.guild.list()).meta.total;
-                return ["ヘキソナ", `来自 ${serverCount} 个服务器的涩图要求`];
+                return ["ヘキソナ", `${serverCount} 个服务器的涩图要求`];
             case 1:
                 return ["John Denver", "Take Me Home, Country Roads"];
             case 2:
                 const diff = luxon.DateTime.fromISO("2022-07-07T04:00").diffNow(['days', "hours", "minutes"]).toObject();
                 const day = diff.days ? Math.abs(diff.days) : -1;
                 const hour = diff.hours ? Math.abs(diff.hours) : -1;
-                const minute = diff.minutes ? Math.abs(diff.minutes) : -1;
-                return ["Pixiv酱", `已不稳定运行 ${day} 天 ${hour} 小时 ${minute} 分钟`];
+                return ["Pixiv酱", `已不稳定运行 ${day} 天 ${hour} 小时`];
             case 3:
                 const pak = JSON.parse(fs.readFileSync("package.json", { encoding: "utf-8", flag: "r" }));
                 return ["正在运行", `Pixiv酱 v${pak.version}`];
