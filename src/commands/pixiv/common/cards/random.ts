@@ -10,15 +10,6 @@ export default (link: string[], pid: string[], { resave = false, nsfw = false, i
             "elements": [
                 {
                     "type": "kmarkdown",
-                    "content": "图片若出现模糊属于正常现象"
-                }
-            ]
-        })
-        .addModule({
-            "type": "context",
-            "elements": [
-                {
-                    "type": "kmarkdown",
                     "content": "为满足审核要求，图片若出现模糊属于正常现象"
                 }
             ]
