@@ -4,7 +4,7 @@ import config from 'configs/config';
 import fs, { link } from 'fs';
 import { bot } from 'init/client';
 import upath from 'upath';
-import { type } from '..';
+import { common, type } from '..';
 
 export namespace linkmap {
     export var map: {
@@ -101,7 +101,7 @@ export namespace linkmap {
         if (isInDatabase(illustID, page)) {
             return map[illustID][page].kookLink;
         } else {
-            return "";
+            return common.akarin;
         }
     }
 
