@@ -31,6 +31,16 @@ class PixivMenu extends MenuCommand {
         })
         .addText("**请输入 `.pixiv help` 查询详细指令用法与使用示例**")
         .addDivider()
+        .addText("```plain\n.pixiv gui```\n 使用交互式图形界面")
+        .addModule({
+            "type": "context",
+            "elements": [
+                {
+                    "type": "plain-text",
+                    "content": "WIP 尚未完工"
+                }
+            ]
+        })
         .addText("```plain\n.pixiv tag [{day|week|month}] <tag>...```\n 获取所给标签人气前九的图片")
         .addText("```plain\n.pixiv random```\n 获取⑨张随机插画")
         .addText("```plain\n.pixiv top [option]```\n 获取本日/周/月等的全站最热插画")

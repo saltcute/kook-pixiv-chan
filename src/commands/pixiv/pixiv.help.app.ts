@@ -23,8 +23,6 @@ class Help extends AppCommand {
                 })
                 .addDivider()
                 .addText("查询部分指令的中文别名\n```plain\n.pixiv help 中文命令\n```\n")
-                .addDivider()
-                .addText("```plain\n.pixiv help <command>\n```\n查询指令的详细用法\n  指令列表：\n```plain\n.pixiv help top\n```\n```plain\n.pixiv help tag\n```\n```plain\n.pixiv help author\n```\n```plain\n.pixiv help detail\n```\n```plain\n.pixiv help illust\n```\n```plain\n.pixiv help refresh\n```\n```plain\n.pixiv help random\n```\n```plain\n.pixiv help credit\n```\n```plain\n.pixiv help redeem\n```\n```plain\n.pixiv help profile\n```\n")
             );
         } else {
             switch (session.args[0]) {
@@ -128,6 +126,31 @@ class Help extends AppCommand {
                         .addTitle(".pixiv redeem")
                         .addDivider()
                         .addText("```\n.pixiv redeem <code>\n```\n兑换激活码\n例：\n    发送`.pixiv redeem KFCCR-AZYTH-URSDA-YOVME-FIFTY`，兑换激活码`KFCCR-AZYTH-URSDA-YOVME-FIFTY`")
+                    );
+                case "help":
+                    return session.sendCardTemp(new Card()
+                        .setTheme("warning")
+                        .setSize("lg")
+                        .addTitle(".pixiv help")
+                        .addDivider()
+                        .addText("```\n.pixiv help <command>\n```\n你陷入了无尽的循环…")
+                    );
+                case "gui":
+                    return session.sendCardTemp(new Card()
+                        .setTheme("warning")
+                        .setSize("lg")
+                        .addTitle(".pixiv gui")
+                        .addDivider()
+                        .addText("```\n.pixiv gui\n```\n使用交互式图形界面\n例：\n    发送`.pixiv gui`，使用交互式图形界面")
+                        .addModule({
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "plain-text",
+                                    "content": "WIP 尚未完工"
+                                }
+                            ]
+                        })
                     );
                 default:
                     return session.replyTemp("没有这个指令！输入 `.pixiv` 查看指令列表。");
