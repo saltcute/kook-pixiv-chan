@@ -27,6 +27,7 @@
   "dependencies": {
     "@alicloud/imageaudit-2019-12-30": "^2.0.0",
     "@alicloud/pop-core": "^1.7.12",
+    "@types/luxon": "^3.1.0",
     "@types/node-schedule": "^2.1.0",
     "@types/sharp": "^0.30.4",
     "@types/uuid": "^8.3.4",
@@ -38,6 +39,7 @@
     "fs": "^0.0.1-security",
     "got": "^11.8.3",
     "kbotify": "^0.2.5",
+    "luxon": "^3.1.0",
     "node-schedule": "^2.1.0",
     "prettier": "^2.7.1",
     "sharp": "^0.30.7",

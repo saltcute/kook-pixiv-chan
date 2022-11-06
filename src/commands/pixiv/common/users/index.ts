@@ -12,7 +12,7 @@ export namespace users {
     export const afdianTierLink: {
         [tier in tiers | "Quantum"]: string
     } = {
-        Standard: "https://afdian.net/@potatopotat0",
+        Standard: "https://afdian.net/@hexona",
         Backer: "https://afdian.net/item?plan_id=780c3b901f3d11edb51352540025c377",
         Supporter: "https://afdian.net/item?plan_id=dc5e4c9c1ff511edaf6052540025c377",
         Sponser: "https://afdian.net/item?plan_id=27e624fa1ff611eda80a52540025c377",
@@ -28,12 +28,7 @@ export namespace users {
     }
     export interface user {
         kookid: string,
-        kook: {
-            id: string,
-            username: string,
-            identifyNum: string,
-            avatarLink: string,
-        },
+        kook: userMeta,
         pixiv: {
             tier: tiers,
             expire: number,
@@ -235,6 +230,8 @@ export namespace users {
         }).then((res) => {
             if (res.data.code == 0) {
                 var user: users.user = res.data.data;
+                user.kook = userMeta;
+                update(user);
                 return user;
             } else {
                 throw res;

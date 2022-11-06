@@ -4,64 +4,24 @@ import fs from 'fs';
 const pak = JSON.parse(fs.readFileSync("package.json", { encoding: "utf-8", flag: "r" }));
 
 export default () => {
-    return new Card({
-        "type": "card",
-        "theme": "info",
-        "size": "lg",
-        "modules": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "您可以在[爱发电](https://afdian.net/@potatopotat0)支持 Pixiv酱的开发与运营！\nYou can help me to continue developing Pixiv Chan on [Patreon](https://www.patreon.com/potatopotat0)!"
-                }
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "header",
-                "text": {
+    return new Card()
+        .setSize("lg")
+        .setTheme("info")
+        .addText("您可以在[爱发电](https://afdian.net/@hexona)支持 Pixiv酱的开发与运营！")
+        .addDivider()
+        .addTitle("特别感谢")
+        .addText("[fi6](https://github.com/fi6) - [kBotify](https://github.com/fi6/kBotify) & [shugen002](https://github.com/shugen002) - [BotRoot](https://github.com/shugen002/BotRoot)\n[Microsoft](https://github.com/microsoft) - [Visual Studio Code](https://github.com/microsoft/vscode) 与 [Typescript](https://github.com/microsoft/TypeScript)")
+        .addDivider()
+        .addTitle("赞助者")
+        .addText("暂时还没有呢")
+        .addDivider()
+        .addModule({
+            "type": "context",
+            "elements": [
+                {
                     "type": "plain-text",
-                    "content": "特别感谢"
+                    "content": `${pak.name} v${pak.version}\nCopyright © 2022 potatopotat0. All rights reserved.`
                 }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "[potatopotat0](https://lolicon.ac.cn/) - [kook-pixiv-chan](https://github.com/potatopotat0/kook-pixiv-chan) 与 [pix-node](https://github.com/potatopotat0/pix-node)\n[fi6](https://github.com/fi6) - [kBotify](https://github.com/fi6/kBotify) & [shugen002](https://github.com/shugen002) - [BotRoot](https://github.com/shugen002/BotRoot)\n[Microsoft](https://github.com/microsoft) - [Visual Studio Code](https://github.com/microsoft/vscode) 与 [Typescript](https://github.com/microsoft/TypeScript)"
-                }
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain-text",
-                    "content": "赞助者"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "目前还没有呢"
-                }
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "plain-text",
-                        "content": `${pak.name} v${pak.version}\nCopyright © 2022 potatopotat0. All rights reserved.`
-                    }
-                ]
-            }
-        ]
-    })
+            ]
+        });
 }

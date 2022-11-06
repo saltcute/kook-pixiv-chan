@@ -1,10 +1,10 @@
-import { Card } from "kbotify"
+import { Card } from "kbotify";
 
 export default () => {
     return new Card()
         .setTheme("info")
         .setSize("lg")
-        .addTitle("Pixiv酱 主菜单")
+        .addTitle("Pixiv酱 命令列表")
         .addDivider()
         .addModule({
             "type": "action-group",
@@ -12,41 +12,41 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.view.command_list\",\"data\": {}}",
+                    "value": "{\"action\": \"GUI.view.command.top\",\"data\": {}}",
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
-                        "content": "命令菜单"
+                        "content": "top"
                     }
                 },
                 {
                     "type": "button",
                     "theme": "primary",
-                    "value": "{\"action\": \"GUI.view.credits\",\"data\": {}}",
+                    "value": "{\"action\": \"GUI.view.command.tag\",\"data\": {}}",
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
-                        "content": "感谢名单"
+                        "content": "tag"
                     }
                 },
                 {
                     "type": "button",
                     "theme": "primary",
-                    "value": "{\"action\": \"GUI.view.profile\",\"data\": {}}",
+                    "value": "{\"action\": \"GUI.view.command.randomprofile\",\"data\": {}}",
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
-                        "content": "个人资料"
+                        "content": "random"
                     }
                 },
                 {
                     "type": "button",
                     "theme": "warning",
-                    "value": "{\"action\": \"GUI.view.settings\",\"data\": {}}",
+                    "value": "{\"action\": \"GUI.view.main\",\"data\": {}}",
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
-                        "content": "设置"
+                        "content": "返回"
                     }
                 }
             ]

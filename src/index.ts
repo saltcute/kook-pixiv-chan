@@ -6,6 +6,9 @@ import * as pixivadmin from 'commands/pixiv/admin/common'
 import axios from 'axios';
 import auth from 'configs/auth';
 import config from 'configs/config';
+import fs from 'fs';
+import crypto from 'crypto';
+import * as luxon from 'luxon'
 import schedule from 'node-schedule';
 import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
@@ -24,11 +27,15 @@ bot.logger.info("Initialization: kook-pixiv-chan initialization start");
     await pixiv.linkmap.init();
     await pixiv.common.tokenPoolInit();
     await pixivadmin.common.load();
+    await botActivityStatus();
 })()
-schedule.scheduleJob('15 * * * *', async () => {
+schedule.scheduleJob('0,15,30,45 * * * *', async () => {
     pixiv.linkmap.save();
     pixivadmin.common.save();
     await pixiv.linkmap.upload();
+})
+schedule.scheduleJob('0,10,20,30,40,50 * * * *', async () => {
+    botActivityStatus();
 })
 
 /**
@@ -71,10 +78,8 @@ bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
 
 bot.on("buttonClick", (event) => {
-    console.log(event.value);
     try {
         const buttonValue = JSON.parse(event.value);
-        bot.logger.info(buttonValue);
         switch (buttonValue.action) {
             // TODO: convert legacy event
             case "portal.view.detail":
@@ -85,12 +90,34 @@ bot.on("buttonClick", (event) => {
             /**
              * Main menu of GUI
              */
-            case "GUI.view.command_list":
-                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command_list().toString(), undefined, event.userId);
+            case "GUI.view.main":
+                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.main().toString(), undefined, event.userId);
                 break;
-            case "GUI.view.credit":
+            case "GUI.view.command_list":
+                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.list().toString(), undefined, event.userId);
+                break;
+            case "GUI.view.credits":
+                bot.API.message.update(event.targetMsgId, pixiv.cards.credit()
+                    .addModule(pixiv.cards.GUI.returnButton("GUI.view.main"))
+                    .toString(),
+                    undefined, event.userId);
+                // bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.credit().toString(), undefined, event.userId);
                 break;
             case "GUI.view.profile":
+                pixiv.users.detail({
+                    id: event.user.id,
+                    identifyNum: event.user.identifyNum,
+                    username: event.user.username,
+                    avatar: event.user.avatar
+                }).then((res) => {
+                    bot.API.message.update(event.targetMsgId, pixiv.cards.profile(res)
+                        .addModule(pixiv.cards.GUI.returnButton("GUI.view.main"))
+                        .toString(),
+                        undefined, event.userId);
+                }).catch((e) => {
+                    bot.logger.warn(e);
+                    bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
+                });
                 break;
             case "GUI.view.settings":
                 break;
@@ -127,6 +154,55 @@ bot.on("buttonClick", (event) => {
 
 
 bot.connect();
+
+async function getRandomStatus(): Promise<[string, string]> {
+    try {
+        switch (crypto.randomInt(6)) {
+            case 0:
+                const serverCount = (await bot.API.guild.list()).meta.total;
+                return ["ヘキソナ", `来自 ${serverCount} 个服务器的涩图要求`];
+            case 1:
+                return ["John Denver", "Take Me Home, Country Roads"];
+            case 2:
+                const diff = luxon.DateTime.fromISO("2022-07-07T04:00").diffNow(['days', "hours", "minutes"]).toObject();
+                const day = diff.days ? Math.abs(diff.days) : -1;
+                const hour = diff.hours ? Math.abs(diff.hours) : -1;
+                const minute = diff.minutes ? Math.abs(diff.minutes) : -1;
+                return ["Pixiv酱", `已不稳定运行 ${day} 天 ${hour} 小时 ${minute} 分钟`];
+            case 3:
+                const pak = JSON.parse(fs.readFileSync("package.json", { encoding: "utf-8", flag: "r" }));
+                return ["正在运行", `Pixiv酱 v${pak.version}`];
+            case 4:
+                return ["官方服务器", "https://kook.top/iOOsLu"];
+            case 5:
+                return ["行行好吧", "https://afdian.net/@hexona"];
+            default:
+                return ["ヘキソナ", "获取状态错误"];
+        }
+    } catch (e) {
+        bot.logger.warn(e);
+        return ["ヘキソナ", "获取状态错误"];
+    }
+}
+
+async function botActivityStatus() {
+    try {
+        const [singer, music_name] = await getRandomStatus();
+        bot.axios({
+            url: "https://www.kookapp.cn/api/v3/game/activity",
+            method: "POST",
+            data: {
+                singer: singer,
+                music_name: music_name,
+                data_type: 2
+            }
+        }).catch((e) => {
+            bot.logger.warn(e);
+        })
+    } catch (e) {
+        bot.logger.warn(e);
+    }
+}
 
 function botMarketStayOnline() {
     axios({

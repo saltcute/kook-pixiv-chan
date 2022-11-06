@@ -16,104 +16,38 @@ class PixivMenu extends MenuCommand {
     trigger = 'pixiv';
 
     intro = 'Pixiv';
-    menu = new Card({
-        "type": "card",
-        "theme": "warning",
-        "size": "lg",
-        "modules": [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain-text",
-                    "content": "Pixiv酱命令列表"
-                }
-            },
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "kmarkdown",
-                        "content": "所有命令皆不需要括号（<>, (), [], {}）"
-                    }
-                ]
-            },
-            {
-                "type": "section",
-                "text": {
+    menu = new Card()
+        .setTheme("warning")
+        .setSize("lg")
+        .addTitle("Pixiv酱命令列表")
+        .addModule({
+            "type": "context",
+            "elements": [
+                {
                     "type": "kmarkdown",
-                    "content": "**请输入 `.pixiv help` 查询详细指令用法与使用示例**"
+                    "content": "所有命令皆不需要括号（<>, (), [], {}）"
                 }
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "section",
-                "text": {
+            ]
+        })
+        .addText("**请输入 `.pixiv help` 查询详细指令用法与使用示例**")
+        .addDivider()
+        .addText("```plain\n.pixiv tag [{day|week|month}] <tag>...```\n 获取所给标签人气前九的图片")
+        .addText("```plain\n.pixiv random```\n 获取⑨张随机插画")
+        .addText("```plain\n.pixiv top [option]```\n 获取本日/周/月等的全站最热插画")
+        .addText("```plain\n.pixiv author <Illustration ID>```\n 获取用户的最新九张插画")
+        .addText("```plain\n.pixiv illust <Illustration ID>```\n 获取 Pixiv 上对应 ID 的插画")
+        .addText("```plain\n.pixiv detail <Illustration ID>```\n 获取对应 ID 插画的详细信息（作品名、作者、标签等）")
+        .addText("```plain\n.pixiv refresh <Illustration ID>```\n 刷新对应 ID 插画的缓存。")
+        .addText("```plain\n.pixiv credit```\n 查看赞助与感谢列表")
+        .addModule({
+            "type": "context",
+            "elements": [
+                {
                     "type": "kmarkdown",
-                    "content": "```plain\n.pixiv tag [{day|week|month}] <tag>...```\n 获取所给标签人气前九的图片"
+                    "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@hexona)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
                 }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv random```\n 获取⑨张随机插画"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv top [option]```\n 获取本日/周/月等的全站最热插画"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv author <Illustration ID>```\n 获取用户的最新九张插画"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv illust <Illustration ID>```\n 获取 Pixiv 上对应 ID 的插画"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv detail <Illustration ID>```\n 获取对应 ID 插画的详细信息（作品名、作者、标签等）"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv refresh <Illustration ID>```\n 刷新对应 ID 插画的缓存。"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "kmarkdown",
-                    "content": "```plain\n.pixiv credit```\n 查看赞助与感谢列表"
-                }
-            },
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "kmarkdown",
-                        "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@potatopotat0)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
-                    }
-                ]
-            }
-        ]
-    }).toString();
+            ]
+        }).toString();
     useCardMenu = true; // 使用卡片菜单
 }
 
