@@ -2,12 +2,10 @@ export default {
     /**
      * kbotify setup
      * 
-     * Refer to kbotify document for WebHook settings
+     * Only WebSocket is supported. Refer to kbotify document for WebHook settings
      */
     khlport: 6000,
-    khlkey: 'Nothing is required here',
     khltoken: 'Put yor token here',
-    khlverify: 'Nothing is required here',
 
     /**
      * Array of tokens of asset uploader for load balancing and load shifting
@@ -19,7 +17,7 @@ export default {
      * At launch, all of the uploader will send a message to `uploaderOnlineMessageDestination` in `configs/config.ts`
      * 
      * to test the availability of each uploader
-     * k
+     * 
      * Pixiv Chan will tag every administrator (defined by `adminList` in `configs/config.ts`) in uploaderOnlineMessageDestination and automately terminate if no token is available
      */
     assetUploadTokens: [
@@ -52,7 +50,7 @@ export default {
      * 
      * Which requires setting a UUID and token on your web API and here
      * 
-     * Check https://github.com/Hexona69/pixiv-web-api
+     * Check out https://github.com/Hexona69/pixiv-web-api
      */
     remoteLinkmapUUID: "",
     remoteLinkmapToken: "",
