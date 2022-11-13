@@ -16,6 +16,7 @@ import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
 import { ButtonEventMessage, Card, TextMessage } from 'kbotify';
 import { tag } from 'commands/pixiv/pixiv.tag.app';
+import { gui } from 'commands/pixiv/pixiv.gui.app';
 
 bot.logger.fields.name = "kook-pixiv-chan";
 bot.logger.addStream({ level: bot.logger.INFO, stream: process.stdout });
@@ -67,6 +68,7 @@ pixivMenu.addAlias(top, "热门");
 pixivMenu.addAlias(random, "随机");
 pixivMenu.addAlias(detail, "插画");
 pixivMenu.addAlias(author, "作者", "画师");
+pixivMenu.addAlias(gui, "GUI", "GUi", "GuI", "Gui", "guI", "gUI", "gUi");
 bot.addAlias(top, "p站热门", "P站热门", "pixiv热门");
 bot.addAlias(random, "p站随机", "P站随机", "pixiv随机");
 bot.addAlias(detail, "p站插画", "P站插画", "pixiv插画");
