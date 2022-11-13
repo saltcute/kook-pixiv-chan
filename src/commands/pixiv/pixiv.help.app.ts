@@ -36,9 +36,9 @@ class Help extends AppCommand {
                         .addDivider()
                         .addText("所有可能的指令列表：\n    发送`.pixiv top`，默认获取本周前九的插画/漫画\n    发送`.pixiv top day`，获取今日前九的插画/漫画\n    发送`.pixiv top week`，获取本周前九的插画/漫画\n    发送`.pixiv top month`，获取本月前九的插画/漫画")
                         .addDivider()
-                        .addText("    发送`.pixiv top week original`，获取本周前九的原创插画\n    发送`.pixiv top week rookie`，获取本周前九的新人画师的插画")
+                        .addText("    发送`.pixiv top original`，获取本周前九的原创插画\n    发送`.pixiv top rookie`，获取本周前九的新人画师的插画")
                         .addDivider()
-                        .addText("    发送`.pixiv top day male`，获取今日在男性中全站前九的插画\n    发送`.pixiv top day female`，获取今日在女性中全站前九的插画\n    发送`.pixiv top day manga`，获取今日全站前九的漫画")
+                        .addText("    发送`.pixiv top male`，获取今日在男性中全站前九的插画\n    发送`.pixiv top female`，获取今日在女性中全站前九的插画\n    发送`.pixiv top manga`，获取今日全站前九的漫画")
                     );
                 case "tag":
                     return session.sendCardTemp(new Card()

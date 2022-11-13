@@ -12,7 +12,7 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.view.command_list\",\"data\": {}}",
+                    "value": "{\"action\": \"GUI.view.command.list\",\"data\": {}}",
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",

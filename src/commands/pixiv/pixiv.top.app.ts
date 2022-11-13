@@ -19,23 +19,27 @@ class Top extends AppCommand {
         const sendCard = async (data: any, durationName: string) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
-            if (session.guild) {
-                await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                    if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
-                        sendSuccess = true;
-                        mainCardMessageID = res.msgSent?.msgId;
-                    }
-                }).catch((e) => {
-                    if (e) {
-                        if (e.code == 40012) { // Slow-mode limit
-                            bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
-                        } else {
-                            bot.logger.error(e);
+            if (isGUI) {
+                await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片").toString(), undefined, session.userId);
+            } else {
+                if (session.guild) {
+                    await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
+                        if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
+                            sendSuccess = true;
+                            mainCardMessageID = res.msgSent?.msgId;
                         }
-                    }
-                    sendSuccess = false;
-                });
-                if (!sendSuccess) return;
+                    }).catch((e) => {
+                        if (e) {
+                            if (e.code == 40012) { // Slow-mode limit
+                                bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
+                            } else {
+                                bot.logger.error(e);
+                            }
+                        }
+                        sendSuccess = false;
+                    });
+                    if (!sendSuccess) return;
+                }
             }
             var detection: number = 0;
             var link: string[] = [];
@@ -85,55 +89,79 @@ class Top extends AppCommand {
                 pid.push("没有了");
             }
             bot.logger.info(`UserInterface: Presenting card to user`);
-            if (session.guild) {
-                session.updateMessage(mainCardMessageID, [pixiv.cards.top(link, pid, durationName, {})])
-                    .then(async () => {
-                        pixiv.users.logInvoke(session, this.trigger, datas.length, detection);
-                    })
-                    .catch((e) => {
-                        bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
-                        if (e) bot.logger.error(e);
-                    });
+            if (isGUI) {
+                bot.API.message.update(msgID, pixiv.cards.top(link, pid, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.run.command.top", text: "上级" }, { action: "GUI.view.command.list", text: "命令列表" }])).toString(), undefined, session.userId);
             } else {
-                session.sendCard([pixiv.cards.top(link, pid, durationName, {})])
-                    .then((res) => {
-                        const msgID = res.msgSent?.msgId;
-                        pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
-                    })
-                    .catch((e) => {
-                        bot.logger.error(`UserInterface: Failed sending message`);
-                        if (e) bot.logger.error(e);
-                    });
+                if (session.guild) {
+                    session.updateMessage(mainCardMessageID, [pixiv.cards.top(link, pid, durationName, {})])
+                        .then(async () => {
+                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection);
+                        })
+                        .catch((e) => {
+                            bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
+                            if (e) bot.logger.error(e);
+                        });
+                } else {
+                    session.sendCard([pixiv.cards.top(link, pid, durationName, {})])
+                        .then((res) => {
+                            const msgID = res.msgSent?.msgId;
+                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                        })
+                        .catch((e) => {
+                            bot.logger.error(`UserInterface: Failed sending message`);
+                            if (e) bot.logger.error(e);
+                        });
+                }
             }
         }
         const durationList = {
             month: "MONTH",
             week: "WEEK",
-            week_original: "WEEK_ORIGINAL",
-            week_rookie: "WEEK_ROOKIE",
+            original: "WEEK_ORIGINAL",
+            rookie: "WEEK_ROOKIE",
             day: "DAY",
-            day_male: "DAY_MALE",
-            day_female: "DAT_FEMALE",
-            day_manga: "DAY_MANGA"
+            male: "DAY_MALE",
+            female: "DAT_FEMALE",
+            manga: "DAY_MANGA"
         };
         const durationNameList = {
             month: "本月",
             week: "本周",
-            week_original: "本周原创",
-            week_rookie: "本周新人",
+            original: "本周原创",
+            rookie: "本周新人",
             day: "今日",
-            day_male: "今日男性向",
-            day_female: "今日女性向",
-            day_manga: "今日漫画"
+            male: "今日男性向",
+            female: "今日女性向",
+            manga: "今日漫画"
         }
         var duration: string;
         var durationName: string;
-        const selection: string = session.args.join("_").toLowerCase();
+        const selection: string = session.args[0].toLowerCase();
+        const GUIString: string = session.args[1];
+        var isGUI: boolean = false;
+        var msgID: string = "";
+        if (GUIString && GUIString.split(".")[0] == "GUI") {
+            const UUID = GUIString.split(".")[1];
+            await bot.axios({
+                url: "/v3/message/view",
+                method: "GET",
+                params: {
+                    msg_id: UUID
+                }
+            }).then(() => {
+                isGUI = true;
+                msgID = UUID;
+            }).catch((e) => {
+                bot.logger.warn("GUI:Unknown GUI msgID");
+                bot.logger.warn(e);
+                isGUI = false;
+            })
+        }
         if (pixiv.common.isObjKey(selection, durationList)) {
             duration = durationList[selection];
             durationName = durationNameList[selection]
         } else {
-            if (session.args.length > 0) return session.replyTemp(`您是否想要搜索拥有某个标签的插画？此功能已被迁移至 \`.pixiv tag\` 命令，使用方法与先前无异，只需将 \`top\` 换成 \`tag\` 即可\n\`\`\`\n.pixiv tag ${session.args.join(" ")}\n\`\`\`\n同时也有新功能加入！详情请发送 \`.pixiv help tag\`\n亦或可能是您的参数错误，发送 \`.pixiv help top\` 查看参数列表`);
+            if (session.args.length > 0 && !isGUI) return session.replyTemp(`您是否想要搜索拥有某个标签的插画？此功能已被迁移至 \`.pixiv tag\` 命令，使用方法与先前无异，只需将 \`top\` 换成 \`tag\` 即可\n\`\`\`\n.pixiv tag ${session.args.join(" ")}\n\`\`\`\n同时也有新功能加入！详情请发送 \`.pixiv help tag\`\n亦或可能是您的参数错误，发送 \`.pixiv help top\` 查看参数列表`);
             duration = durationList.week;
             durationName = durationNameList.week;
         }
