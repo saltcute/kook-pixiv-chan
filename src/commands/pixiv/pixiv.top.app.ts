@@ -121,7 +121,7 @@ class Top extends AppCommand {
             rookie: "WEEK_ROOKIE",
             day: "DAY",
             male: "DAY_MALE",
-            female: "DAT_FEMALE",
+            female: "DAY_FEMALE",
             manga: "DAY_MANGA"
         };
         const durationNameList = {
