@@ -136,7 +136,7 @@ class Top extends AppCommand {
         }
         var duration: string;
         var durationName: string;
-        const selection: string = session.args[0].toLowerCase();
+        const selection: string = session.args[0] ? session.args[0].toLowerCase() : "";
         const GUIString: string = session.args[1];
         var isGUI: boolean = false;
         var msgID: string = "";
