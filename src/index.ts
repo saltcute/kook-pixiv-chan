@@ -14,6 +14,9 @@ import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
 import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
+import { ButtonEventMessage, Card, TextMessage } from 'kbotify';
+import { tag } from 'commands/pixiv/pixiv.tag.app';
+import { gui } from 'commands/pixiv/pixiv.gui.app';
 
 bot.logger.fields.name = "kook-pixiv-chan";
 bot.logger.addStream({ level: bot.logger.INFO, stream: process.stdout });
@@ -65,6 +68,7 @@ pixivMenu.addAlias(top, "热门");
 pixivMenu.addAlias(random, "随机");
 pixivMenu.addAlias(detail, "插画");
 pixivMenu.addAlias(author, "作者", "画师");
+pixivMenu.addAlias(gui, "GUI", "GUi", "GuI", "Gui", "guI", "gUI", "gUi");
 bot.addAlias(top, "p站热门", "P站热门", "pixiv热门");
 bot.addAlias(random, "p站随机", "P站随机", "pixiv随机");
 bot.addAlias(detail, "p站插画", "P站插画", "pixiv插画");
@@ -77,52 +81,132 @@ bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
 bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
 
-bot.on("buttonClick", (event) => {
+bot.on("buttonClick", async (event) => {
     try {
         const buttonValue = JSON.parse(event.value);
-        switch (buttonValue.action) {
+        const action = buttonValue.action.split(".");
+        bot.logger.info(`From ${event.user.username}#${event.user.identifyNum} invoke ${buttonValue.action}`);
+        // return;
+        switch (action[0]) {
             // TODO: convert legacy event
-            case "portal.view.detail":
+            case "portal":
+                switch (action[1]) {
+                    case "view":
+                        switch (action[2]) {
+                            case "detail":
+                            case "return_from_detail":
+                        }
+                        break;
+                }
                 break;
-            case "portal.view.return_from_detail":
-                break;
-
-            /**
-             * Main menu of GUI
-             */
-            case "GUI.view.main":
-                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.main().toString(), undefined, event.userId);
-                break;
-            case "GUI.view.command_list":
-                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.list().toString(), undefined, event.userId);
-                break;
-            case "GUI.view.credits":
-                bot.API.message.update(event.targetMsgId, pixiv.cards.credit()
-                    .addModule(pixiv.cards.GUI.returnButton("GUI.view.main"))
-                    .toString(),
-                    undefined, event.userId);
-                // bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.credit().toString(), undefined, event.userId);
-                break;
-            case "GUI.view.profile":
-                pixiv.users.detail({
-                    id: event.user.id,
-                    identifyNum: event.user.identifyNum,
-                    username: event.user.username,
-                    avatar: event.user.avatar
-                }).then((res) => {
-                    bot.API.message.update(event.targetMsgId, pixiv.cards.profile(res)
-                        .addModule(pixiv.cards.GUI.returnButton("GUI.view.main"))
-                        .toString(),
-                        undefined, event.userId);
-                }).catch((e) => {
-                    bot.logger.warn(e);
-                    bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
-                });
-                break;
-            case "GUI.view.settings":
-                break;
-            default:
-                bot.logger.warn(`ButtonEvent: Unrecognized action: ${buttonValue.action}`);
+            case "GUI":
+                switch (action[1]) {
+                    case "view":
+                        switch (action[2]) {
+                            case "main":
+                                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.main().toString(), undefined, event.userId);
+                                break;
+                            case "command":
+                                switch (action[3]) {
+                                    case "list":
+                                        bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.list().toString(), undefined, event.userId);
+                                        break;
+                                }
+                                break;
+                            case "credits":
+                                bot.API.message.update(event.targetMsgId, pixiv.cards.credit()
+                                    .addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.main" }]))
+                                    .toString(),
+                                    undefined, event.userId);
+                                break;
+                            case "profile":
+                                pixiv.users.detail({
+                                    id: event.user.id,
+                                    identifyNum: event.user.identifyNum,
+                                    username: event.user.username,
+                                    avatar: event.user.avatar
+                                }).then((res) => {
+                                    bot.API.message.update(event.targetMsgId, pixiv.cards.profile(res)
+                                        .addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.main" }]))
+                                        .toString(),
+                                        undefined, event.userId);
+                                }).catch((e) => {
+                                    bot.logger.warn(e);
+                                    bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
+                                });
+                                break;
+                            case "settings":
+                                break;
+                        }
+                        break;
+                    case "run":
+                        switch (action[2]) {
+                            case "command":
+                                function textTrigger(callback: (msg: string) => any) {
+                                    const trigger = (eve: TextMessage) => {
+                                        if (eve.authorId != event.userId) return;
+                                        if (eve.channelId != event.channelId) return;
+                                        if (eve.content.split(" ").length == 0) return;
+                                        bot.API.message.update(event.targetMsgId, new Card().addText(`已接收关键字，正在处理请求…`).toString(), undefined, event.userId);
+                                        bot.message.off("text", trigger)
+                                        clearTimeout(timeout)
+                                        callback(eve.content);
+                                        bot.message.off("text", trigger);
+                                    }
+                                    bot.message.on("text", trigger);
+                                    var count: number = 60;
+                                    var timeout: NodeJS.Timeout;
+                                    const counter = () => {
+                                        console.log(count);
+                                        if (count == 0) {
+                                            bot.API.message.update(event.targetMsgId, new Card().addText(`超时未收到关键字…将在3秒后返回上级菜单`).toString(), undefined, event.userId);
+                                            bot.message.off("text", trigger)
+                                            setTimeout(() => {
+                                                bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.list().toString(), undefined, event.userId);
+                                            }, 3000);
+                                            clearTimeout(timeout)
+                                            return;
+                                        }
+                                        bot.API.message.update(event.targetMsgId, new Card().addText(`请在 ${count} 秒内发送直接发送关键字以进行搜索`).toString(), undefined, event.userId);
+                                        count--;
+                                        timeout = setTimeout(counter, 1000);
+                                    }
+                                    counter();
+                                }
+                                switch (action[3]) {
+                                    case "top":
+                                        if (action[4]) {
+                                            top.exec("top", [action[4], `GUI.${event.targetMsgId}`], new ButtonEventMessage(event, bot));
+                                        } else {
+                                            bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.top().toString(), undefined, event.userId);
+                                        }
+                                        break;
+                                    case "random":
+                                        random.exec("random", [`GUI.${event.targetMsgId}`], new ButtonEventMessage(event, bot));
+                                        break;
+                                    case "author":
+                                        textTrigger((msg) => {
+                                            author.exec("author", msg.split(" ").concat([`GUI.${event.targetMsgId}`]), new ButtonEventMessage(event, bot));
+                                        });
+                                        break;
+                                    case "tag":
+                                        textTrigger((msg) => {
+                                            tag.exec("tag", [`GUI.${event.targetMsgId}`].concat(msg.split(" ")), new ButtonEventMessage(event, bot));
+                                        });
+                                        break;
+                                    case "detail":
+                                        textTrigger((msg) => {
+                                            detail.exec("detail", msg.split(" ").concat([`GUI.${event.targetMsgId}`]), new ButtonEventMessage(event, bot));
+                                        });
+                                        break;
+                                    default:
+                                        bot.logger.warn(`ButtonEvent: Unrecognized command ${buttonValue.action}`);
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+                }
         }
     } catch { // Compatibility
         const identifier = event.value.split("|")[0];
@@ -160,15 +244,14 @@ async function getRandomStatus(): Promise<[string, string]> {
         switch (crypto.randomInt(6)) {
             case 0:
                 const serverCount = (await bot.API.guild.list()).meta.total;
-                return ["ヘキソナ", `来自 ${serverCount} 个服务器的涩图要求`];
+                return ["ヘキソナ", `${serverCount} 个服务器的涩图要求`];
             case 1:
                 return ["John Denver", "Take Me Home, Country Roads"];
             case 2:
                 const diff = luxon.DateTime.fromISO("2022-07-07T04:00").diffNow(['days', "hours", "minutes"]).toObject();
                 const day = diff.days ? Math.abs(diff.days) : -1;
                 const hour = diff.hours ? Math.abs(diff.hours) : -1;
-                const minute = diff.minutes ? Math.abs(diff.minutes) : -1;
-                return ["Pixiv酱", `已不稳定运行 ${day} 天 ${hour} 小时 ${minute} 分钟`];
+                return ["Pixiv酱", `不稳定运行 ${day} 天 ${hour} 小时`];
             case 3:
                 const pak = JSON.parse(fs.readFileSync("package.json", { encoding: "utf-8", flag: "r" }));
                 return ["正在运行", `Pixiv酱 v${pak.version}`];

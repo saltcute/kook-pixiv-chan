@@ -16,6 +16,7 @@ import MultiDetail from './multiDetail'
 
 import GUIMain from './GUI/main'
 import GUICMDLST from './GUI/command/list'
+import GUICMDTOP from './GUI/command/top'
 import { Card, CardObject } from 'kbotify'
 import * as pixiv from "../"
 
@@ -74,21 +75,25 @@ export namespace cards {
         }
     }
     export namespace GUI {
-        export function returnButton(destination: string): any {
+        export function returnButton(destination: { action: string, text?: string }[]): any {
             return {
                 "type": "action-group",
-                "elements": [
-                    {
-                        "type": "button",
-                        "theme": "warning",
-                        "value": `{"action": "${destination}","data": {}}`,
-                        "click": "return-val",
-                        "text": {
-                            "type": "plain-text",
-                            "content": "返回"
-                        }
+                "elements": (() => {
+                    var arr: any[] = [];
+                    for (var i = 0; i < 4 && i < destination.length; i++) {
+                        arr.push({
+                            "type": "button",
+                            "theme": "warning",
+                            "value": `{"action": "${destination[i].action}","data": {}}`,
+                            "click": "return-val",
+                            "text": {
+                                "type": "plain-text",
+                                "content": `返回${destination[i].text ? destination[i].text : ""}`
+                            }
+                        })
                     }
-                ]
+                    return arr;
+                })()
             }
         };
         export function portalEntry(pid: string[]): any {
@@ -121,6 +126,7 @@ export namespace cards {
         export const main = GUIMain;
         export namespace command {
             export const list = GUICMDLST;
+            export const top = GUICMDTOP;
         }
     }
     export const error = ErrorCard;

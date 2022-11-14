@@ -31,7 +31,7 @@ export default {
     /** 
      * URL of the web API
      * 
-     * Check https://github.com/Hexona69/pixiv-web-api
+     * Check out https://github.com/Hexona69/pixiv-web-api
      */
     pixivAPIBaseURL: "http://pixiv.lolicon.ac.cn",
 
@@ -44,7 +44,7 @@ export default {
      * 
      * Pixiv web API also comes with remote linkmap
      * 
-     * Check https://github.com/Hexona69/pixiv-web-api
+     * Check out https://github.com/Hexona69/pixiv-web-api
      */
     useRemoteLinkmap: false,
     remoteLinkmapBaseURL: "",
@@ -56,7 +56,7 @@ export default {
      * 
      * This require setting a UUID and token on your web API and in your configs/auth.ts
      * 
-     * Check https://github.com/Hexona69/pixiv-web-api
+     * Check out https://github.com/Hexona69/pixiv-web-api
      */
     maintainingRemoteLinkmap: false,
 
@@ -66,12 +66,16 @@ export default {
      * You can use virtually any service for this: 
      * 
      * `i.pixiv.cat`
-     * 
      * `i.pixiv.re`
+     * and etc...
      * 
-     * and more...
+     * Or build your own using your server or with 3rd party service like Cloudflare Workers, Replit, etc.
      * 
-     * Or build your own using your server or with 3rd party service like Cloudflare Workers, Replit.
+     * Note: Aliyun Green may return code 581 (timeout) error
+     * when your Aliyun service region is set to China 
+     * and the reverse proxy server is outside of China, or vice versa
+     * 
+     * It is best to choose service in the same region if applicable
      */
     pixivImageProxyBaseURL: "https://i.pixiv.lolicon.ac.cn",
 
@@ -83,7 +87,9 @@ export default {
     /**
      * Channel ID for testing if the token is banned or not, and recieving online status message
      * 
-     * Make sure the bot have the premission to view, and to send message to, this channel
+     * Make sure the bot have the premission 
+     * to view, and to send message to, this channel, 
+     * or it may be mistaken that no uploader is available, shutting down Pixiv Chan on start
      */
     uploaderOnlineMessageDestination: "1145141919810"
 }

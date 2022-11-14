@@ -23,26 +23,30 @@ class Detail extends AppCommand {
             var detection = 0;
             var sendSuccess = false;
             var mainCardMessageID = "";
-            if (session.guild) {
-                await session.sendCard(pixiv.cards.resaving(data.id)).then((res) => {
-                    if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
-                        sendSuccess = true;
-                        mainCardMessageID = res.msgSent?.msgId;
-                    }
-                }).catch((e) => {
-                    if (e) {
-                        if (e.code == 40012) { // Slow-mode limit
-                            bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
-                        } else {
-                            bot.logger.error(e);
+            if (isGUI) {
+                await bot.API.message.update(msgID, pixiv.cards.resaving(data.id).toString(), undefined, session.userId);
+            } else {
+                if (session.guild) {
+                    await session.sendCard(pixiv.cards.resaving(data.id)).then((res) => {
+                        if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
+                            sendSuccess = true;
+                            mainCardMessageID = res.msgSent?.msgId;
                         }
-                    }
-                    sendSuccess = false;
-                });
-                if (!sendSuccess) return;
+                    }).catch((e) => {
+                        if (e) {
+                            if (e.code == 40012) { // Slow-mode limit
+                                bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
+                            } else {
+                                bot.logger.error(e);
+                            }
+                        }
+                        sendSuccess = false;
+                    });
+                    if (!sendSuccess) return;
+                }
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
-            if(!detectionResult) {
+            if (!detectionResult) {
                 bot.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
@@ -60,24 +64,28 @@ class Detail extends AppCommand {
                 }
             });
             bot.logger.info(`UserInterface: Presenting card to user`);
-            if (session.guild) {
-                session.updateMessage(mainCardMessageID, [pixiv.cards.detail(data, uploadResult.link)])
-                    .then(() => {
-                        pixiv.users.logInvoke(session, this.trigger, 1, detection)
-                    })
-                    .catch((e) => {
-                        bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
-                        if (e) bot.logger.error(e);
-                    });
+            if (isGUI) {
+                bot.API.message.update(msgID, pixiv.cards.detail(data, uploadResult.link).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
             } else {
-                session.sendCard([pixiv.cards.detail(data, uploadResult.link)])
-                    .then(() => {
-                        pixiv.users.logInvoke(session, this.trigger, 1, detection)
-                    })
-                    .catch((e) => {
-                        bot.logger.error(`UserInterface: Failed sending message`);
-                        if (e) bot.logger.error(e);
-                    });
+                if (session.guild) {
+                    session.updateMessage(mainCardMessageID, [pixiv.cards.detail(data, uploadResult.link)])
+                        .then(() => {
+                            pixiv.users.logInvoke(session, this.trigger, 1, detection)
+                        })
+                        .catch((e) => {
+                            bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
+                            if (e) bot.logger.error(e);
+                        });
+                } else {
+                    session.sendCard([pixiv.cards.detail(data, uploadResult.link)])
+                        .then(() => {
+                            pixiv.users.logInvoke(session, this.trigger, 1, detection)
+                        })
+                        .catch((e) => {
+                            bot.logger.error(`UserInterface: Failed sending message`);
+                            if (e) bot.logger.error(e);
+                        });
+                }
             }
         }
         if (session.args.length === 0) {
@@ -85,6 +93,26 @@ class Detail extends AppCommand {
         } else {
             if (isNaN(parseInt(session.args[0]))) {
                 return session.reply(`插画ID必须是纯数字！请输入一个合法的插画ID（收到 ${session.args[0]}）\n（使用 \`.pixiv help detail\` 查询指令详细用法）`)
+            }
+            const selection = session.args[1];
+            var isGUI: boolean = false;
+            var msgID: string = "";
+            if (selection && selection.split(".")[0] == "GUI") {
+                const UUID = selection.split(".")[1];
+                await bot.axios({
+                    url: "/v3/message/view",
+                    method: "GET",
+                    params: {
+                        msg_id: UUID
+                    }
+                }).then(() => {
+                    isGUI = true;
+                    msgID = UUID;
+                }).catch((e) => {
+                    bot.logger.warn("GUI:Unknown GUI msgID");
+                    bot.logger.warn(e);
+                    isGUI = false;
+                })
             }
             axios({
                 baseURL: config.pixivAPIBaseURL,
