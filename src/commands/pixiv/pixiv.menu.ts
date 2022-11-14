@@ -36,8 +36,8 @@ class PixivMenu extends MenuCommand {
             "type": "context",
             "elements": [
                 {
-                    "type": "plain-text",
-                    "content": "WIP 尚未完工"
+                    "type": "kmarkdown",
+                    "content": "Beta 功能，若发现任何问题，请务必[回报](https://kook.top/eu5CvH)"
                 }
             ]
         })
