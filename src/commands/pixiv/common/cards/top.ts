@@ -15,7 +15,7 @@ export default (link: string[], pid: string[], durationName: string, { resave = 
             ]
         })
         .addDivider()
-        .addModule(pixiv.cards.GUI.portalEntry(pid))
+        .addModule(pixiv.cards.GUI.portalEntry(link, pid, "top", { durationName: durationName }))
         .addModule({
             "type": "image-group",
             "elements": (() => {

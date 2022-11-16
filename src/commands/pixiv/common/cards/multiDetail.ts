@@ -4,56 +4,80 @@ class MultiDetailCard extends Card {
     constructor(content?: string | CardObject) {
         super(content);
     }
-    addControl(idx: number, illust: string[]) {
+    addControl(idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", data?: any) {
         this.addModule({
             "type": "action-group",
-            "elements": [
-                ...(() => {
-                    var arr = [];
-                    if (!isNaN(parseInt(illust[idx - 1]))) {
-                        arr.push({
-                            "type": "button",
-                            "theme": "info",
-                            "value": `view_detail|${idx - 1}|${JSON.stringify(illust)}`,
-                            "click": "return-val",
-                            "text": {
-                                "type": "plain-text",
-                                "content": "上一张"
-                            }
-                        })
-                    }
+            "elements": (() => {
+                var arr = [];
+                if (!isNaN(parseInt(pid[idx - 1]))) {
                     arr.push({
                         "type": "button",
-                        "theme": "warning",
-                        "value": `view_return|${idx}|${JSON.stringify(illust)}`,
+                        "theme": "info",
+                        "value": JSON.stringify({
+                            action: "portal.view.detail",
+                            data: {
+                                ...data,
+                                index: idx - 1,
+                                type: type,
+                                link: link,
+                                pid: pid
+                            }
+                        }),
                         "click": "return-val",
                         "text": {
                             "type": "plain-text",
-                            "content": "返回"
+                            "content": "上一张"
                         }
                     })
-                    if (!isNaN(parseInt(illust[idx + 1]))) {
-                        arr.push({
-                            "type": "button",
-                            "theme": "info",
-                            "value": `view_detail|${idx + 1}| ${JSON.stringify(illust)}`,
-                            "click": "return-val",
-                            "text": {
-                                "type": "plain-text",
-                                "content": "下一张"
-                            }
-                        })
+                }
+                arr.push({
+                    "type": "button",
+                    "theme": "warning",
+                    "value": JSON.stringify({
+                        action: "portal.view.return_from_detail",
+                        data: {
+                            ...data,
+                            link: link,
+                            type: type,
+                            pid: pid
+                        }
+                    }),
+                    "click": "return-val",
+                    "text": {
+                        "type": "plain-text",
+                        "content": "返回"
                     }
-                    return arr;
-                })()
-            ]
+                })
+                if (!isNaN(parseInt(pid[idx + 1]))) {
+                    arr.push({
+                        "type": "button",
+                        "theme": "info",
+                        "value": JSON.stringify({
+                            action: "portal.view.detail",
+                            data: {
+                                ...data,
+                                type: type,
+                                index: idx + 1,
+                                link: link,
+                                pid: pid
+                            }
+                        }),
+                        "click": "return-val",
+                        "text": {
+                            "type": "plain-text",
+                            "content": "下一张"
+                        }
+                    })
+                }
+                return arr;
+            })()
         });
         return this;
     }
 }
 
-export default (data: any, link: string, idx: number, illust: string[]) => {
-    // console.log(illust, idx, illust[idx - 1], illust[idx], illust[idx + 1]);
+export default (data: any, curLink: string, idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", inheritData?: any) => {
+    // console.log(pid, idx, pid[idx - 1], pid[idx], pid[idx + 1]);
     return new MultiDetailCard()
         .setTheme("info")
         .setSize("lg")
@@ -71,8 +95,8 @@ export default (data: any, link: string, idx: number, illust: string[]) => {
             ]
         },)
         .addDivider()
-        .addControl(idx, illust)
-        .addImage(link)
+        .addControl(idx, pid, link, type, inheritData)
+        .addImage(curLink)
         .addModule({
             "type": "context",
             "elements": [
