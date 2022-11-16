@@ -1,7 +1,7 @@
 import { BaseSession } from 'kbotify';
 import * as pixiv from '..'
 
-export default (data: any, r18: number, link: string[], pid: string[], session: BaseSession, { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
+export default (data: any, r18: number, link: string[], pid: string[], { resave = false, nsfw = false, id = "-1" }: { resave?: boolean, nsfw?: boolean, id?: string }) => {
     return new pixiv.cards.MultiCard()
         .setTheme("info")
         .setSize("lg")
@@ -22,7 +22,7 @@ export default (data: any, r18: number, link: string[], pid: string[], session: 
             ]
         })
         .addDivider()
-        .addModule(pixiv.cards.GUI.portalEntry(pid))
+        .addModule(pixiv.cards.GUI.portalEntry(link, pid, "author", { data: data, r18: r18 }))
         .addModule({
             "type": "image-group",
             "elements": (() => {

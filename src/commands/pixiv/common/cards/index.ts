@@ -96,14 +96,23 @@ export namespace cards {
                 })()
             }
         };
-        export function portalEntry(pid: string[]): any {
+        export function portalEntry(link: string[], pid: string[], type: "tag" | "top" | "random" | "author", data?: any): any {
             return {
                 "type": "action-group",
                 "elements": [
                     {
                         "type": "button",
                         "theme": "info",
-                        "value": `view_detail|0|${JSON.stringify(pid)}`,
+                        "value": JSON.stringify({
+                            action: "portal.view.detail",
+                            data: {
+                                ...data,
+                                index: 0,
+                                type: type,
+                                link: link,
+                                pid: pid
+                            }
+                        }),
                         "click": "return-val",
                         "text": {
                             "type": "plain-text",
@@ -113,7 +122,16 @@ export namespace cards {
                     {
                         "type": "button",
                         "theme": "info",
-                        "value": `view_detail|8|${JSON.stringify(pid)}`,
+                        "value": JSON.stringify({
+                            action: "portal.view.detail",
+                            data: {
+                                ...data,
+                                index: 8,
+                                type: type,
+                                link: link,
+                                pid: pid
+                            }
+                        }),
                         "click": "return-val",
                         "text": {
                             "type": "plain-text",

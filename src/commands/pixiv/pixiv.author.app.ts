@@ -90,10 +90,10 @@ class Author extends AppCommand {
             }
             bot.logger.info(`UserInterface: Presenting card to user`);
             if (isGUI) {
-                bot.API.message.update(msgID, pixiv.cards.author(data[0], r18, link, pid, session, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
+                bot.API.message.update(msgID, pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
             } else {
                 if (session.guild) {
-                    await session.updateMessage(mainCardMessageID, [pixiv.cards.author(data[0], r18, link, pid, session, {})])
+                    await session.updateMessage(mainCardMessageID, [pixiv.cards.author(data[0], r18, link, pid, {})])
                         .then(() => {
                             pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                         })
@@ -102,7 +102,7 @@ class Author extends AppCommand {
                             if (e) bot.logger.error(e);
                         });
                 } else {
-                    session.sendCard([pixiv.cards.author(data[0], r18, link, pid, session, {})])
+                    session.sendCard([pixiv.cards.author(data[0], r18, link, pid, {})])
                         .then(() => {
                             pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
                         })

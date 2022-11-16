@@ -15,7 +15,7 @@ export default (link: string[], pid: string[], { resave = false, nsfw = false, i
             ]
         })
         .addDivider()
-        .addModule(pixiv.cards.GUI.portalEntry(pid))
+        .addModule(pixiv.cards.GUI.portalEntry(link, pid, "random"))
         .addModule({
             "type": "image-group",
             "elements": (() => {

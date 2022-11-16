@@ -85,6 +85,7 @@ bot.on("buttonClick", async (event) => {
     try {
         const buttonValue = JSON.parse(event.value);
         const action = buttonValue.action.split(".");
+        const data = buttonValue.data;
         bot.logger.info(`From ${event.user.username}#${event.user.identifyNum} invoke ${buttonValue.action}`);
         // return;
         switch (action[0]) {
@@ -92,9 +93,44 @@ bot.on("buttonClick", async (event) => {
             case "portal":
                 switch (action[1]) {
                     case "view":
+                        const idx = data.index;
+                        const pid = data.pid;
+                        const link = data.link;
+                        const type = data.type;
+                        const curIndex = pid[idx];
+                        const curLink = link[idx];
+                        console.log(data);
                         switch (action[2]) {
                             case "detail":
+                                pixiv.common.getIllustDetail(curIndex).then((res) => {
+                                    bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, data).toString(), undefined, event.userId);
+                                })
+                                break;
                             case "return_from_detail":
+                                const durationName = data.durationName
+                                var card: Card;
+                                switch (type) {
+                                    case "top":
+                                        card = pixiv.cards.top(link, pid, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.run.command.top", text: "上级" }, { action: "GUI.view.command.list", text: "命令列表" }]));
+                                        break;
+                                    case "tag":
+                                        const tags = data.tags;
+                                        card = pixiv.cards.tag(link, pid, tags, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }]));
+                                        break;
+                                    case "random":
+                                        card = pixiv.cards.random(link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }]));;
+                                        break;
+                                    case "author":
+                                        const data_ = data.data,
+                                            r18 = data.r18;
+                                        card = pixiv.cards.author(data_, r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }]));;
+                                        break;
+                                    default:
+                                        card = pixiv.cards.error("无法加载卡片")
+                                        break;
+                                }
+                                bot.API.message.update(event.targetMsgId, card.toString(), undefined, event.userId);
+                                break;
                         }
                         break;
                 }
@@ -210,28 +246,10 @@ bot.on("buttonClick", async (event) => {
         }
     } catch { // Compatibility
         const identifier = event.value.split("|")[0];
-        if (identifier == "view_detail") {
-            const idx = parseInt(event.value.split("|")[1]);
-            const illust = JSON.parse(event.value.split("|")[2]);
-            const crt_illust = illust[idx];
-            pixiv.common.getIllustDetail(crt_illust).then((res) => {
-                bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, pixiv.linkmap.getLink(crt_illust, "0"), idx, illust).toString(), undefined, event.userId);
-            })
-        } else if (identifier == "view_return") {
-            axios({
-                baseURL: "https://www.kookapp.cn/api/v3/",
-                url: "message/view",
-                method: "get",
-                params: {
-                    msg_id: event.targetMsgId
-                },
-                headers: {
-                    'Authorization': `Bot ${auth.khltoken}`
-                }
-            }).then((res) => {
-                const val = res.data;
-                bot.API.message.update(event.targetMsgId, val.data.content, undefined, event.userId);
-            })
+        if (identifier == "view_detail" || identifier == "view_return") {
+            bot.API.message.update(event.targetMsgId, pixiv.cards.error("此卡片来自旧版 Pixiv酱，现已无法使用").toString(), undefined, event.userId);
+        } else {
+            bot.API.message.update(event.targetMsgId, pixiv.cards.error(`唤起了无效的按钮事件： \`${event.value}\``).toString(), undefined, event.userId);
         }
     }
 })
@@ -246,7 +264,24 @@ async function getRandomStatus(): Promise<[string, string]> {
                 const serverCount = (await bot.API.guild.list()).meta.total;
                 return ["ヘキソナ", `${serverCount} 个服务器的涩图要求`];
             case 1:
-                return ["John Denver", "Take Me Home, Country Roads"];
+                const songs: [string, string][] = [ // OMEGALUL WEEBOO AF
+                    ["John Denver", "Take Me Home, Country Roads"],
+                    ["hololive IDOL PROJECT", "BLUE CLAPPER"],
+                    ["hololive IDOL PROJECT", "Suspect"],
+                    ["邪神ちゃん, 初音ミク", "サンキュードロップキック"],
+                    ["キズナアイ, 花譜", "ラブしい"],
+                    ["halca, 鈴木愛奈", "あれこれドラスティック"],
+                    ["MORE MORE JUMP!", "モア!ジャンプ!モア!"],
+                    ["チト, ユーリ", "More One Night"],
+                    ["Nanahira, Camellia", "You Make My Life 1UP"],
+                    ["邪神★ガールズ", "あの娘にドロップキック"],
+                    ["キノシタ", "どぅーまいべすと"],
+                    ["キノシタ", "夢色フェスティバル"],
+                    ["鹿乃", "なだめスかし Negotiation"],
+                    ["キノシタ", "人間のくせになまいきだ"],
+                    ["ナユタン星人, ナナヲアカリ, 000", "コスモポップファンクラブ"]
+                ];
+                return songs[crypto.randomInt(songs.length)];
             case 2:
                 const diff = luxon.DateTime.fromISO("2022-07-07T04:00").diffNow(['days', "hours", "minutes"]).toObject();
                 const day = diff.days ? Math.abs(diff.days) : -1;
