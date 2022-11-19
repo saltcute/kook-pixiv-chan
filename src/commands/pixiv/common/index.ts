@@ -41,7 +41,7 @@ export namespace type {
 export namespace common {
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
 
-    export function isObjKey<T>(key: PropertyKey, obj: T): key is keyof T {
+    export function isObjKey<T extends object>(key: PropertyKey, obj: T): key is keyof T {
         return key in obj;
     }
 
