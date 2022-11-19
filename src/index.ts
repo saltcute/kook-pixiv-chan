@@ -99,7 +99,6 @@ bot.on("buttonClick", async (event) => {
                         const type = data.type;
                         const curIndex = pid[idx];
                         const curLink = link[idx];
-                        console.log(data);
                         switch (action[2]) {
                             case "detail":
                                 pixiv.common.getIllustDetail(curIndex).then((res) => {
@@ -193,7 +192,6 @@ bot.on("buttonClick", async (event) => {
                                     var count: number = 60;
                                     var timeout: NodeJS.Timeout;
                                     const counter = () => {
-                                        console.log(count);
                                         if (count == 0) {
                                             bot.API.message.update(event.targetMsgId, new Card().addText(`超时未收到关键字…将在3秒后返回上级菜单`).toString(), undefined, event.userId);
                                             bot.message.off("text", trigger)
