@@ -1,11 +1,13 @@
 export default {
     /**
      * kbotify setup
-     * 
-     * Only WebSocket is supported. Refer to kbotify document for WebHook settings
      */
-    khlport: 6000,
-    khltoken: 'Put yor token here',
+    khltoken: 'Your Token',
+
+    useWebHook: false,
+    khlverifytoken: "Your Verify Token",
+    khlkey: "Your Encrypt Key",
+    khlport: 9999,
 
     /**
      * Array of tokens of asset uploader for load balancing and load shifting

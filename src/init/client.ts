@@ -1,9 +1,24 @@
 import { KBotify } from 'kbotify';
+import { BotConfig } from 'kbotify/dist/core/kbotify/types';
 import auth from '../configs/auth';
 
-export const bot = new KBotify({
-    mode: 'websocket', //确保和开黑啦应用的后台设置一样。如果使用webhook，请详细阅读开发者手册关于"?compress=0"的部分。
-    token: auth.khltoken,
-    port: auth.khlport,
-    ignoreDecryptError: true,
-});
+var kbotifyConfig: BotConfig;
+
+if (auth.useWebHook) {
+    kbotifyConfig = {
+        mode: 'webhook',
+        token: auth.khltoken,
+        verifyToken: auth.khlverifytoken,
+        key: auth.khlkey,
+        port: auth.khlport,
+        ignoreDecryptError: false
+    }
+} else {
+    kbotifyConfig = {
+        mode: 'websocket',
+        token: auth.khltoken,
+        ignoreDecryptError: false
+    }
+}
+
+export const bot = new KBotify(kbotifyConfig);
