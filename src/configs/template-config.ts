@@ -33,7 +33,7 @@ export default {
      * 
      * Check out https://github.com/Hexona69/pixiv-web-api
      */
-    pixivAPIBaseURL: "http://pixiv.lolicon.ac.cn",
+    pixivAPIBaseURL: "https://pixiv.lolicon.ac.cn",
 
     /**
      * URL of remote linkmap
@@ -46,8 +46,8 @@ export default {
      * 
      * Check out https://github.com/Hexona69/pixiv-web-api
      */
-    useRemoteLinkmap: false,
-    remoteLinkmapBaseURL: "",
+    useRemoteLinkmap: true,
+    remoteLinkmapBaseURL: "https://pixiv.lolicon.ac.cn",
 
     /**
      * Whether this instance of Pixiv Chan is contributing to the remote linkmap or not
