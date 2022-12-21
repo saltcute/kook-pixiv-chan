@@ -80,6 +80,36 @@ bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P
 bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
 bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
+bot.on('textMessage', (event) => {
+    // if (event.mention.user.includes(bot.userId)) { // Quote bot
+    if (/(met)[0-9]+(met) [再在]?多?来?[一俩二仨三四五六七八九十百千万亿兆京]*[张点]([涩色瑟蛇]图)?/.test(event.content)) {
+        bot.axios({
+            url: '/v3/message/view',
+            params: {
+                msg_id: event.msgId
+            }
+        }).then((res) => {
+            const data = res.data.data;
+            try {
+                const quote = JSON.parse(data.quote.content);
+                const type = quote.modules.filter((val: any) => { return val.type == 'action-group' }).map((val: any) => val.elements.map((val: any) => JSON.parse(val.value).data.type));
+                const pid = quote.modules.filter((val: any) => { return val.type == 'action-group' }).map((val: any) => val.elements.map((val: any) => JSON.parse(val.value).data.pid));
+                switch (type[0]) {
+                    case 'random':
+                    case 'top':
+                    case 'author':
+                        random.exec('random', [], event);
+                    case 'detail':
+                    case 'illust':
+                        bot.logger.info("Fuck KOOK cuz user invoked detail/illust")
+                        break;
+                    default:
+                }
+            } catch (e) { }
+        })
+    }
+    // }
+})
 
 bot.on("buttonClick", async (event) => {
     try {
