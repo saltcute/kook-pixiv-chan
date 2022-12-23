@@ -14,7 +14,7 @@ import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
 import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
-import { ButtonEventMessage, Card, TextMessage } from 'kbotify';
+import { ButtonEventMessage, Card, GuildSession, TextMessage } from 'kbotify';
 import { tag } from 'commands/pixiv/pixiv.tag.app';
 import { gui } from 'commands/pixiv/pixiv.gui.app';
 
@@ -80,9 +80,9 @@ bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P
 bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
 bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
-bot.on('textMessage', (event) => {
+bot.on('kmarkdownMessage', (event) => {
     // if (event.mention.user.includes(bot.userId)) { // Quote bot
-    if (/(met)[0-9]+(met) [再在]?多?来?[一俩二仨三四五六七八九十百千万亿兆京]*[张点]([涩色瑟蛇]图)?/.test(event.content)) {
+    if (/(\(met\)[0-9]+\(met\))? ?[再在]?多?来?[一俩二仨三四五六七八九十百千万亿兆京]*[张点]([涩色瑟蛇]图)?/.test(event.content)) {
         bot.axios({
             url: '/v3/message/view',
             params: {
@@ -91,21 +91,23 @@ bot.on('textMessage', (event) => {
         }).then((res) => {
             const data = res.data.data;
             try {
-                const quote = JSON.parse(data.quote.content);
+                const quote = JSON.parse(data.quote.content)[0] || JSON.parse(data.quote.content);
                 const type = quote.modules.filter((val: any) => { return val.type == 'action-group' }).map((val: any) => val.elements.map((val: any) => JSON.parse(val.value).data.type));
                 const pid = quote.modules.filter((val: any) => { return val.type == 'action-group' }).map((val: any) => val.elements.map((val: any) => JSON.parse(val.value).data.pid));
-                switch (type[0]) {
+                switch (type[0][0]) {
                     case 'random':
                     case 'top':
                     case 'author':
-                        random.exec('random', [], event);
+                        const text = new TextMessage(event, bot);
+                        random.exec('random', [], text);
+                        break;
                     case 'detail':
                     case 'illust':
                         bot.logger.info("Fuck KOOK cuz user invoked detail/illust")
                         break;
                     default:
                 }
-            } catch (e) { }
+            } catch (e) { console.log(e) };
         })
     }
     // }
