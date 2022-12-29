@@ -91,6 +91,9 @@ bot.on('kmarkdownMessage', (event) => {
         }).then((res) => {
             const data = res.data.data;
             try {
+                const text = new TextMessage(event, bot);
+                random.exec('random', [], text);
+                /*
                 const quote = JSON.parse(data.quote.content)[0] || JSON.parse(data.quote.content);
                 const type = quote.modules.filter((val: any) => { return val.type == 'action-group' }).map((val: any) => val.elements.map((val: any) => JSON.parse(val.value).data.type));
                 const pid = quote.modules.filter((val: any) => { return val.type == 'action-group' }).map((val: any) => val.elements.map((val: any) => JSON.parse(val.value).data.pid));
@@ -107,6 +110,7 @@ bot.on('kmarkdownMessage', (event) => {
                         break;
                     default:
                 }
+                */
             } catch (e) { console.log(e) };
         })
     }
