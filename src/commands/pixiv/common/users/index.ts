@@ -162,6 +162,19 @@ export namespace users {
         else left = limit - user.pixiv.statistics_today.command_requests_counter[trigger];
         return left < 0 ? 0 : left;
     }
+    export function tiersCommandLimitLeftRaw(user: user, trigger: commands): number | "unlimited" {
+        const limit = tiersCommandLimit(user, trigger);
+        var left: number | "unlimited";
+        if (trigger == "refresh") {
+            if (limit == "unlimited") left = "unlimited";
+            else left = limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+        } else if (trigger == "detail" || trigger == "illust") {
+            if (limit == "unlimited") left = "unlimited";
+            else left = limit - user.pixiv.statistics_today.command_requests_counter["detail"] - user.pixiv.statistics_today.command_requests_counter["illust"];
+        } else if (limit == "unlimited") left = "unlimited";
+        else left = limit - user.pixiv.statistics_today.command_requests_counter[trigger];
+        return left < 0 ? 0 : left;
+    }
     export async function reachesCommandLimit(session: BaseSession, trigger: string): Promise<boolean> {
         var reached = false;
         if (isCommand(trigger)) {
@@ -240,6 +253,13 @@ export namespace users {
             throw e.data;
         });
     }
+    /**
+     * Update statistics of usage
+     * @param session kbotify session
+     * @param trigger command trigger
+     * @param totalIllust requested illustrations number
+     * @param newIllust requested new illustrations number
+     */
     export function logInvoke(session: BaseSession, trigger: string, totalIllust: number, newIllust: number) {
         detail({
             id: session.user.id,
@@ -250,6 +270,24 @@ export namespace users {
             if (res) {
                 res.pixiv.statistics.last_seen_on = Date.now();
 
+                if (isCommand(trigger)) {
+                    const commandLeft = tiersCommandLimitLeftRaw(res, trigger)
+                    if (commandLeft != 'unlimited') {
+                        var reduction = 0;
+                        if (commandLeft < newIllust) {
+                            reduction = (newIllust - commandLeft);
+                        } else {
+                            reduction = newIllust;
+                        }
+
+                        if (res.pixiv.quantum_pack_capacity > reduction) {
+                            res.pixiv.quantum_pack_capacity -= reduction;
+                        } else {
+                            res.pixiv.quantum_pack_capacity = 0;
+                        }
+                    }
+                }
+
                 res.pixiv.statistics.new_illustration_requested += newIllust;
                 res.pixiv.statistics.total_illustration_requested += totalIllust;
 
@@ -257,11 +295,6 @@ export namespace users {
                 res.pixiv.statistics_today.total_illustration_requested += totalIllust;
 
                 res.pixiv.statistics.total_requests_counter++;
-                if (res.pixiv.quantum_pack_capacity > newIllust) {
-                    res.pixiv.quantum_pack_capacity -= newIllust;
-                } else {
-                    res.pixiv.quantum_pack_capacity = 0;
-                }
                 if (isCommand(trigger)) {
                     if (trigger == "refresh") {
                         res.pixiv.statistics_today.command_requests_counter[trigger]++;

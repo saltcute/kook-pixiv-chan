@@ -15,7 +15,6 @@ import userBanList from './userBanList';
 import { BaseSession, Card } from 'kbotify';
 import FormData, { Stream } from 'form-data';
 import * as pixivadmin from '../admin/common';
-import { link } from 'fs';
 const sharp = require('sharp');
 
 export namespace type {
@@ -39,12 +38,28 @@ export namespace type {
 }
 
 export namespace common {
+    /**
+     * Placeholder for forbidden images
+     * 
+     * R-18, network failure, etc.
+     */
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
 
+    /**
+     * Check if key is in obkect
+     * @param key key
+     * @param obj object
+     * @returns Whether or not the key is in the object
+     */
     export function isObjKey<T extends object>(key: PropertyKey, obj: T): key is keyof T {
         return key in obj;
     }
 
+    /**
+     * Convert illustration id string to Markdown link
+     * @param pid Pixiv illustartion id
+     * @returns clickable link to the artwork page on Pixiv in Markdown
+     */
     export function pid2Markdown(pid: string) {
         if (isNaN(parseInt(pid))) {
             return pid;
@@ -53,16 +68,31 @@ export namespace common {
         }
     }
 
+    /**
+     * Get proxied Pixiv image link
+     * @param original original i.pximg.net link
+     * @returns reverse proxied image link
+     */
     export function getProxiedImageLink(original: string): string {
         return original.replace("https://i.pximg.net", config.pixivImageProxyBaseURL)
     }
 
 
     //======================Logging======================
+    /**
+     * Log an execution of command
+     * @param command command name
+     * @param session kbotify session
+     */
     export function logInvoke(command: string, session: BaseSession) {
         bot.logger.info(`From ${session.user.username}#${session.user.identifyNum} as ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
     }
 
+    /**
+     * Check if the tag is forbbiden
+     * @param tag Pixiv illustration tag
+     * @returns Whether the tag is forbidden from query
+     */
     export function isForbittedTag(tag: string) {
         if (tagBanList.includes(tag)) {
             return true;
@@ -71,6 +101,11 @@ export namespace common {
         }
     }
 
+    /**
+     * Check if the user is forbidden
+     * @param userid Pixiv user ID
+     * @returns Whether the user is forbidden from query
+     */
     export function isForbittedUser(userid: string) {
         const id = parseInt(userid);
         if (isNaN(id)) return false;
@@ -81,6 +116,11 @@ export namespace common {
         }
     }
 
+    /**
+     * Get detail of illustration from Pixiv web API
+     * @param illustID Pixiv illsutration ID
+     * @returns illustration data from Pixiv web API
+     */
     export async function getIllustDetail(illustID: string) {
         return axios({
             baseURL: config.pixivAPIBaseURL,
@@ -92,6 +132,11 @@ export namespace common {
         })
     }
 
+    /**
+     * Convert a stream to buffer
+     * @param stream stream
+     * @returns buffer
+     */
     export async function stream2buffer(stream: Stream): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
             const _buf = Array<any>();
@@ -147,6 +192,11 @@ export namespace common {
         })
     }
     var currentIndex = 0;
+    /**
+     * Check through every token provided in auth.ts and
+     * make sure they are capable of uploading files
+     * @returns Whether or not there were at least one available token
+     */
     export async function cycleThroughTokens() {
         const lastIndex = currentIndex;
         while (!auth.assetUploadTokens[currentIndex].active) {
@@ -160,6 +210,10 @@ export namespace common {
         }
         return false;
     }
+    /**
+     * Get the next token to use
+     * @returns KOOK bot token
+     */
     export async function getNextToken() {
         if (await cycleThroughTokens()) {
             await bot.API.message.create(9, config.uploaderOnlineMessageDestination, `${config.adminList.map(str => `(met)${str}(met)`).join(" ")} FATAL: NO UPLOADER AVAILABLE. PIXIV CHAN IS GOING OFFLINE IMMEDIATELY`)
@@ -171,9 +225,19 @@ export namespace common {
         }
         return auth.assetUploadTokens[currentIndex].token;
     }
+    /**
+     * Mark the current token as inactive
+     */
     export function deactiveCurrentToken() {
         auth.assetUploadTokens[currentIndex].active = false;
     }
+    /**
+     * Upload a file to KOOK's server
+     * @param session kbotify session
+     * @param val illustration data from Pixiv web API 
+     * @param bodyFormData form data to be uploaded
+     * @returns The link to the uploaded file
+     */
     export async function uploadFile(session: BaseSession, val: any, bodyFormData: FormData) {
         var rtLink = "";
         await axios({
@@ -203,6 +267,14 @@ export namespace common {
         });
         return rtLink;
     }
+    /**
+     * Detect if a image needs to be blurred and
+     * upload it to KOOK's server
+     * @param data illustration data from Pixiv web API
+     * @param detectionResult Aliyun Image Green detection result
+     * @param session kbotify session
+     * @returns link to the image on img.kookapp.cn and its pixiv id
+     */
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
         if (linkmap.isInDatabase(val.id, "0")) {
@@ -237,14 +309,27 @@ export namespace common {
     var noticed: string[] = [];
     var notification: string = "";
     var enableNotification = false;
+    /**
+     * Remove current notification
+     */
     export function deleteNotifications() {
         enableNotification = false;
     }
+    /**
+     * Set notification to be pushed to every user
+     * @param content kMarkdown content of the notification
+     */
     export function addNotifications(content: string) {
         notification = content;
         enableNotification = true;
         noticed = [];
     }
+    /**
+     * If there were a notification and the user hasn't read the it,
+     * send it to the user and record.
+     * @param session kbotify session
+     * @returns kbotify funcResult
+     */
     export function getNotifications(session: BaseSession) {
         if (enableNotification && !noticed.includes(session.user.id)) {
             noticed.push(session.user.id)
@@ -254,12 +339,24 @@ export namespace common {
 
     //================Rate control================
     var rateControl: { [key: string]: { [key: string]: number } } = {};
+    /**
+     * Record execution of command from the user
+     * @param id KOOK user id
+     * @param trigger commnad trigger
+     */
     export function registerExecution(id: string, trigger: string) {
         rateControl[id] = {
             ...rateControl[id],
             [trigger]: Date.now()
         }
     }
+    /**
+     * Check if user is rate limited
+     * @param session kbotify session
+     * @param limit rate limit in seconds for the command
+     * @param trigger command trigger
+     * @returns Whether or not the user shall be limited
+     */
     export function isRateLimited(session: BaseSession, limit: number, trigger: string): boolean {
         const lastExecutionTimestamp = common.getLastExecutionTimestamp(session.userId, trigger);
         if (!pixivadmin.common.isAdmin(session.userId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
@@ -296,6 +393,13 @@ export namespace common {
             [trigger]: Date.now() + time * 1000
         }
     }
+
+    /**
+     * Check if a user has been banned
+     * @param session kbotify session
+     * @param trigger command trigger
+     * @returns Whether or not the user is banned
+     */
     export function isBanned(session: BaseSession, trigger: string): boolean {
         const banEndTimestamp = common.getBanEndTimestamp(session.userId, trigger);
         if (!pixivadmin.common.isAdmin(session.userId) && Date.now() < banEndTimestamp) {
