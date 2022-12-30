@@ -29,7 +29,7 @@ export default (user: users.user) => {
                     {
                         "type": "kmarkdown",
                         "content": `> **订阅到期**\n(font)${user.pixiv.tier == "Standard" ? "永不" : new Date(user.pixiv.expire).toLocaleDateString("zh-cn")}(font)[${(() => {
-                            if (user.pixiv.expire - Date.now() <= 60 * 60 * 24 * 7 * 1000) return 'danger';
+                            if (user.pixiv.expire - Date.now() <= 60 * 60 * 24 * 7 * 1000 && !(user.pixiv.tier == "Standard")) return 'danger';
                             else return 'tips'
                         })()}]`
                     },
