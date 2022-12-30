@@ -10,10 +10,10 @@ class Redeem extends AppCommand {
     trigger = 'redeem'; // 用于触发的文字
     intro = 'Redeem gift code';
     func: AppFunc<BaseSession> = async (session) => {
-        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
-        if (await pixiv.users.reachesIllustLimit(session)) return;
+        // if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
+        // if (await pixiv.users.reachesIllustLimit(session)) return;
         if (pixiv.common.isBanned(session, this.trigger)) return;
-        if (pixiv.common.isRateLimited(session, 15, this.trigger)) return;
+        if (pixiv.common.isRateLimited(session, 3, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         if (session.args.length == 0) {
             return session.reply("请输入激活码");
