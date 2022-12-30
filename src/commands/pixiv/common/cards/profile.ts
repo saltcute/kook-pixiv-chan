@@ -1,11 +1,12 @@
 import { Card } from "kbotify"
+import { cards } from ".";
 import { users } from "../users";
 
 export default (user: users.user) => {
     return new Card()
         .setTheme("info")
         .setSize("lg")
-        .addText(`**${user.kook.username}#${user.kook.identifyNum}**\n级别: [${user.pixiv.tier}](${users.afdianTierLink[user.pixiv.tier]})`,
+        .addText(`**(font)${user.kook.username}#${user.kook.identifyNum}(font)[${cards.getTierColor(user.pixiv.tier)}]**\n级别: [${user.pixiv.tier}](${users.afdianTierLink[user.pixiv.tier]})`,
             undefined,
             "left",
             {
@@ -23,11 +24,14 @@ export default (user: users.user) => {
                 "fields": [
                     {
                         "type": "kmarkdown",
-                        "content": `> **活跃订阅**\n${user.pixiv.tier}`
+                        "content": `> **活跃订阅**\n(font)${user.pixiv.tier}(font)[${cards.getTierColor(user.pixiv.tier)}]`
                     },
                     {
                         "type": "kmarkdown",
-                        "content": `> **订阅到期**\n${user.pixiv.tier == "Standard" ? "永不" : new Date(user.pixiv.expire).toLocaleDateString("zh-cn")}`
+                        "content": `> **订阅到期**\n(font)${user.pixiv.tier == "Standard" ? "永不" : new Date(user.pixiv.expire).toLocaleDateString("zh-cn")}(font)[${(() => {
+                            if (user.pixiv.expire - Date.now() <= 60 * 60 * 24 * 7 * 1000) return 'danger';
+                            else return 'tips'
+                        })()}]`
                     },
                     {
                         "type": "kmarkdown",
@@ -81,7 +85,10 @@ export default (user: users.user) => {
                     },
                     {
                         "type": "kmarkdown",
-                        "content": `> **Quantum Pack**\n${user.pixiv.quantum_pack_capacity > 0 ? `剩余 ${user.pixiv.quantum_pack_capacity} 张` : "无"}`
+                        "content": `> **Quantum Pack**\n${user.pixiv.quantum_pack_capacity > 0 ? `剩余 (font)${user.pixiv.quantum_pack_capacity}(font)[${(() => {
+                            if (user.pixiv.quantum_pack_capacity > 0 && user.pixiv.quantum_pack_capacity < 150) return 'danger';
+                            else return 'body';
+                        })()}] 张` : "无"}`
                     }
                 ]
             }

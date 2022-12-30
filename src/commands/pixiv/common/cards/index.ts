@@ -19,6 +19,7 @@ import GUICMDLST from './GUI/command/list'
 import GUICMDTOP from './GUI/command/top'
 import { Card, CardObject } from 'kbotify'
 import * as pixiv from "../"
+import { users } from '../'
 
 export namespace cards {
 
@@ -147,6 +148,20 @@ export namespace cards {
             export const top = GUICMDTOP;
         }
     }
+
+    export function getTierColor(tier: users.tiers) {
+        switch (tier) {
+            case 'Standard':
+                return 'primary';
+            case 'Backer':
+                return 'warning';
+            case 'Supporter':
+                return 'pink';
+            case 'Sponser':
+                return 'danger';
+        }
+    }
+
     export const error = ErrorCard;
     export const nsfw = NSFWCard;
     export const top = TopCard;
