@@ -19,7 +19,7 @@ class Profile extends AppCommand {
             return session.sendCard([pixiv.cards.profile(res)]);
         }).catch((e) => {
             bot.logger.warn(e);
-            return session.replyCardTemp([pixiv.cards.error(e)]);
+            return session.replyCardTemp([pixiv.cards.error(e.stack)]);
         });
     }
 }

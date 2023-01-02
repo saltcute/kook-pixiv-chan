@@ -1,11 +1,118 @@
+import config from "configs/config";
 import { Card, CardObject } from "kbotify"
 import error from "./error";
+
+type apexEvent = {
+    isVIP?: boolean,
+    isSendButtonClicked?: boolean,
+    sendButtonPreviewImageLink?: string,
+    isSent?: boolean,
+    isSuccess?: boolean,
+}
 
 class MultiDetailCard extends Card {
     constructor(content?: string | CardObject) {
         super(content);
     }
-    addControl(idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", data?: any) {
+    addApex(pid: string, apex?: apexEvent, data?: any) {
+        // console.log(data);
+        if (config.connectApex) {
+            if (!apex?.isVIP) {
+                if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
+                    this.addDivider().addText(`您需要购买 Apex助手 高级会员 才能将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手背景图像。`)
+                        .addModule({
+                            "type": "action-group",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "theme": "primary",
+                                    "value": "https://afdian.net/@night386",
+                                    "click": "link",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": "前往购买"
+                                    }
+                                },
+                                {
+                                    "type": "button",
+                                    "theme": "danger",
+                                    "value": JSON.stringify({
+                                        action: `portal.view.detail`,
+                                        data: data
+                                    }),
+                                    "click": "return-val",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": "返回"
+                                    }
+                                }
+                            ]
+                        }).addDivider();
+                }
+            } else {
+                if (apex.isSendButtonClicked) {
+                    this.addDivider().addText(`您真的要将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手背景图像 吗？`);
+                    if (apex.sendButtonPreviewImageLink) {
+                        this.addModule({
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "kmarkdown",
+                                    "content": `低分辨率预览图像，与最后成品可能不同`
+                                }
+                            ]
+                        })
+                            .addModule(<any>{
+                                type: "container",
+                                elements: [
+                                    {
+                                        "type": "image",
+                                        "src": apex.sendButtonPreviewImageLink
+                                    }
+                                ]
+                            })
+                    }
+                    this.addModule({
+                        "type": "action-group",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "theme": "primary",
+                                "value": JSON.stringify({
+                                    action: `portal.run.apex.send`,
+                                    data: data
+                                }),
+                                "click": "return-val",
+                                "text": {
+                                    "type": "plain-text",
+                                    "content": "确定"
+                                }
+                            },
+                            {
+                                "type": "button",
+                                "theme": "danger",
+                                "value": JSON.stringify({
+                                    action: `portal.view.detail`,
+                                    data: data
+                                }),
+                                "click": "return-val",
+                                "text": {
+                                    "type": "plain-text",
+                                    "content": "再想想"
+                                }
+                            }
+                        ]
+                    }).addDivider();
+                } else if (apex.isSent) {
+                    this.addDivider().addText(`正在转存 (font)${pid}_p0.png(font)[pink]…请稍候`).addDivider();
+                } else if (apex.isSuccess) {
+                    this.addDivider().addText(`(font)设置成功！(font)[primary]`).addDivider();
+                }
+            }
+        }
+        return this;
+    }
+    addControl(idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", apex?: apexEvent, data?: any) {
         this.addModule({
             "type": "action-group",
             "elements": (() => {
@@ -70,6 +177,27 @@ class MultiDetailCard extends Card {
                         }
                     })
                 }
+                if (config.connectApex) {
+                    arr.push({
+                        "type": "button",
+                        "theme": apex?.isVIP ? "primary" : "secondary",
+                        "value": JSON.stringify({
+                            action: `portal.view.apex.${apex?.isVIP ? 'VIP' : 'normal'}`,
+                            data: {
+                                ...data,
+                                type: type,
+                                index: idx,
+                                link: link,
+                                pid: pid
+                            }
+                        }),
+                        "click": "return-val",
+                        "text": {
+                            "type": "plain-text",
+                            "content": "添加至 Apex助手"
+                        }
+                    })
+                }
                 return arr;
             })()
         });
@@ -77,7 +205,7 @@ class MultiDetailCard extends Card {
     }
 }
 
-export default (data: any, curLink: string, idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", inheritData?: any) => {
+export default (data: any, curLink: string, idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", apex?: apexEvent, inheritData?: any) => {
     // console.log(pid, idx, pid[idx - 1], pid[idx], pid[idx + 1]);
     try {
         return new MultiDetailCard()
@@ -95,9 +223,16 @@ export default (data: any, curLink: string, idx: number, pid: string[], link: st
                         "content": `** [${data.user.name}](https://www.pixiv.net/users/${data.user.uid})**(${data.user.uid}) | [pid ${data.id}](https://www.pixiv.net/artworks/${data.id})`
                     }
                 ]
-            },)
+            })
             .addDivider()
-            .addControl(idx, pid, link, type, inheritData)
+            .addControl(idx, pid, link, type, apex, inheritData)
+            .addApex(pid[idx], apex, {
+                ...inheritData,
+                index: idx,
+                type: type,
+                link: link,
+                pid: pid
+            })
             .addImage(curLink)
             .addModule({
                 "type": "context",
@@ -129,7 +264,7 @@ export default (data: any, curLink: string, idx: number, pid: string[], link: st
                     }
                 ]
             });
-    } catch (err) {
-        return error(err);
+    } catch (e: any) {
+        return error(e.stack);
     }
 }

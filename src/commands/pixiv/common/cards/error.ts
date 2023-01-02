@@ -17,7 +17,18 @@ export default (e: any, containTrace: boolean = false) => {
     return new ErrorCard()
         .setTheme("danger")
         .setSize("lg")
-        .addText("**内部错误 | Internal Error**")
+        .addText("**内部错误 | Internal Error**", undefined, "right", {
+            "type": "button",
+            "theme": "primary",
+            "click": "return-val",
+            "value": JSON.stringify({
+                action: "portal.error.reset"
+            }),
+            "text": {
+                "type": "plain-text",
+                "content": "重置"
+            }
+        })
         .addDivider()
         .addModule({
             "type": "context",

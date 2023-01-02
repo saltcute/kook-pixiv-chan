@@ -57,7 +57,7 @@ export namespace linkmap {
                 data: diff,
                 maxContentLength: Infinity
             }).then(() => {
-                bot.logger.info("Linkmap: Successfuly uploaded linkmap");
+                bot.logger.debug("Linkmap: Successfuly uploaded linkmap");
                 diff = {};
             }).catch((e) => {
                 bot.logger.warn("Linkmap: Failed uploading linkmap");
@@ -117,6 +117,20 @@ export namespace linkmap {
         }
     }
 
+    export function getSuggestion(illustID: string, page: string): {
+        ban: boolean
+        blurAmount: number
+    } {
+        if (isInDatabase(illustID, page)) {
+            return map[illustID][page].suggestion;
+        } else {
+            return {
+                ban: false,
+                blurAmount: 7
+            };
+        }
+    }
+
     export function addMap(illustID: string, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
         map = {
             ...map,
@@ -153,7 +167,7 @@ export namespace linkmap {
                 bot.logger.warn(e);
             }
             else {
-                bot.logger.info(`Linkmap: Successfully saved linkmap`);
+                bot.logger.debug(`Linkmap: Successfully saved linkmap`);
             }
         });
     }

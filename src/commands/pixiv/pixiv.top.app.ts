@@ -76,8 +76,8 @@ class Top extends AppCommand {
                 uploadResults = res;
             }).catch((e) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
             for (var val of uploadResults) {
@@ -88,7 +88,7 @@ class Top extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            bot.logger.info(`UserInterface: Presenting card to user`);
+            bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.top(link, pid, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.run.command.top", text: "上级" }, { action: "GUI.view.command.list", text: "命令列表" }])).toString(), undefined, session.userId);
             } else {
@@ -189,8 +189,8 @@ class Top extends AppCommand {
             sendCard(res.data, durationName);
         }).catch((e: any) => {
             if (e) {
-                console.error(e);
-                session.sendCardTemp(pixiv.cards.error(e, true));
+                bot.logger.error(e);
+                session.sendCardTemp(pixiv.cards.error(e.stack));
             }
         });
     };

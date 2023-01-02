@@ -29,7 +29,7 @@ export namespace common {
     }
     export async function save() {
         fs.writeFileSync(upath.join(__dirname, "ban.json"), JSON.stringify(ban), { encoding: "utf-8", flag: "w" });
-        bot.logger.info(`AdminBan: Saved user blacklist`);
+        bot.logger.debug(`AdminBan: Saved user blacklist`);
     }
     /**
      * Ban a user from using a command
@@ -38,7 +38,7 @@ export namespace common {
      * @param time Total time of the ban in seconds
      */
     export function banTrigger(id: string, trigger: string, time: number, message: string) {
-        bot.logger.debug(`AdminBan: Banned ${id} from ${trigger} until ${time} for ${message}`);
+        bot.logger.trace(`AdminBan: Banned ${id} from ${trigger} until ${time} for ${message}`);
         ban[id] = {
             ...ban[id],
             [trigger]: {

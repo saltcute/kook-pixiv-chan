@@ -27,7 +27,7 @@ class Refresh extends AppCommand {
             if (pixiv.linkmap.isInDatabase(illust_id, "0")) {
                 pixiv.common.getNotifications(session);
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
-                bot.logger.info(`ImageProcessing: Refreshing ${illust_id}_0.jpg`);
+                bot.logger.debug(`ImageProcessing: Refreshing ${illust_id}_0.jpg`);
                 axios({
                     baseURL: config.pixivAPIBaseURL,
                     url: "/illustration/detail",
@@ -54,7 +54,7 @@ class Refresh extends AppCommand {
                     for (const val of res.data.tags) {
                         const tag = val.name;
                         if (pixiv.common.isForbittedTag(tag)) {
-                            bot.logger.info(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
+                            bot.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                             pixiv.common.registerBan(session.userId, this.trigger, 30);
                             return session.reply(`此插画包含标签黑名单中的标签，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                         }
@@ -85,7 +85,7 @@ class Refresh extends AppCommand {
                     }
                     pixiv.common.getNotifications(session);
                     const detectionResult = (await pixiv.aligreen.imageDetectionSync([val], true))[val.id];
-                    if(!detectionResult) {
+                    if (!detectionResult) {
                         bot.logger.error("ImageDetection: No detection result was returned");
                         return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
                     }
@@ -98,7 +98,7 @@ class Refresh extends AppCommand {
                         var bodyFormData = new FormData();
                         bodyFormData.append('file', buffer, "image.jpg");
                         rtLink = await pixiv.common.uploadFile(session, val, bodyFormData)
-                        bot.logger.info(`ImageProcessing: Ended stage 1 refreshing with ${blur}px of gaussian blur (Aliyun)`);
+                        bot.logger.debug(`ImageProcessing: Ended stage 1 refreshing with ${blur}px of gaussian blur (Aliyun)`);
                         var uncensored = false;
                         var tyblur = 0;
                         for (let i = 1; i <= 5; ++i) {
@@ -106,7 +106,7 @@ class Refresh extends AppCommand {
                                 url: rtLink,
                                 method: "GET"
                             }).then(() => {
-                                bot.logger.info(`ImageProcessing: Uncensoring success with ${tyblur}px of gaussian blur`);
+                                bot.logger.debug(`ImageProcessing: Uncensoring success with ${tyblur}px of gaussian blur`);
                                 uncensored = true;
                             }).catch(async () => {
                                 bot.logger.warn(`ImageProcessing: Uncensoring failed, try ${7 * i}px of gaussian blur`);
@@ -117,8 +117,8 @@ class Refresh extends AppCommand {
                             })
                             if (uncensored) break;
                         }
-                        bot.logger.info(`ImageProcessing: Ended stage 2 refreshing with ${blur + tyblur}px of gaussian blur (trial & error)`);
-                        bot.logger.info(`UserInterface: Presenting card to user`);
+                        bot.logger.debug(`ImageProcessing: Ended stage 2 refreshing with ${blur + tyblur}px of gaussian blur (trial & error)`);
+                        bot.logger.debug(`UserInterface: Presenting card to user`);
                         if (!uncensored) {
                             if (session.guild) {
                                 session.updateMessage(mainCardMessageID, [{
@@ -145,7 +145,7 @@ class Refresh extends AppCommand {
                                     })
                                     .catch((e) => {
                                         bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
-                        if (e) bot.logger.error(e);
+                                        if (e) bot.logger.error(e);
                                     });
                             } else {
                                 session.sendCard([pixiv.cards.detail(val, rtLink)])
@@ -154,7 +154,7 @@ class Refresh extends AppCommand {
                                     })
                                     .catch((e) => {
                                         bot.logger.error(`UserInterface: Failed sending message`);
-                        if (e) bot.logger.error(e);
+                                        if (e) bot.logger.error(e);
                                     });
                             }
                             if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", rtLink, detectionResult);
@@ -166,8 +166,8 @@ class Refresh extends AppCommand {
                     }
                 }).catch((e: any) => {
                     if (e) {
-                        console.error(e);
-                        session.sendCardTemp(pixiv.cards.error(e, true));
+                        bot.logger.error(e);
+                        session.sendCardTemp(pixiv.cards.error(e.stack));
                     }
                 });
             } else {

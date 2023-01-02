@@ -14,13 +14,29 @@ import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
 import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
-import { ButtonEventMessage, Card, GuildSession, TextMessage } from 'kbotify';
+import { ButtonEventMessage, Card, TextMessage } from 'kbotify';
 import { tag } from 'commands/pixiv/pixiv.tag.app';
 import { gui } from 'commands/pixiv/pixiv.gui.app';
+import FormData from 'form-data';
+import got from 'got/dist/source';
+import sharp from 'sharp';
+import upath from 'upath';
 
+
+const logFolderPath = upath.join(__dirname, 'configs', 'logs', new Date().toISOString())
+if (!fs.existsSync(logFolderPath)) {
+    fs.mkdirSync(logFolderPath, { recursive: true });
+}
+const traceLogStream = fs.createWriteStream(upath.join(logFolderPath, 'kook-pixiv-chan-trace.log'), { flags: 'a' });
+const debugLogStream = fs.createWriteStream(upath.join(logFolderPath, 'kook-pixiv-chan-debug.log'), { flags: 'a' });
+const infoLogStream = fs.createWriteStream(upath.join(logFolderPath, 'kook-pixiv-chan-info.log'), { flags: 'a' });
 bot.logger.fields.name = "kook-pixiv-chan";
-bot.logger.addStream({ level: bot.logger.INFO, stream: process.stdout });
-// bot.logger.addStream({ level: bot.logger.DEBUG, stream: process.stdout }); // DEBUG
+
+bot.logger.addStream({ level: 'trace', stream: traceLogStream });
+bot.logger.addStream({ level: 'debug', stream: debugLogStream });
+bot.logger.addStream({ level: 'info', stream: infoLogStream });
+bot.logger.addStream({ level: 'info', stream: process.stdout });
+
 bot.logger.info("Initialization: kook-pixiv-chan initialization start");
 
 (async () => {
@@ -31,6 +47,8 @@ bot.logger.info("Initialization: kook-pixiv-chan initialization start");
     await pixiv.common.tokenPoolInit();
     await pixivadmin.common.load();
     await botActivityStatus();
+    bot.logger.info("Initialization: Done");
+    bot.connect();
 })()
 schedule.scheduleJob('0,15,30,45 * * * *', async () => {
     pixiv.linkmap.save();
@@ -106,12 +124,12 @@ bot.on('kmarkdownMessage', (event) => {
                         break;
                     case 'detail':
                     case 'illust':
-                        bot.logger.info("Fuck KOOK cuz user invoked detail/illust")
+                        bot.logger.debug("Fuck KOOK cuz user invoked detail/illust")
                         break;
                     default:
                 }
                 */
-            } catch (e) { console.log(e) };
+            } catch (e) { bot.logger.error(e) };
         })
     }
     // }
@@ -122,23 +140,27 @@ bot.on("buttonClick", async (event) => {
         const buttonValue = JSON.parse(event.value);
         const action = buttonValue.action.split(".");
         const data = buttonValue.data;
-        bot.logger.info(`From ${event.user.username}#${event.user.identifyNum} invoke ${buttonValue.action}`);
+        bot.logger.debug(`ButtonClicked: From ${event.user.username}#${event.user.identifyNum} (ID ${event.userId} in (${event.guildId}/${event.channelId}), invoke ${buttonValue.action}`);
         // return;
         switch (action[0]) {
             // TODO: convert legacy event
             case "portal":
                 switch (action[1]) {
-                    case "view":
-                        const idx = data.index;
-                        const pid = data.pid;
-                        const link = data.link;
-                        const type = data.type;
-                        const curIndex = pid[idx];
-                        const curLink = link[idx];
+                    case "view": {
+                        let idx = data.index,
+                            pid = data.pid,
+                            link = data.link,
+                            type = data.type,
+                            curIndex = pid[idx],
+                            curLink = link[idx];
+                        // console.log([idx, pid, link, type, curIndex, curLink].join('\n'))
                         switch (action[2]) {
                             case "detail":
+                                const apex = await pixiv.common.getApexVIPStatus(event.userId);
                                 pixiv.common.getIllustDetail(curIndex).then((res) => {
-                                    bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, data).toString(), undefined, event.userId);
+                                    bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, {
+                                        isVIP: apex.data.is_vip
+                                    }, data).toString(), undefined, event.userId);
                                 })
                                 break;
                             case "return_from_detail":
@@ -165,6 +187,146 @@ bot.on("buttonClick", async (event) => {
                                         break;
                                 }
                                 bot.API.message.update(event.targetMsgId, card.toString(), undefined, event.userId);
+                                break;
+                            case 'apex':
+                                switch (action[3]) {
+                                    case 'VIP':
+                                        let pdata = (await pixiv.common.getIllustDetail(curIndex)).data
+                                        let apexUserInfo = (await pixiv.common.getApexVIPStatus(event.userId)).data;
+                                        // console.log(curIndex);
+                                        // console.log(pixiv.linkmap.getLink(curIndex, "0"));
+                                        let apexPreviewImageLink = (await pixiv.common.getApexImagePreview(pixiv.linkmap.getLink(curIndex, "0"), apexUserInfo.originData.uid)).url;
+                                        bot.logger.debug("ApexConnect: Fetched data for preview");
+                                        // bot.logger.debug("ApexConnect: Get preview done");
+                                        bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(pdata, curLink, idx, pid, link, type, {
+                                            isVIP: true,
+                                            isSendButtonClicked: true,
+                                            sendButtonPreviewImageLink: apexPreviewImageLink
+                                        }, data).toString(), undefined, event.userId).then(() => {
+                                            bot.logger.debug("ApexConnect: Sent preview");
+                                        })
+                                        break;
+                                    case 'normal':
+                                        pixiv.common.getIllustDetail(curIndex).then((res) => {
+                                            bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, {
+                                                isSendButtonClicked: true
+                                            }, data).toString(), undefined, event.userId);
+                                        })
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+                    }
+                    case 'run': {
+                        let idx = data.index,
+                            pid = data.pid,
+                            link = data.link,
+                            type = data.type,
+                            curIndex = pid[idx],
+                            curLink = link[idx];
+                        switch (action[2]) {
+                            case 'apex':
+                                switch (action[3]) {
+                                    case 'send':
+                                        await pixiv.common.getIllustDetail(curIndex).then((res) => {
+                                            bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, {
+                                                isVIP: true,
+                                                isSent: true
+                                            }, data).toString(), undefined, event.userId);
+                                        })
+                                        pixiv.common.getIllustDetail(curIndex).then(async (res) => {
+                                            const pdata = res.data;
+                                            const originalImageURL = pdata.page_count > 1 ? pdata.meta_pages[0].image_urls.original : pdata.meta_single_page.original_image_url
+                                            const master1200 = pixiv.common.getProxiedImageLink(originalImageURL.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
+                                            bot.logger.debug(`ApexConnect: Downloading ${master1200}`);
+                                            var bodyFormData = new FormData();
+                                            const stream = got.stream(master1200);                               // Get readable stream from origin
+                                            const censor = pixiv.linkmap.getDetection(curIndex, "0");
+                                            var sp = sharp(await pixiv.common.stream2buffer(stream))
+                                            if (censor.blur) sp = sp.blur(censor.blur);
+                                            var buffer = await (sp.png().toBuffer()); // Resize stream and convert to buffer
+                                            bodyFormData.append('file', buffer, "image.png");
+                                            await axios({
+                                                method: "post",
+                                                url: "https://www.kookapp.cn/api/v3/asset/create",
+                                                data: bodyFormData,
+                                                headers: {
+                                                    'Authorization': `Bot ${await pixiv.common.getNextToken()}`,
+                                                    ...bodyFormData.getHeaders()
+                                                }
+                                            }).then((res: any) => {
+                                                bot.logger.debug(`ApexConnect: Upload ${curIndex} success`);
+                                                const link = res.data.data.url;
+                                                const body = {
+                                                    kook: {
+                                                        user_id: event.userId,
+                                                        username: event.user.username,
+                                                        identify_num: event.user.identifyNum
+                                                    },
+                                                    pixiv: {
+                                                        illust_id: curIndex,
+                                                        illust_page: "0",
+                                                        image_original: master1200,
+                                                        image_censored: link,
+                                                        aliyun_result: {
+                                                            "raw": pixiv.linkmap.getDetection(curIndex, "0"),
+                                                            "suggestion": pixiv.linkmap.getSuggestion(curIndex, "0")
+                                                        }
+                                                    }
+                                                }
+                                                // console.dir(body, { depth: null });
+                                                pixiv.common.sendApexImage(body).then(() => {
+                                                    pixiv.common.getIllustDetail(curIndex).then((res) => {
+                                                        bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, {
+                                                            isVIP: true,
+                                                            isSuccess: true
+                                                        }, data).toString(), undefined, event.userId).then(() => {
+                                                            setTimeout(() => {
+                                                                pixiv.common.getApexVIPStatus(event.userId).then((rep) => {
+                                                                    bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, { isVIP: rep.data.is_vip }, data).toString(), undefined, event.userId);
+                                                                })
+                                                            }, 1500);
+                                                        })
+                                                    })
+                                                }).catch((e) => {
+                                                    bot.logger.warn("ApexConnect: Update user setting failed");
+                                                    bot.logger.warn(e.message);
+                                                    bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
+                                                })
+                                            }).catch(async (e) => {
+                                                bot.logger.warn(`ApexConnect: Upload ${curIndex} failed`);
+                                                bot.logger.warn(e);
+                                                bot.API.message.update(event.channelId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
+                                            });
+                                        }).catch((e) => {
+                                            bot.logger.warn(e);
+                                            bot.API.message.update(event.targetMsgId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
+                                        });
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+                    }
+                    case 'error':
+                        switch (action[2]) {
+                            case 'reset':
+                                // console.log(event);
+                                bot.axios({
+                                    url: '/v3/message/view',
+                                    params: {
+                                        msg_id: event.targetMsgId,
+                                    }
+                                }).then((res) => {
+                                    // console.log(res.data);
+                                    bot.API.message.update(event.targetMsgId, res.data.data.content, undefined, event.userId)
+                                        .catch((e) => {
+                                            bot.logger.error(e);
+                                        })
+                                }).catch((e) => {
+                                    bot.logger.error(e);
+                                })
                                 break;
                         }
                         break;
@@ -203,7 +365,7 @@ bot.on("buttonClick", async (event) => {
                                         undefined, event.userId);
                                 }).catch((e) => {
                                     bot.logger.warn(e);
-                                    bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
+                                    bot.API.message.update(event.targetMsgId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
                                 });
                                 break;
                             case "settings":
@@ -278,18 +440,16 @@ bot.on("buttonClick", async (event) => {
                         break;
                 }
         }
-    } catch { // Compatibility
+    } catch (e: any) { // Compatibility
         const identifier = event.value.split("|")[0];
         if (identifier == "view_detail" || identifier == "view_return") {
             bot.API.message.update(event.targetMsgId, pixiv.cards.error("此卡片来自旧版 Pixiv酱，现已无法使用").toString(), undefined, event.userId);
         } else {
-            bot.API.message.update(event.targetMsgId, pixiv.cards.error(`唤起了无效的按钮事件： \`${event.value}\``).toString(), undefined, event.userId);
+            bot.logger.error(e.stack);
+            bot.API.message.update(event.targetMsgId, pixiv.cards.error(`唤起按钮事件时出错：\n${event.value}\n\n错误信息：\n${e.stack}`).toString(), undefined, event.userId);
         }
     }
 })
-
-
-bot.connect();
 
 async function getRandomStatus(): Promise<[string, string]> {
     try {
@@ -365,8 +525,8 @@ function botMarketStayOnline() {
         }
     }).then((res) => {
         if (res.data.code == 0) {
-            bot.logger.info(`BotMarket: Successfully updated online status with remote returning: `);
-            bot.logger.info(res.data);
+            bot.logger.debug(`BotMarket: Successfully updated online status with remote returning: `);
+            bot.logger.debug(res.data);
             setTimeout(botMarketStayOnline, (res.data.data.onTime + 5) * 1000);
         } else if (res.data.code == -1) {
             bot.logger.warn(`BotMarket: Failed updating online status with remote returning: `);

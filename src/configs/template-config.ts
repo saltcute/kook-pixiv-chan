@@ -91,5 +91,13 @@ export default {
      * to view, and to send message to, this channel, 
      * or it may be mistaken that no uploader is available, shutting down Pixiv Chan on start
      */
-    uploaderOnlineMessageDestination: "1145141919810"
+    uploaderOnlineMessageDestination: "1145141919810",
+
+    /**
+     * Apex助手 connection configurations
+     */
+    connectApex: false,
+    connectApexHost: '',
+    previewApexHost: '',
+    connectApexToken: '',
 }

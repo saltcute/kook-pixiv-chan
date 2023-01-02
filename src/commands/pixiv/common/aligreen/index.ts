@@ -28,11 +28,11 @@ export namespace aligreen {
             }
         }
         if (empty) {
-            bot.logger.info("ImageDetection: No detection needed for the given illustrations");
+            bot.logger.debug("ImageDetection: No detection needed for the given illustrations");
             return linkmapResults;
         }
-        bot.logger.info(`ImageDetection: Aliyun image detection started for:`);
-        bot.logger.info(Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", "));
+        bot.logger.debug(`ImageDetection: Aliyun image detection started for:`);
+        bot.logger.debug(Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", "));
         function blur(v: any, block: number, censor: number, hide: number, blur: number, dodge: number) {
             switch (v.suggestion) {
                 case "block":
@@ -127,7 +127,7 @@ export namespace aligreen {
             }
         }).catch((e) => {
             if (e) {
-                console.error(e);
+                bot.logger.error(e);
             }
         });
         return result;

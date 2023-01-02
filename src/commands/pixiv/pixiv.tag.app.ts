@@ -80,8 +80,8 @@ class Tag extends AppCommand {
                 uploadResults = res;
             }).catch((e) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
             for (var val of uploadResults) {
@@ -92,7 +92,7 @@ class Tag extends AppCommand {
                 link.push(pixiv.common.akarin);
                 pid.push("没有了");
             }
-            bot.logger.info(`UserInterface: Presenting card to user`);
+            bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.tag(link, pid, tags, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
             } else {
@@ -171,7 +171,7 @@ class Tag extends AppCommand {
             }
             for (const tag of tags) {
                 if (pixiv.common.isForbittedTag(tag)) {
-                    bot.logger.info(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
+                    bot.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.userId, this.trigger, 30);
                     return session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
                 }
@@ -203,8 +203,8 @@ class Tag extends AppCommand {
                 sendCard(res.data, tags, durationName);
             }).catch((e: any) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
         }

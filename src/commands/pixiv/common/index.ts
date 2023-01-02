@@ -56,6 +56,91 @@ export namespace common {
     }
 
     /**
+     * Check if user is VIP for Apex助手
+     * @param uid KOOK user id
+     */
+    export async function getApexVIPStatus(uid: string): Promise<{
+        status: number,
+        data: {
+            id: string,
+            is_exist: boolean,
+            is_vip: boolean,
+            originData: {
+                name: string,
+                uid: string,
+                pid: string
+            }
+        }
+    }> {
+        const res = await axios({
+            baseURL: config.connectApexHost,
+            url: '/user/view',
+            params: {
+                user_id: uid
+            },
+            method: 'GET',
+            headers: {
+                'Authorization': config.connectApexToken
+            }
+        }).catch((e) => {
+            bot.logger.warn("ApexConnect: Checking Apex助手 status failed");
+            bot.logger.warn(e);
+            return {
+                data: {
+                    status: -1,
+                    data: {
+                        id: "-1",
+                        is_exist: false,
+                        is_vip: false,
+                        originData: {
+                            name: 'Unknown',
+                            uid: "-1",
+                            pid: "-1"
+                        }
+                    }
+                }
+            };
+        })
+        return res.data;
+    }
+
+    export async function sendApexImage(data: any) {
+        return axios({
+            baseURL: config.connectApexHost,
+            url: '/user/update',
+            method: 'POST',
+            data: data,
+            headers: {
+                'Authorization': config.connectApexToken
+            }
+        });
+    }
+
+    export async function getApexImagePreview(image: string, uid: string): Promise<{
+        url: string
+    }> {
+        const res = (await axios({
+            baseURL: config.previewApexHost,
+            url: 'stat_img',
+            params: {
+                bg: image,
+                mode: 'search',
+                type: 'uid',
+                player: uid
+            }
+        }).catch((e) => {
+            bot.logger.warn("ApexConnect: Getting Apex image preview failed");
+            bot.logger.warn(e);
+            return {
+                data: {
+                    url: akarin
+                }
+            }
+        })).data;
+        return res;
+    }
+
+    /**
      * Convert illustration id string to Markdown link
      * @param pid Pixiv illustartion id
      * @returns clickable link to the artwork page on Pixiv in Markdown
@@ -85,7 +170,7 @@ export namespace common {
      * @param session kbotify session
      */
     export function logInvoke(command: string, session: BaseSession) {
-        bot.logger.info(`From ${session.user.username}#${session.user.identifyNum} as ${session.user.nickname} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
+        bot.logger.debug(`InvokedCommand: From ${session.user.username}#${session.user.identifyNum} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
     }
 
     /**
@@ -249,11 +334,11 @@ export namespace common {
                 ...bodyFormData.getHeaders()
             }
         }).then((res: any) => {
-            bot.logger.info(`ImageProcessing: Upload ${val.id} success`);
+            bot.logger.debug(`ImageProcessing: Upload ${val.id} success`);
             rtLink = res.data.data.url
         }).catch(async () => {
             bot.logger.error(`ImageProcessing: Upload ${val.id} failed, forcing token offline`);
-            bot.logger.info(`ImageProcessing: Retrying with another token`);
+            bot.logger.debug(`ImageProcessing: Retrying with another token`);
             deactiveCurrentToken();
             if (await cycleThroughTokens()) {
                 await session.replyCard(new Card()
@@ -278,12 +363,12 @@ export namespace common {
     export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
         var val = data;
         if (linkmap.isInDatabase(val.id, "0")) {
-            bot.logger.info(`ImageDetection: ${val.id} in database, skipped`);
+            bot.logger.debug(`ImageDetection: ${val.id} in database, skipped`);
             return { link: linkmap.getLink(val.id, "0"), pid: val.id };
         }
 
         const master1200 = common.getProxiedImageLink(val.image_urls.large.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
-        bot.logger.info(`ImageProcessing: Downloading ${master1200}`);
+        bot.logger.debug(`ImageProcessing: Downloading ${master1200}`);
         var bodyFormData = new FormData();
         const stream = got.stream(master1200);                               // Get readable stream from origin
         var buffer = await sharp(await stream2buffer(stream)).resize(config.resizeWidth, config.resizeHeight, { fit: "outside" }).jpeg().toBuffer(); // Resize stream and convert to buffer
@@ -291,7 +376,7 @@ export namespace common {
         if (detectionResult.success) {
             blur = detectionResult.blur;
             if (blur > 0) buffer = await sharp(buffer).blur(blur).jpeg().toBuffer();
-            bot.logger.info(`ImageProcessing: Finished blurring ${val.id} with ${blur}px of gaussian blur`);
+            bot.logger.debug(`ImageProcessing: Finished blurring ${val.id} with ${blur}px of gaussian blur`);
             bodyFormData.append('file', buffer, "image.jpg");
             var rtLink = await uploadFile(session, val, bodyFormData);
             //Upload image to KOOK's server

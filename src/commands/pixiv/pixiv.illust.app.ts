@@ -42,7 +42,7 @@ class Illust extends AppCommand {
                 if (!sendSuccess) return;
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
-            if(!detectionResult) {
+            if (!detectionResult) {
                 bot.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
@@ -55,11 +55,11 @@ class Illust extends AppCommand {
                 uploadResult = res;
             }).catch((e) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
-            bot.logger.info(`UserInterface: Presenting card to user`);
+            bot.logger.debug(`UserInterface: Presenting card to user`);
             if (session.guild) {
                 session.updateMessage(mainCardMessageID, [pixiv.cards.illust(data, uploadResult.link)])
                     .then(() => {
@@ -110,14 +110,14 @@ class Illust extends AppCommand {
                     return session.reply("Pixiv官方服务器不可用，请稍后再试");
                 }
                 if (pixiv.common.isForbittedUser(res.data.user.uid)) {
-                    bot.logger.info(`UserInterface: User violates tag blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
+                    bot.logger.debug(`UserInterface: User violates tag blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.userId, this.trigger, 30);
                     return session.reply(`此插画来自用户黑名单中的用户，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                 }
                 for (const val of res.data.tags) {
                     const tag = val.name;
                     if (pixiv.common.isForbittedTag(tag)) {
-                        bot.logger.info(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
+                        bot.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                         pixiv.common.registerBan(session.userId, this.trigger, 30);
                         return session.reply(`此插画包含标签黑名单中的标签，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                     }
@@ -126,8 +126,8 @@ class Illust extends AppCommand {
                 sendCard(res.data);
             }).catch((e: any) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
         }

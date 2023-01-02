@@ -59,11 +59,11 @@ class Detail extends AppCommand {
                 uploadResult = res;
             }).catch((e) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
-            bot.logger.info(`UserInterface: Presenting card to user`);
+            bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.detail(data, uploadResult.link).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
             } else {
@@ -138,14 +138,14 @@ class Detail extends AppCommand {
                     return session.reply("Pixiv官方服务器不可用，请稍后再试");
                 }
                 if (pixiv.common.isForbittedUser(res.data.user.uid)) {
-                    bot.logger.info(`UserInterface: User violates user blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
+                    bot.logger.debug(`UserInterface: User violates user blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.userId, this.trigger, 30);
                     return session.reply(`此插画来自用户黑名单中的用户，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                 }
                 for (const val of res.data.tags) {
                     const tag = val.name;
                     if (pixiv.common.isForbittedTag(tag)) {
-                        bot.logger.info(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
+                        bot.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                         pixiv.common.registerBan(session.userId, this.trigger, 30);
                         return session.reply(`此插画包含标签黑名单中的标签，您已被暂时停止使用 \`.pixiv ${this.trigger}\` 指令 30秒`);
                     }
@@ -154,8 +154,8 @@ class Detail extends AppCommand {
                 sendCard(res.data);
             }).catch((e: any) => {
                 if (e) {
-                    console.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e, true));
+                    bot.logger.error(e);
+                    session.sendCardTemp(pixiv.cards.error(e.stack));
                 }
             });
         }
