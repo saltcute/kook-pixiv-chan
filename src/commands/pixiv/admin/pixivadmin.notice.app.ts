@@ -17,14 +17,14 @@ class Notice extends AppCommand {
         pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
         switch (session.args[0]) {
             case "add":
-                bot.logger.info("AdminNotice: Added notification:")
+                bot.logger.debug("AdminNotice: Added notification:")
                 const content = session.args.slice(1).join(" ");
-                bot.logger.info(content);
+                bot.logger.debug(content);
                 session.replyCardTemp([pixiv.cards.notification(content)]);
                 pixiv.common.addNotifications(content);
                 break;
             case "delete":
-                bot.logger.info("AdminNotice: Deleted current notification");
+                bot.logger.debug("AdminNotice: Deleted current notification");
                 session.replyTemp("Deleted");
                 pixiv.common.deleteNotifications();
                 break;

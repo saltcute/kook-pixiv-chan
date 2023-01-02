@@ -2,6 +2,8 @@ import { Card, MenuCommand } from 'kbotify';
 import { notice } from './pixivadmin.notice.app';
 import { detection } from './pixivadmin.detection.app';
 import { ban } from './pixivadmin.ban.app';
+import { kill } from './pixivadmin.kill.app';
+import { ping } from './pixivadmin.ping.app';
 
 class PixivAdminMenu extends MenuCommand {
     code = 'pixivadmin';
@@ -42,4 +44,4 @@ class PixivAdminMenu extends MenuCommand {
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivAdminMenu = new PixivAdminMenu(notice, detection, ban);
+export const pixivAdminMenu = new PixivAdminMenu(notice, detection, ban, kill, ping);
