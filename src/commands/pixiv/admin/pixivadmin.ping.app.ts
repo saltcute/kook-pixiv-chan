@@ -10,58 +10,76 @@ class Ping extends AppCommand {
         if (!pixivadmin.common.isAdmin(session.userId)) {
             return session.reply("You do not have the permission to use this command")
         }
-        const userTimestamp = session.msg.msgTimestamp;
-        const localTimeStamp = Date.now();
+        const remoteOrigin = session.msg.msgTimestamp;
+        const localOrigin = Date.now();
         session.sendCard(new Card()
             .addModule({
                 "type": "section",
                 "text": {
                     "type": "paragraph",
-                    "cols": 3,
+                    "cols": 2,
                     "fields": [
                         {
                             "type": "kmarkdown",
-                            "content": `**Remote Origin**\n(font)${userTimestamp}(font)[primary]`
+                            "content": `**LocalOrigin**\n(font)${localOrigin}(font)[success]`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `**Local Response**\n(font)${localTimeStamp}(font)[pink]`
+                            "content": `**RemoteOrigin**\n(font)${remoteOrigin}(font)[primary]`
                         },
                         {
                             "type": "kmarkdown",
-                            "content": `**Remote Response**\n(font)N/A(font)[secondary]`
+                            "content": `**LocalResponse**\n(font)N/A(font)[secondary]`
+                        },
+                        {
+                            "type": "kmarkdown",
+                            "content": `**RemoteResponse**\n(font)N/A(font)[secondary]`
                         }
                     ]
                 }
             })).then((res) => {
-                const remoteTimeStamp = res.msgSent?.msgTimestamp || -1;
+                const localResponse = Date.now()
+                const remoteReponse = res.msgSent?.msgTimestamp || -1;
                 const messageId = res.msgSent?.msgId;
-                if (messageId && remoteTimeStamp) {
-                    const latency = remoteTimeStamp - userTimestamp;
-                    const timeDiff = Math.abs(remoteTimeStamp - localTimeStamp);
+                if (messageId && remoteReponse) {
+                    const localLatency = localResponse - localOrigin;
+                    const remoteLatency = remoteReponse - remoteOrigin;
+                    const originDiff = Math.abs(localOrigin - remoteOrigin);
+                    const responseDiff = Math.abs(localResponse - remoteReponse);
+                    const colorizeLatencyString = (time: number): string => {
+                        return `(font)${time}ms(font)[${time > 1000 ? "danger" : time > 500 ? "warning" : "primary"}]`;
+                    }
                     bot.API.message.update(messageId, new Card()
                         .addModule({
                             "type": "section",
                             "text": {
                                 "type": "paragraph",
-                                "cols": 3,
+                                "cols": 2,
                                 "fields": [
                                     {
                                         "type": "kmarkdown",
-                                        "content": `**Remote Origin**\n(font)${userTimestamp}(font)[primary]`
+                                        "content": `**LocalOrigin**\n(font)${localOrigin}(font)[success]`
                                     },
                                     {
                                         "type": "kmarkdown",
-                                        "content": `**Local Response**\n(font)${localTimeStamp}(font)[pink]`
+                                        "content": `**RemoteOrigin**\n(font)${remoteOrigin}(font)[primary]`
                                     },
                                     {
                                         "type": "kmarkdown",
-                                        "content": `**Remote Response**\n(font)${remoteTimeStamp}(font)[purple]`
+                                        "content": `**LocalResponse**\n(font)${localResponse}(font)[pink]`
+                                    },
+                                    {
+                                        "type": "kmarkdown",
+                                        "content": `**RemoteResponse**\n(font)${remoteReponse}(font)[purple]`
                                     }
                                 ]
                             }
-                        }).addText(`ResponseLatency: (font)${latency}ms(font)[${latency > 1000 ? "danger" : latency > 500 ? "warning" : "primary"}]`)
-                        .addText(`TimeDiff: (font)${timeDiff}ms(font)[${timeDiff > 1000 ? "danger" : timeDiff > 500 ? "warning" : "primary"}]`)
+                        })
+                        .addDivider()
+                        .addText(`localLatency: ${colorizeLatencyString(localLatency)}`)
+                        .addText(`remoteLatency: ${colorizeLatencyString(remoteLatency)}`)
+                        .addText(`originDiff: ${colorizeLatencyString(originDiff)}`)
+                        .addText(`repsonseDiff: ${colorizeLatencyString(responseDiff)}`)
                         .toString()
                     )
                 }
