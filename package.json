@@ -44,6 +44,7 @@
   "devDependencies": {
     "@alicloud/imageaudit-2019-12-30": "^2.0.0",
     "@alicloud/pop-core": "^1.7.12",
+    "@types/bunyan": "^1.8.8",
     "@types/luxon": "^3.1.0",
     "@types/node-schedule": "^2.1.0",
     "@types/sharp": "^0.30.4",
