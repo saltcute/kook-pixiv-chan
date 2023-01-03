@@ -11,6 +11,7 @@ import { profile } from './pixiv.profile.app';
 import { tag } from './pixiv.tag.app';
 import { redeem } from './pixiv.redeem.app';
 import { gui } from './pixiv.gui.app';
+import { cards } from './common';
 class PixivMenu extends MenuCommand {
     code = 'pixiv';
     trigger = 'pixiv';
@@ -49,16 +50,7 @@ class PixivMenu extends MenuCommand {
         .addText("```plain\n.pixiv detail <Illustration ID>```\n 获取对应 ID 插画的详细信息（作品名、作者、标签等）")
         .addText("```plain\n.pixiv refresh <Illustration ID>```\n 刷新对应 ID 插画的缓存。")
         .addText("```plain\n.pixiv credit```\n 查看赞助与感谢列表")
-        .addModule({
-            "type": "context",
-            "elements": [
-                {
-                    "type": "kmarkdown",
-                    "content": "有定制 KOOK 机器人需求的朋友们可以联系 Hexona#6969\n可以[进服](https://kook.top/iOOsLu)@我或者私信（请详细描述需求） \n您也可以在[爱发电](https://afdian.net/@hexona)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
-                    // "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@hexona)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
-                }
-            ]
-        }).toString();
+        .addModule(cards.getCommercials()).toString();
     useCardMenu = true; // 使用卡片菜单
 }
 

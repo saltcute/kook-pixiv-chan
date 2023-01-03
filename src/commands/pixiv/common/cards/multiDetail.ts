@@ -19,7 +19,7 @@ class MultiDetailCard extends Card {
         if (config.connectApex) {
             if (!apex?.isVIP) {
                 if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
-                    this.addDivider().addText(`您需要购买 Apex助手 高级会员 才能将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手背景图像。`)
+                    this.addDivider().addText(`您需要购买 Apex助手 高级会员 才能将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手 背景图像。`)
                         .addModule({
                             "type": "action-group",
                             "elements": [

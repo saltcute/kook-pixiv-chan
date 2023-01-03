@@ -204,6 +204,8 @@ bot.on("buttonClick", async (event) => {
                                             sendButtonPreviewImageLink: apexPreviewImageLink
                                         }, data).toString(), undefined, event.userId).then(() => {
                                             bot.logger.debug("ApexConnect: Sent preview");
+                                        }).catch((e) => {
+                                            bot.logger.error(e);
                                         })
                                         break;
                                     case 'normal':
@@ -211,6 +213,8 @@ bot.on("buttonClick", async (event) => {
                                             bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res.data, curLink, idx, pid, link, type, {
                                                 isSendButtonClicked: true
                                             }, data).toString(), undefined, event.userId);
+                                        }).catch((e) => {
+                                            bot.logger.error(e);
                                         })
                                         break;
                                 }
@@ -245,7 +249,7 @@ bot.on("buttonClick", async (event) => {
                                             const censor = pixiv.linkmap.getDetection(curIndex, "0");
                                             var sp = sharp(await pixiv.common.stream2buffer(stream))
                                             if (censor.blur) sp = sp.blur(censor.blur);
-                                            var buffer = await (sp.png().toBuffer()); // Resize stream and convert to buffer
+                                            var buffer = await (sp.jpeg({ quality: 90 }).toBuffer()); // Encode to jpeg and convert to buffer
                                             bodyFormData.append('file', buffer, "image.png");
                                             await axios({
                                                 method: "post",
