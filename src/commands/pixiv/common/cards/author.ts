@@ -23,7 +23,7 @@ export default (data: any, r18: number, link: string[], pid: string[], { resave 
             ]
         })
         .addDivider()
-        .addModule(pixiv.cards.GUI.portalEntry(link, pid, "author", { data: data, r18: r18 }))
+        .addModule(pixiv.cards.GUI.portalEntry(link, pid, "author", { r18: r18 }))
         .addModule({
             "type": "image-group",
             "elements": (() => {
