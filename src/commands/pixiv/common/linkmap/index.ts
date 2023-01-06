@@ -87,7 +87,8 @@ export namespace linkmap {
         }
     }
 
-    export function isInDatabase(illustID: string, page: string): boolean {
+    export function isInDatabase(illustID: string | number, page: string): boolean {
+        illustID = illustID.toString();
         if (map.hasOwnProperty(illustID)) {
             if (map[illustID].hasOwnProperty(page)) {
                 return true;
@@ -97,7 +98,8 @@ export namespace linkmap {
         }
     }
 
-    export function getLink(illustID: string, page: string): string {
+    export function getLink(illustID: string | number, page: string): string {
+        illustID = illustID.toString();
         if (isInDatabase(illustID, page)) {
             return map[illustID][page].kookLink;
         } else {
@@ -105,7 +107,8 @@ export namespace linkmap {
         }
     }
 
-    export function getDetection(illustID: string, page: string): type.detectionResult {
+    export function getDetection(illustID: string | number, page: string): type.detectionResult {
+        illustID = illustID.toString();
         if (isInDatabase(illustID, page)) {
             return map[illustID][page].NSFWResult;
         } else {
@@ -117,10 +120,11 @@ export namespace linkmap {
         }
     }
 
-    export function getSuggestion(illustID: string, page: string): {
+    export function getSuggestion(illustID: string | number, page: string): {
         ban: boolean
         blurAmount: number
     } {
+        illustID = illustID.toString();
         if (isInDatabase(illustID, page)) {
             return map[illustID][page].suggestion;
         } else {
@@ -131,7 +135,8 @@ export namespace linkmap {
         }
     }
 
-    export function addMap(illustID: string, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
+    export function addMap(illustID: string | number, illustPage: string, illustLink: string, detectionResult: type.detectionResult): void {
+        illustID = illustID.toString();
         map = {
             ...map,
             [illustID]: {

@@ -52,8 +52,8 @@ class Detail extends AppCommand {
             }
             var uploadResult: {
                 link: string;
-                pid: string;
-            } = { link: pixiv.common.akarin, pid: "没有了" };
+                pid: number;
+            } = { link: pixiv.common.akarin, pid: -1 };
             if (!pixiv.linkmap.isInDatabase(data.id, "0") && detectionResult.success) detection++;
             await pixiv.common.uploadImage(data, detectionResult, session).then((res) => {
                 uploadResult = res;

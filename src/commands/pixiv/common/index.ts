@@ -15,6 +15,7 @@ import userBanList from './userBanList';
 import { BaseSession, Card } from 'kbotify';
 import FormData, { Stream } from 'form-data';
 import * as pixivadmin from '../admin/common';
+import { types } from 'pixnode';
 const sharp = require('sharp');
 
 export namespace type {
@@ -324,32 +325,33 @@ export namespace common {
      * @returns The link to the uploaded file
      */
     export async function uploadFile(session: BaseSession, val: any, bodyFormData: FormData) {
-        var rtLink = "";
-        await axios({
-            method: "post",
-            url: "https://www.kookapp.cn/api/v3/asset/create",
-            data: bodyFormData,
-            headers: {
-                'Authorization': `Bot ${await getNextToken()}`,
-                ...bodyFormData.getHeaders()
-            }
-        }).then((res: any) => {
-            bot.logger.debug(`ImageProcessing: Upload ${val.id} success`);
-            rtLink = res.data.data.url
-        }).catch(async () => {
-            bot.logger.error(`ImageProcessing: Upload ${val.id} failed, forcing token offline`);
-            bot.logger.debug(`ImageProcessing: Retrying with another token`);
-            deactiveCurrentToken();
-            if (await cycleThroughTokens()) {
-                await session.replyCard(new Card()
-                    .addTitle("FATAL ERROR | 致命错误")
-                    .addDivider()
-                    .addText("**所有**图片上传机器人均不可用！Pixiv酱将立即下线并通知管理员修复。请耐心等待，通常情况下下，这个问题可以被很快解决。")
-                )
-                process.exit();
-            }
-            uploadFile(session, val, bodyFormData);
-        });
+        var rtLink: string | undefined = undefined;
+        while (!rtLink) {
+            rtLink = await axios({
+                method: "post",
+                url: "https://www.kookapp.cn/api/v3/asset/create",
+                data: bodyFormData,
+                headers: {
+                    'Authorization': `Bot ${await getNextToken()}`,
+                    ...bodyFormData.getHeaders()
+                }
+            }).then((res: any) => {
+                bot.logger.debug(`ImageProcessing: Upload ${val.id} success`);
+                return res.data.data.url
+            }).catch(async () => {
+                bot.logger.error(`ImageProcessing: Upload ${val.id} failed, forcing token offline`);
+                bot.logger.debug(`ImageProcessing: Retrying with another token`);
+                deactiveCurrentToken();
+                if (await cycleThroughTokens()) {
+                    await session.replyCard(new Card()
+                        .addTitle("FATAL ERROR | 致命错误")
+                        .addDivider()
+                        .addText("**所有**图片上传机器人均不可用！Pixiv酱将立即下线并通知管理员修复。请耐心等待，通常情况下下，这个问题可以被很快解决。")
+                    )
+                    process.exit();
+                }
+            });
+        }
         return rtLink;
     }
     /**
@@ -360,7 +362,7 @@ export namespace common {
      * @param session kbotify session
      * @returns link to the image on img.kookapp.cn and its pixiv id
      */
-    export async function uploadImage(data: any, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: string }> {
+    export async function uploadImage(data: types.illustration, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: number }> {
         var val = data;
         if (linkmap.isInDatabase(val.id, "0")) {
             bot.logger.debug(`ImageDetection: ${val.id} in database, skipped`);
