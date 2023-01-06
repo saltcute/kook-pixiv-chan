@@ -11,9 +11,6 @@ type apexEvent = {
 }
 
 class MultiDetailCard extends Card {
-    constructor(content?: string | CardObject) {
-        super(content);
-    }
     addApex(pid: string, apex?: apexEvent, data?: any) {
         // console.log(data);
         if (config.connectApex) {

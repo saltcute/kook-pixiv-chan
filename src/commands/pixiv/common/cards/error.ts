@@ -1,9 +1,6 @@
-import { Card, CardObject } from "kbotify"
+import { Card } from "kbotify"
 
 class ErrorCard extends Card {
-    constructor(content?: string | CardObject) {
-        super(content);
-    }
     addTrace(containTrace: boolean) {
         if (containTrace) {
             this.addText(`\`\`\`\n${Error().stack}\n\`\`\``);

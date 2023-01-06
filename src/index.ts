@@ -14,7 +14,7 @@ import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
 import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
-import { ButtonEventMessage, Card, TextMessage } from 'kbotify';
+import { ButtonEventMessage, Card, GuildSession, TextMessage } from 'kbotify';
 import { tag } from 'commands/pixiv/pixiv.tag.app';
 import { gui } from 'commands/pixiv/pixiv.gui.app';
 import FormData from 'form-data';
@@ -137,6 +137,7 @@ bot.on('kmarkdownMessage', (event) => {
 
 bot.on("buttonClick", async (event) => {
     try {
+        let session = new GuildSession(top, [], new ButtonEventMessage(event, bot));
         const buttonValue = JSON.parse(event.value);
         const action = buttonValue.action.split(".");
         const data = buttonValue.data;

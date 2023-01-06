@@ -24,9 +24,6 @@ import { users } from '../'
 export namespace cards {
 
     export class MultiCard extends Card {
-        constructor(content?: string | CardObject) {
-            super(content);
-        }
         addPID(pid: string[]) {
             if (pid.length >= 9) {
                 this.addModule({
