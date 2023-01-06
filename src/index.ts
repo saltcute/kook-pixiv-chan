@@ -137,7 +137,6 @@ bot.on('kmarkdownMessage', (event) => {
 
 bot.on("buttonClick", async (event) => {
     try {
-        let session = new GuildSession(top, [], new ButtonEventMessage(event, bot));
         const buttonValue = JSON.parse(event.value);
         const action = buttonValue.action.split(".");
         const data = buttonValue.data;
