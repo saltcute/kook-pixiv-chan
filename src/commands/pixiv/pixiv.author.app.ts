@@ -4,6 +4,7 @@ import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
+import { types } from 'pixnode';
 
 class Author extends AppCommand {
     code = 'author'; // 只是用作标记
@@ -16,7 +17,7 @@ class Author extends AppCommand {
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        const sendCard = async (data: any) => {
+        const sendCard = async (data: types.illustration[]) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
             if (isGUI) {
@@ -123,58 +124,59 @@ class Author extends AppCommand {
             }
             if (isNaN(parseInt(session.args[0]))) {
                 return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）");
-            }
-            const selection = session.args[1];
-            var isGUI: boolean = false;
-            var msgID: string = "";
-            if (selection && selection.split(".")[0] == "GUI") {
-                const UUID = selection.split(".")[1];
-                await bot.axios({
-                    url: "/v3/message/view",
+            } else {
+                const selection = session.args[1];
+                var isGUI: boolean = false;
+                var msgID: string = "";
+                if (selection && selection.split(".")[0] == "GUI") {
+                    const UUID = selection.split(".")[1];
+                    await bot.axios({
+                        url: "/v3/message/view",
+                        method: "GET",
+                        params: {
+                            msg_id: UUID
+                        }
+                    }).then(() => {
+                        isGUI = true;
+                        msgID = UUID;
+                    }).catch((e) => {
+                        bot.logger.warn("GUI:Unknown GUI msgID");
+                        bot.logger.warn(e);
+                        isGUI = false;
+                    })
+                }
+                axios({
+                    baseURL: config.pixivAPIBaseURL,
+                    url: "/creator/illustration",
                     method: "GET",
                     params: {
-                        msg_id: UUID
+                        keyword: session.args[0],
+                        user: {
+                            id: session.user.id,
+                            identifyNum: session.user.identifyNum,
+                            username: session.user.username,
+                            avatar: session.user.avatar
+                        }
                     }
-                }).then(() => {
-                    isGUI = true;
-                    msgID = UUID;
-                }).catch((e) => {
-                    bot.logger.warn("GUI:Unknown GUI msgID");
-                    bot.logger.warn(e);
-                    isGUI = false;
-                })
+                }).then((res: any) => {
+                    if (res.data.length === 0) {
+                        return session.reply("用户不存在或此用户没有上传过插画！")
+                    }
+                    if (res.data.hasOwnProperty("code") && res.data.code == 400) {
+                        return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）")
+                    }
+                    if (res.data.hasOwnProperty("code") && res.data.code == 500) {
+                        return session.reply("Pixiv官方服务器不可用，请稍后再试");
+                    }
+                    pixiv.common.getNotifications(session);
+                    sendCard(res.data);
+                }).catch((e: any) => {
+                    if (e) {
+                        bot.logger.error(e);
+                        session.sendCardTemp(pixiv.cards.error(e.stack));
+                    }
+                });
             }
-            axios({
-                baseURL: config.pixivAPIBaseURL,
-                url: "/illustration/creator",
-                method: "GET",
-                params: {
-                    keyword: session.args[0],
-                    user: {
-                        id: session.user.id,
-                        identifyNum: session.user.identifyNum,
-                        username: session.user.username,
-                        avatar: session.user.avatar
-                    }
-                }
-            }).then((res: any) => {
-                if (res.data.length === 0) {
-                    return session.reply("用户不存在或此用户没有上传过插画！")
-                }
-                if (res.data.hasOwnProperty("code") && res.data.code == 400) {
-                    return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）")
-                }
-                if (res.data.hasOwnProperty("code") && res.data.code == 500) {
-                    return session.reply("Pixiv官方服务器不可用，请稍后再试");
-                }
-                pixiv.common.getNotifications(session);
-                sendCard(res.data);
-            }).catch((e: any) => {
-                if (e) {
-                    bot.logger.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e.stack));
-                }
-            });
         }
     };
 }
