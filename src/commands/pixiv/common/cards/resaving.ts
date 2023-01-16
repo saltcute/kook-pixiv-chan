@@ -1,7 +1,7 @@
 import { Card } from "kbotify"
 import { cards } from ".";
 
-export default (str: string) => {
+export default (str: string | number) => {
     return new Card()
         .setTheme("warning")
         .setSize("lg")

@@ -4,6 +4,7 @@ import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
+import { types } from 'pixnode';
 
 class Random extends AppCommand {
     code = 'random'; // 只是用作标记
@@ -16,7 +17,7 @@ class Random extends AppCommand {
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 10, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        const sendCard = async (data: any) => {
+        const sendCard = async (data: types.illustration[]) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
             if (isGUI) {

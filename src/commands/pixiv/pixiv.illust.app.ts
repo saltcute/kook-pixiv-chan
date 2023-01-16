@@ -4,6 +4,7 @@ import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
+import { types } from 'pixnode';
 
 class Illust extends AppCommand {
     code = 'illust'; // 只是用作标记
@@ -16,7 +17,7 @@ class Illust extends AppCommand {
         if (pixiv.common.isBanned(session, this.trigger)) return;
         if (pixiv.common.isRateLimited(session, 3, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        const sendCard = async (data: any) => {
+        const sendCard = async (data: types.illustration) => {
             if (data.x_restrict !== 0) {
                 return session.sendCard(pixiv.cards.illust(data, pixiv.common.akarin));
             }

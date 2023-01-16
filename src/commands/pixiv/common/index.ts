@@ -55,6 +55,21 @@ export namespace common {
     export function isObjKey<T extends object>(key: PropertyKey, obj: T): key is keyof T {
         return key in obj;
     }
+    /**
+     * Suffle the input array
+     * 
+     * The array will be modified
+     * @param array The array to be suffled
+     */
+    export function shuffleArray(array: any[]) {
+        var m = array.length, t, i;
+        while (m) {
+            i = Math.floor(Math.random() * m--);
+            t = array[m];
+            array[m] = array[i];
+            array[i] = t;
+        }
+    }
 
     /**
      * Check if user is VIP for Apex助手
