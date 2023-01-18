@@ -94,13 +94,34 @@ bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P
 bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
 bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
-bot.on('kmarkdownMessage', (event) => {
-    // if (event.mention.user.includes(bot.userId)) { // Quote bot
-    if (new RegExp(String.raw`^(\(met\)${bot.userId}\(met\))? ?[再在]?多?来[一俩二仨三四五六七八九十百千万亿兆京]*[张点][不]?[涩色瑟蛇]?图?$`).test(event.content)) {
-        const text = new TextMessage(event, bot);
-        random.exec('random', [], text);
+function getMatches(string: string, regex: RegExp): string[] {
+    let matches = regex.exec(string);
+    let res = [];
+    if (matches) {
+        for (let i = 1; i < matches.length; ++i) {
+            res.push(matches[i]);
+        }
     }
-    // }
+    return res;
+}
+
+bot.on('kmarkdownMessage', (event) => {
+    const text = new TextMessage(event, bot);
+    switch (true) {
+        case new RegExp(String.raw`^(\(met\)${bot.userId}\(met\))? ?[再在]?多?来[一俩二仨三四五六七八九十百千万亿兆京]*[张点][不]?[涩色瑟蛇]?图?$`).test(event.content): {
+            random.exec('random', [], text);
+            break;
+        };
+        case /^\/查询画师 ?([0-9]+)$/.test(event.content): {
+            const matches = getMatches(event.content, /^\/查询画师 ?([0-9]+)$/);
+            author.exec('author', [matches[0]], text);
+        };
+        case /^\/查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/.test(event.content): {
+            const matches = getMatches(event.content, /^\/查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/);
+            detail.exec('detail', [matches[0]], text);
+            break;
+        }
+    }
 })
 
 bot.on("buttonClick", async (event) => {
