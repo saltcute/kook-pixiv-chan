@@ -222,15 +222,15 @@ export namespace common {
      * @param illustID Pixiv illsutration ID
      * @returns illustration data from Pixiv web API
      */
-    export async function getIllustDetail(illustID: string) {
-        return axios({
+    export async function getIllustDetail(illustID: string): Promise<types.illustration> {
+        return (await axios({
             baseURL: config.pixivAPIBaseURL,
             url: "/illustration/detail",
             method: "GET",
             params: {
                 keyword: illustID
             }
-        })
+        })).data;
     }
 
     /**

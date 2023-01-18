@@ -3,7 +3,6 @@ import NSFWCard from './nsfwWarning'
 import TopCard from './top'
 import AuthorCard from './author'
 import DetailCard from './detail'
-import IllustCard from './illust'
 import ResavingCard from './resaving'
 import CreditCard from './credit'
 import RandomCard from './random'
@@ -17,11 +16,146 @@ import MultiDetail from './multiDetail'
 import GUIMain from './GUI/main'
 import GUICMDLST from './GUI/command/list'
 import GUICMDTOP from './GUI/command/top'
-import { Card, CardObject } from 'kbotify'
+import { Card } from 'kbotify'
 import * as pixiv from "../"
 import { users } from '../'
+import config from 'configs/config'
+
+
 
 export namespace cards {
+    export type apexEvent = {
+        isVIP?: boolean,
+        isSendButtonClicked?: boolean,
+        sendButtonPreviewImageLink?: string,
+        isSent?: boolean,
+        isSuccess?: boolean,
+    }
+    export class SingleCard extends Card {
+        addApex(pid: number, link: string, apex?: apexEvent) {
+            // console.log(data);
+            if (config.connectApex) {
+                if (!apex?.isVIP) {
+                    if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
+                        this.addDivider().addText(`您需要购买 Apex助手 高级会员 才能将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手 背景图像。`)
+                            .addModule({
+                                "type": "action-group",
+                                "elements": [
+                                    {
+                                        "type": "button",
+                                        "theme": "primary",
+                                        "value": "https://afdian.net/@night386",
+                                        "click": "link",
+                                        "text": {
+                                            "type": "plain-text",
+                                            "content": "前往购买"
+                                        }
+                                    },
+                                    {
+                                        "type": "button",
+                                        "theme": "danger",
+                                        "value": JSON.stringify({
+                                            action: `portal.view.reset`
+                                        }),
+                                        "click": "return-val",
+                                        "text": {
+                                            "type": "plain-text",
+                                            "content": "返回"
+                                        }
+                                    }
+                                ]
+                            }).addDivider();
+                    }
+                } else {
+                    if (apex.isSendButtonClicked) {
+                        this.addDivider().addText(`您真的要将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手背景图像 吗？`);
+                        if (apex.sendButtonPreviewImageLink) {
+                            this.addModule({
+                                "type": "context",
+                                "elements": [
+                                    {
+                                        "type": "kmarkdown",
+                                        "content": `低分辨率预览图像，与最后成品可能不同`
+                                    }
+                                ]
+                            })
+                                .addModule(<any>{
+                                    type: "container",
+                                    elements: [
+                                        {
+                                            "type": "image",
+                                            "src": apex.sendButtonPreviewImageLink
+                                        }
+                                    ]
+                                })
+                        }
+                        this.addModule({
+                            "type": "action-group",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "theme": "primary",
+                                    "value": JSON.stringify({
+                                        action: `portal.run.apex.send`,
+                                        data: {
+                                            trigger: 'detail',
+                                            pid,
+                                            link
+                                        }
+                                    }),
+                                    "click": "return-val",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": "确定"
+                                    }
+                                },
+                                {
+                                    "type": "button",
+                                    "theme": "danger",
+                                    "value": JSON.stringify({
+                                        action: `portal.view.reset`,
+                                    }),
+                                    "click": "return-val",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": "再想想"
+                                    }
+                                }
+                            ]
+                        }).addDivider();
+                    } else if (apex.isSent) {
+                        this.addDivider().addText(`正在转存 (font)${pid}_p0.png(font)[pink]…请稍候`).addDivider();
+                    } else if (apex.isSuccess) {
+                        this.addDivider().addText(`(font)设置成功！(font)[primary]`).addDivider();
+                    } else {
+                        this.addModule({
+                            "type": "action-group",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "theme": "primary",
+                                    "value": JSON.stringify({
+                                        action: `portal.view.apex.${apex?.isVIP ? 'VIP' : 'normal'}`,
+                                        data: {
+                                            trigger: 'detail',
+                                            pid: pid,
+                                            link
+                                        }
+                                    }),
+                                    "click": "return-val",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": "添加至 Apex 助手"
+                                    }
+                                }
+                            ]
+                        })
+                    }
+                }
+            }
+            return this;
+        }
+    }
 
     export class MultiCard extends Card {
         addPID(pid: string[]) {
@@ -176,7 +310,6 @@ export namespace cards {
     export const top = TopCard;
     export const author = AuthorCard;
     export const detail = DetailCard;
-    export const illust = IllustCard;
     export const resaving = ResavingCard;
     export const credit = CreditCard;
     export const random = RandomCard;

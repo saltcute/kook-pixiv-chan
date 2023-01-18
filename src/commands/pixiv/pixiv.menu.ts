@@ -3,7 +3,6 @@ import { author } from './pixiv.author.app';
 import { detail } from './pixiv.detail.app';
 import { credit } from './pixiv.credit.app';
 import { help } from './pixiv.help.app';
-import { illust } from './pixiv.illust.app';
 import { refresh } from './pixiv.refresh.app';
 import { top } from './pixiv.top.app';
 import { random } from './pixiv.random.app';
@@ -54,4 +53,4 @@ class PixivMenu extends MenuCommand {
     useCardMenu = true; // 使用卡片菜单
 }
 
-export const pixivMenu = new PixivMenu(top, tag, illust, detail, author, refresh, help, credit, random, profile, redeem, gui);
+export const pixivMenu = new PixivMenu(top, tag, detail, author, refresh, help, credit, random, profile, redeem, gui);

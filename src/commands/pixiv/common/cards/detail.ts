@@ -1,8 +1,8 @@
-import { Card } from "kbotify"
+import { types } from 'pixnode';
 import { cards } from ".";
 
-export default (data: any, link: string) => {
-    return new Card()
+export default (data: types.illustration, link: string, apex: cards.apexEvent) => {
+    return new cards.SingleCard()
         .setTheme("info")
         .setSize("lg")
         .addText(`** ${(() => {
@@ -19,6 +19,7 @@ export default (data: any, link: string) => {
             ]
         },)
         .addDivider()
+        .addApex(data.id, link, apex)
         .addImage(link)
         .addModule(cards.getCommercials())
         .addDivider()

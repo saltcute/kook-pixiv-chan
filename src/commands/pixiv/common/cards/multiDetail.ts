@@ -77,7 +77,10 @@ class MultiDetailCard extends Card {
                                 "theme": "primary",
                                 "value": JSON.stringify({
                                     action: `portal.run.apex.send`,
-                                    data: data
+                                    data: {
+                                        trigger: 'mutil',
+                                        ...data
+                                    }
                                 }),
                                 "click": "return-val",
                                 "text": {
@@ -181,6 +184,7 @@ class MultiDetailCard extends Card {
                         "value": JSON.stringify({
                             action: `portal.view.apex.${apex?.isVIP ? 'VIP' : 'normal'}`,
                             data: {
+                                trigger: 'multi',
                                 ...data,
                                 type: type,
                                 index: idx,

@@ -119,6 +119,7 @@ class Refresh extends AppCommand {
                         }
                         bot.logger.debug(`ImageProcessing: Ended stage 2 refreshing with ${blur + tyblur}px of gaussian blur (trial & error)`);
                         bot.logger.debug(`UserInterface: Presenting card to user`);
+                        const isVIP = (await pixiv.common.getApexVIPStatus(session.userId)).data.is_vip;
                         if (!uncensored) {
                             if (session.guild) {
                                 session.updateMessage(mainCardMessageID, [{
@@ -139,7 +140,7 @@ class Refresh extends AppCommand {
                             if (detectionResult.success) pixiv.linkmap.addMap(val.id, "0", pixiv.common.akarin, detectionResult);
                         } else {
                             if (session.guild) {
-                                session.updateMessage(mainCardMessageID, [pixiv.cards.detail(val, rtLink)])
+                                session.updateMessage(mainCardMessageID, [pixiv.cards.detail(val, rtLink, { isVIP })])
                                     .then(() => {
                                         pixiv.users.logInvoke(session, this.trigger, 0, 0)
                                     })
@@ -148,7 +149,7 @@ class Refresh extends AppCommand {
                                         if (e) bot.logger.error(e);
                                     });
                             } else {
-                                session.sendCard([pixiv.cards.detail(val, rtLink)])
+                                session.sendCard([pixiv.cards.detail(val, rtLink, { isVIP })])
                                     .then(() => {
                                         pixiv.users.logInvoke(session, this.trigger, 0, 0)
                                     })

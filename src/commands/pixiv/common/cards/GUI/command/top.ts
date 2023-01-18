@@ -13,7 +13,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.run.command.top.day\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'day'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -23,7 +28,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "primary",
-                    "value": "{\"action\": \"GUI.run.command.top.week\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'week'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -33,7 +43,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.run.command.top.month\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'month'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -48,7 +63,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.run.command.top.original\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'original'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -58,7 +78,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "primary",
-                    "value": "{\"action\": \"GUI.run.command.top.rookie\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'rookie'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -73,7 +98,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.run.command.top.male\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'male'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -83,7 +113,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "primary",
-                    "value": "{\"action\": \"GUI.run.command.top.female\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'female'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",
@@ -93,7 +128,12 @@ export default () => {
                 {
                     "type": "button",
                     "theme": "info",
-                    "value": "{\"action\": \"GUI.run.command.top.manga\",\"data\": {}}",
+                    "value": JSON.stringify({
+                        action: "GUI.run.command.top",
+                        data: {
+                            type: 'manga'
+                        }
+                    }),
                     "click": "return-val",
                     "text": {
                         "type": "plain-text",

@@ -18,8 +18,11 @@ class Detail extends AppCommand {
         if (pixiv.common.isRateLimited(session, 3, this.trigger)) return;
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
         const sendCard = async (data: types.illustration) => {
+            const isVIP = (await pixiv.common.getApexVIPStatus(session.userId)).data.is_vip;
             if (data.x_restrict !== 0) {
-                return session.sendCard(pixiv.cards.detail(data, pixiv.common.akarin));
+                return session.sendCard(pixiv.cards.detail(data, pixiv.common.akarin, {
+                    isVIP
+                }));
             }
             var detection = 0;
             var sendSuccess = false;
@@ -66,10 +69,10 @@ class Detail extends AppCommand {
             });
             bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
-                bot.API.message.update(msgID, pixiv.cards.detail(data, uploadResult.link).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
+                bot.API.message.update(msgID, pixiv.cards.detail(data, uploadResult.link, { isVIP }).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
             } else {
                 if (session.guild) {
-                    session.updateMessage(mainCardMessageID, [pixiv.cards.detail(data, uploadResult.link)])
+                    session.updateMessage(mainCardMessageID, [pixiv.cards.detail(data, uploadResult.link, { isVIP })])
                         .then(() => {
                             pixiv.users.logInvoke(session, this.trigger, 1, detection)
                         })
@@ -78,7 +81,7 @@ class Detail extends AppCommand {
                             if (e) bot.logger.error(e);
                         });
                 } else {
-                    session.sendCard([pixiv.cards.detail(data, uploadResult.link)])
+                    session.sendCard([pixiv.cards.detail(data, uploadResult.link, { isVIP })])
                         .then(() => {
                             pixiv.users.logInvoke(session, this.trigger, 1, detection)
                         })
