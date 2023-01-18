@@ -113,11 +113,12 @@ bot.on('kmarkdownMessage', (event) => {
             break;
         };
         case /^查询画师 ?([0-9]+)$/.test(event.content): {
-            const matches = getMatches(event.content, /^\/查询画师 ?([0-9]+)$/);
+            const matches = getMatches(event.content, /^查询画师 ?([0-9]+)$/);
             author.exec('author', [matches[0]], text);
+            break;
         };
         case /^查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/.test(event.content): {
-            const matches = getMatches(event.content, /^\/查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/);
+            const matches = getMatches(event.content, /^查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/);
             detail.exec('detail', [matches[0]], text);
             break;
         }
