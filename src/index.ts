@@ -16,7 +16,8 @@ import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
 import { TextMessage } from 'kbotify';
 import { gui } from 'commands/pixiv/pixiv.gui.app';
-import upath from 'upath';
+import upath, { parse } from 'upath';
+import { ArgumentParser } from 'argparse';
 
 
 const logFolderPath = upath.join(__dirname, 'configs', 'logs', new Date().toISOString())
@@ -31,7 +32,34 @@ bot.logger.fields.name = "kook-pixiv-chan";
 bot.logger.addStream({ level: 'trace', stream: traceLogStream });
 bot.logger.addStream({ level: 'debug', stream: debugLogStream });
 bot.logger.addStream({ level: 'info', stream: infoLogStream });
-bot.logger.addStream({ level: 'info', stream: process.stdout });
+
+
+
+process.argv[1] = "kook-pixiv-chan";
+const parser = new ArgumentParser({
+    description: 'Stream local audio file to a KOOK voice channel, without the need rejoin the channel when switching songs',
+    epilog: 'Have fun streaming'
+});
+
+parser.add_argument('-d', '--debug', {
+    help: 'Set log level to DEBUG',
+    action: 'store_true'
+})
+
+parser.add_argument('-v', '--verbose', {
+    help: 'Set log level to DEBUG',
+    action: 'store_true'
+})
+const args = parser.parse_args()
+if (args.debug) {
+    bot.logger.addStream({ level: 'debug', stream: process.stdout });
+    bot.logger.debug('DEBUG MODE ENABLED');
+} else if (args.verbose) {
+    bot.logger.addStream({ level: 'trace', stream: process.stdout });
+    bot.logger.trace('VERBOSE MODE ENABLED');
+} else {
+    bot.logger.addStream({ level: 'info', stream: process.stdout });
+}
 
 bot.logger.info("Initialization: kook-pixiv-chan initialization start");
 

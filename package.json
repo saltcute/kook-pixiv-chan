@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "node --nolazy -r ts-node/register -r tsconfig-paths/register src/index.ts",
+    "debug": "npm start -- --debug",
     "pm2": "pm2 start src/pm2-windows.js"
   },
   "repository": {
@@ -25,6 +26,8 @@
   },
   "homepage": "https://github.com/Hexona69/kook-pixiv-chan#readme",
   "dependencies": {
+    "ali-oss": "^6.17.1",
+    "argparse": "^2.0.1",
     "axios": "^0.27.2",
     "base64url": "^3.0.1",
     "bunyan": "^1.8.15",
@@ -45,6 +48,8 @@
   "devDependencies": {
     "@alicloud/imageaudit-2019-12-30": "^2.0.0",
     "@alicloud/pop-core": "^1.7.12",
+    "@types/ali-oss": "^6.16.7",
+    "@types/argparse": "^2.0.10",
     "@types/bunyan": "^1.8.8",
     "@types/luxon": "^3.1.0",
     "@types/node-schedule": "^2.1.0",
