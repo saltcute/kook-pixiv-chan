@@ -35,7 +35,7 @@ class MultiDetailCard extends Card {
                                     "theme": "danger",
                                     "value": JSON.stringify({
                                         action: `portal.view.detail`,
-                                        data: data
+                                         data: data
                                     }),
                                     "click": "return-val",
                                     "text": {

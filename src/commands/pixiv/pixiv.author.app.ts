@@ -1,10 +1,12 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { AppCommand, AppFunc, BaseSession, Card } from 'kbotify';
 import * as pixiv from './common';
 import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
 import { types } from 'pixnode';
+import FormData from 'form-data';
+import sharp from 'sharp';
 
 class Author extends AppCommand {
     code = 'author'; // 只是用作标记
@@ -123,7 +125,84 @@ class Author extends AppCommand {
                 return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
             }
             if (isNaN(parseInt(session.args[0]))) {
-                return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）");
+                axios({
+                    baseURL: config.pixivAPIBaseURL,
+                    url: "/creator/search",
+                    method: "GET",
+                    params: {
+                        keyword: session.args[0],
+                        user: {
+                            id: session.user.id,
+                            identifyNum: session.user.identifyNum,
+                            username: session.user.username,
+                            avatar: session.user.avatar
+                        }
+                    }
+                }).then(async (res: any) => {
+                    if (res.data.length === 0) {
+                        return session.reply("用户不存在或此用户没有上传过插画！")
+                    }
+                    if (res.data.hasOwnProperty("code") && res.data.code == 400) {
+                        return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）")
+                    }
+                    if (res.data.hasOwnProperty("code") && res.data.code == 500) {
+                        return session.reply("Pixiv官方服务器不可用，请稍后再试");
+                    }
+                    let messageId = (await session.sendCard(new Card().addText("正在加载……请稍候").addModule(pixiv.cards.getCommercials()))).msgSent?.msgId;
+                    if (!messageId) return;
+                    let data: {
+                        user_previews: {
+                            illusts: types.illustration[],
+                            [key: string]: any
+                        }[],
+                        next_url: string
+                    } = res.data;
+                    let users = [];
+                    for (let index = 0; index < data.user_previews.length && index < 3; ++index) {
+                        let val = data.user_previews[index];
+                        let detections = await pixiv.aligreen.imageDetectionSync(val.illusts);
+                        let promises: Promise<any>[] = [];
+                        for (const illust of val.illusts) {
+                            promises.push(pixiv.common.uploadImage(illust, detections[illust.id], session));
+                        }
+                        var uploadResults: {
+                            link: string;
+                            pid: string;
+                        }[] = [];
+                        await Promise.all(promises).then((res) => {
+                            uploadResults = res;
+                        }).catch((e) => {
+                            if (e) {
+                                bot.logger.error(e);
+                                session.sendCardTemp(pixiv.cards.error(e.stack));
+                            }
+                        });
+                        const avatarDetection = await pixiv.aligreen.simpleImageDetection(val.user.profile_image_urls.medium, val.user.id);
+                        let avatarBuffer: Buffer = (await axios({
+                            url: pixiv.common.getProxiedImageLink(val.user.profile_image_urls.medium),
+                            responseType: 'arraybuffer'
+                        })).data;
+                        let avatarSharp = sharp(avatarBuffer);
+                        if (avatarDetection.blur) {
+                            avatarSharp.blur(avatarDetection.blur);
+                        }
+                        avatarBuffer = await avatarSharp.jpeg().toBuffer();
+                        let avatarLink = await pixiv.common.simpleUploadFile(avatarBuffer);
+                        users.push({
+                            username: val.user.name,
+                            avatar: avatarLink,
+                            uid: val.user.id,
+                            links: uploadResults.map(val => val.link)
+                        });
+                    }
+                    session.updateMessage(messageId, [pixiv.cards.searchForAuthor(users)]);
+                }).catch((e: any) => {
+                    if (e) {
+                        bot.logger.error(e);
+                        session.sendCardTemp(pixiv.cards.error(e.stack));
+                    }
+                });
+                // return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）");
             } else {
                 const selection = session.args[1];
                 var isGUI: boolean = false;
