@@ -37,7 +37,7 @@ export namespace cards {
             if (config.connectApex) {
                 if (!apex?.isVIP) {
                     if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
-                        this.addDivider().addText(`您需要购买 Apex助手 高级会员 才能将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手 背景图像。`)
+                        this.addText(`您需要购买 Apex助手 高级会员 才能将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手 背景图像。`)
                             .addModule({
                                 "type": "action-group",
                                 "elements": [
@@ -55,7 +55,7 @@ export namespace cards {
                                         "type": "button",
                                         "theme": "danger",
                                         "value": JSON.stringify({
-                                            action: `portal.view.reset`
+                                            action: `portal.error.reset`
                                         }),
                                         "click": "return-val",
                                         "text": {
@@ -71,7 +71,7 @@ export namespace cards {
                             "elements": [
                                 {
                                     "type": "button",
-                                    "theme": apex?.isVIP ? "primary" : "secondary",
+                                    "theme": "secondary",
                                     "value": JSON.stringify({
                                         action: "portal.view.apex.normal",
                                         data: {
@@ -91,7 +91,7 @@ export namespace cards {
                     }
                 } else {
                     if (apex.isSendButtonClicked) {
-                        this.addDivider().addText(`您真的要将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手背景图像 吗？`);
+                        this.addText(`您真的要将 (font)${pid}_p0.png(font)[pink] 设置为您的 Apex助手背景图像 吗？`);
                         if (apex.sendButtonPreviewImageLink) {
                             this.addModule({
                                 "type": "context",
@@ -101,16 +101,15 @@ export namespace cards {
                                         "content": `低分辨率预览图像，与最后成品可能不同`
                                     }
                                 ]
+                            }).addModule(<any>{
+                                type: "container",
+                                elements: [
+                                    {
+                                        "type": "image",
+                                        "src": apex.sendButtonPreviewImageLink
+                                    }
+                                ]
                             })
-                                .addModule(<any>{
-                                    type: "container",
-                                    elements: [
-                                        {
-                                            "type": "image",
-                                            "src": apex.sendButtonPreviewImageLink
-                                        }
-                                    ]
-                                })
                         }
                         this.addModule({
                             "type": "action-group",
@@ -147,9 +146,9 @@ export namespace cards {
                             ]
                         }).addDivider();
                     } else if (apex.isSent) {
-                        this.addDivider().addText(`正在转存 (font)${pid}_p0.png(font)[pink]…请稍候`).addDivider();
+                        this.addText(`正在转存 (font)${pid}_p0.png(font)[pink]…请稍候`).addDivider();
                     } else if (apex.isSuccess) {
-                        this.addDivider().addText(`(font)设置成功！(font)[primary]`).addDivider();
+                        this.addText(`(font)设置成功！(font)[primary]`).addDivider();
                     } else {
                         this.addModule({
                             "type": "action-group",
