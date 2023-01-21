@@ -12,6 +12,7 @@ import ChineseCommandMapping from './chineseCommandMapping'
 import ProfileCard from './profile'
 import ReachesLimit from './reachesLimit'
 import MultiDetail from './multiDetail'
+import SearchForAuthor from './searchForAuthor'
 
 import GUIMain from './GUI/main'
 import GUICMDLST from './GUI/command/list'
@@ -33,7 +34,6 @@ export namespace cards {
     }
     export class SingleCard extends Card {
         addApex(pid: number, link: string, apex?: apexEvent) {
-            // console.log(data);
             if (config.connectApex) {
                 if (!apex?.isVIP) {
                     if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
@@ -65,6 +65,29 @@ export namespace cards {
                                     }
                                 ]
                             }).addDivider();
+                    } else {
+                        this.addModule({
+                            "type": "action-group",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "theme": apex?.isVIP ? "primary" : "secondary",
+                                    "value": JSON.stringify({
+                                        action: "portal.view.apex.normal",
+                                        data: {
+                                            trigger: 'detail',
+                                            pid,
+                                            link
+                                        }
+                                    }),
+                                    "click": "return-val",
+                                    "text": {
+                                        "type": "plain-text",
+                                        "content": "添加至 Apex助手"
+                                    }
+                                }
+                            ]
+                        })
                     }
                 } else {
                     if (apex.isSendButtonClicked) {
@@ -319,4 +342,5 @@ export namespace cards {
     export const profile = ProfileCard;
     export const reachesLimit = ReachesLimit;
     export const multiDetail = MultiDetail;
+    export const searchForAuthor = SearchForAuthor;
 }

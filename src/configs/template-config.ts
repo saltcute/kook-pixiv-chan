@@ -100,4 +100,10 @@ export default {
     connectApexHost: '',
     previewApexHost: '',
     connectApexToken: '',
+
+    /**
+     * Aliyun OSS config
+     */
+    OSSRegion: 'oss-cn-shenzhen',
+    OSSBucketName: 'kook-pixiv-chan',
 }

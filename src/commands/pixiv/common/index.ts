@@ -332,6 +332,33 @@ export namespace common {
     export function deactiveCurrentToken() {
         auth.assetUploadTokens[currentIndex].active = false;
     }
+    export async function simpleUploadFile(buffer: Buffer) {
+        let bodyFormData = new FormData();
+        bodyFormData.append('file', buffer, "image.jpg");
+        var rtLink: string | undefined = undefined;
+        while (!rtLink) {
+            rtLink = await axios({
+                method: "post",
+                url: "https://www.kookapp.cn/api/v3/asset/create",
+                data: bodyFormData,
+                headers: {
+                    'Authorization': `Bot ${await getNextToken()}`,
+                    ...bodyFormData.getHeaders()
+                }
+            }).then((res: any) => {
+                return res.data.data.url
+            }).catch(async () => {
+                bot.logger.error(`ImageProcessing: Upload failed, forcing token offline`);
+                bot.logger.debug(`ImageProcessing: Retrying with another token`);
+                deactiveCurrentToken();
+                if (await cycleThroughTokens()) {
+                    bot.logger.fatal("NO MORE TOKEN IS AVAILABLE, PIXIV CHAN IS GOING OFFLINE");
+                    process.exit();
+                }
+            });
+        }
+        return rtLink;
+    }
     /**
      * Upload a file to KOOK's server
      * @param session kbotify session
