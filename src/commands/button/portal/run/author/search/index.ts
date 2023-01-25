@@ -69,11 +69,10 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
             pid.push("没有了");
         }
         bot.logger.debug(`UserInterface: Presenting card to user`);
-        session.updateMessage(event.targetMsgId, [pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: 'portal.error.reset' }]))])
+        session.updateMessageTemp(event.targetMsgId, [pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: 'portal.error.reset' }]))])
             .then(() => {
                 pixiv.users.logInvoke(session, 'author', datas.length, detection)
-            })
-            .catch((e) => {
+            }).catch((e) => {
                 if (e) bot.logger.error(e);
             });
     }
