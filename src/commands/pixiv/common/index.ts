@@ -16,6 +16,7 @@ import { BaseSession, Card } from 'kbotify';
 import FormData, { Stream } from 'form-data';
 import * as pixivadmin from '../admin/common';
 import { types } from 'pixnode';
+import crypto from 'crypto';
 const sharp = require('sharp');
 
 export namespace type {
@@ -36,6 +37,70 @@ export namespace type {
         label?: string,
         probability: number
     }
+    export namespace afdian {
+        export type plan = {
+            plan_id: string,
+            rank: number,
+            user_id: string,
+            status: number,
+            name: string,
+            pic: string,
+            desc: string,
+            price: string,
+            update_time: number,
+            timing: {
+                timing_on: number,
+                timing_off: number
+            },
+            pay_month: number,
+            show_price: string,
+            show_price_after_adjust: string,
+            has_coupon: number,
+            favorable_price: number,
+            independent: number,
+            permanent: number,
+            can_buy_hide: number,
+            need_address: number,
+            product_type: number,
+            sale_limit_count: number,
+            need_invite_code: boolean,
+            bundle_stock: number,
+            bundle_sku_select_count: number,
+            config: any,
+            has_plan_config: number,
+            expire_time: number,
+            sku_processed: any,
+            rankType: number
+        }
+        export type sponserData = {
+            total_count: number,
+            total_page: number,
+            list: {
+                sponsor_plans: type.afdian.plan[],
+                current_plan: type.afdian.plan,
+                all_sum_amount: string,
+                first_pay_time: number,
+                last_pay_time: number,
+                user: {
+                    user_id: string,
+                    name: string,
+                    avatar: string,
+                    user_private_id: string
+                }
+            }[],
+            request: {
+                user_id: string,
+                params: string,
+                ts: number,
+                sign: string
+            }
+        };
+        export type sponserResponse = {
+            ec: number,
+            em: string,
+            data: sponserData
+        }
+    }
 }
 
 export namespace common {
@@ -45,6 +110,31 @@ export namespace common {
      * R-18, network failure, etc.
      */
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
+
+    export async function getAfdianSupporter(page: number): Promise<type.afdian.sponserData> {
+        let user_id = "b775664e507311ea9e2b52540025c377";
+        let token = "9SrdBnJPVgNFHYcTbC8M56fEGpqwkWDe";
+        let body = {
+            page
+        };
+        let ts = Math.trunc(Date.now() / 1000);
+        let sign = crypto.createHash('md5').update(`${token}params${JSON.stringify(body)}ts${ts}user_id${user_id}`).digest('hex');
+        let res: type.afdian.sponserResponse = (await axios({
+            url: 'https://afdian.net/api/open/query-sponsor',
+            method: 'GET',
+            data: {
+                user_id,
+                params: JSON.stringify(body),
+                ts,
+                sign
+            }
+        })).data;
+        if (res.data.request.sign == sign) {
+            return res.data;
+        } else {
+            throw new Error('Signature dismatch');
+        }
+    }
 
     /**
      * Check if key is in obkect

@@ -7,7 +7,7 @@ class Credit extends AppCommand {
     intro = 'Credits';
     func: AppFunc<BaseSession> = async (session) => {
         pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        return session.sendCard([pixiv.cards.credit()]);
+        return session.sendCard([await pixiv.cards.credit(1)]);
     }
 }
 
