@@ -142,5 +142,5 @@ export default () => {
                 }
             ]
         })
-        .addModule(cards.GUI.returnButton([{ action: "GUI.command.list" }]));
+        .addModule(cards.GUI.returnButton([{ action: "GUI.view.command.list" }]));
 }
