@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --nolazy -r ts-node/register -r tsconfig-paths/register src/index.ts",
     "debug": "npm start -- --debug",
-    "pm2": "pm2 start src/pm2-windows.js"
+    "pm2": "pm2 start src/pm2-windows.js --name='kook-pixiv-chan'"
   },
   "repository": {
     "type": "git",
