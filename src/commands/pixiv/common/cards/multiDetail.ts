@@ -1,5 +1,5 @@
 import config from "configs/config";
-import { Card, CardObject } from "kbotify"
+import { Card } from "kasumi.js"
 import error from "./error";
 
 type apexEvent = {
@@ -35,7 +35,7 @@ class MultiDetailCard extends Card {
                                     "theme": "danger",
                                     "value": JSON.stringify({
                                         action: `portal.view.detail`,
-                                         data: data
+                                        data: data
                                     }),
                                     "click": "return-val",
                                     "text": {
@@ -115,7 +115,7 @@ class MultiDetailCard extends Card {
     addControl(idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", apex?: apexEvent, data?: any) {
         this.addModule({
             "type": "action-group",
-            "elements": (() => {
+            "elements": <any>(() => {
                 var arr = [];
                 if (!isNaN(parseInt(pid[idx - 1]))) {
                     arr.push({

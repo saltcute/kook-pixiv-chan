@@ -2,19 +2,19 @@ import axios from 'axios';
 import auth from 'configs/auth';
 import config from 'configs/config';
 import { bot } from 'init/client';
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
 import * as pixiv from './common'
 
-class Redeem extends AppCommand {
-    code = 'redeem'; // 只是用作标记
-    trigger = 'redeem'; // 用于触发的文字
-    intro = 'Redeem gift code';
-    func: AppFunc<BaseSession> = async (session) => {
-        // if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
+class Redeem extends BaseCommand {
+    name = 'redeem';
+    usage = '.pixiv redeem <Key>';
+    description = '兑换激活码';
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        // if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
         // if (await pixiv.users.reachesIllustLimit(session)) return;
-        if (pixiv.common.isBanned(session, this.trigger)) return;
-        if (pixiv.common.isRateLimited(session, 3, this.trigger)) return;
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
+        if (pixiv.common.isBanned(session, this.name)) return;
+        if (pixiv.common.isRateLimited(session, 3, this.name)) return;
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
         if (session.args.length == 0) {
             return session.reply("请输入激活码");
         } else {
@@ -34,10 +34,10 @@ class Redeem extends AppCommand {
                     data: {
                         key: key,
                         user: {
-                            id: session.user.id,
-                            identifyNum: session.user.identifyNum,
-                            username: session.user.username,
-                            avatar: session.user.avatar
+                            id: session.author.id,
+                            identifyNum: session.author.identify_num,
+                            username: session.author.username,
+                            avatar: session.author.avatar
                         }
                     }
                 }).then((res) => {
@@ -47,15 +47,15 @@ class Redeem extends AppCommand {
                             session.reply("兑换成功")
                             // this.exec("profile", ["arg"], "msg");
                             pixiv.users.detail({
-                                id: session.user.id,
-                                identifyNum: session.user.identifyNum,
-                                username: session.user.username,
-                                avatar: session.user.avatar
+                                id: session.author.id,
+                                identifyNum: session.author.identify_num,
+                                username: session.author.username,
+                                avatar: session.author.avatar
                             }).then((res) => {
-                                return session.sendCard([pixiv.cards.profile(res)]);
+                                return session.send([pixiv.cards.profile(res)]);
                             }).catch((e) => {
                                 bot.logger.warn(e);
-                                return session.replyCardTemp([pixiv.cards.error(e.stack)]);
+                                return session.replyTemp([pixiv.cards.error(e.stack)]);
                             });
                             break;
                         case '40001': // Used or non-existence key
@@ -68,7 +68,7 @@ class Redeem extends AppCommand {
                 }).catch((e) => {
                     bot.logger.error(`Subscription: Failed activating key ${key}`);
                     bot.logger.error(e);
-                    session.sendCard([pixiv.cards.error(e, false)]);
+                    session.send([pixiv.cards.error(e, false)]);
                 })
             } else {
                 session.reply("不是有效的激活码！");

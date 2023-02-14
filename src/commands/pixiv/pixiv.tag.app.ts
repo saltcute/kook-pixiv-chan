@@ -1,4 +1,4 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
 import * as pixiv from './common';
 import * as pixivadmin from './admin/common'
 import axios from 'axios';
@@ -6,29 +6,27 @@ import config from 'configs/config';
 import { bot } from 'init/client';
 import { types } from 'pixnode';
 
-class Tag extends AppCommand {
-    code = 'tag'; // 只是用作标记
-    trigger = 'tag'; // 用于触发的文字
-    intro = 'Search tags';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
+class Tag extends BaseCommand {
+    name = 'tag';
+    usage = '.pixiv tag [{day|week|month}] <tag>...';
+    description = '获取所给标签人气前九的图片'
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
         if (await pixiv.users.reachesIllustLimit(session)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
-        if (pixiv.common.isBanned(session, this.trigger)) return;
-        if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
+        if (pixiv.common.isBanned(session, this.name)) return;
+        if (pixiv.common.isRateLimited(session, 6, this.name)) return;
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
         const sendCard = async (data: types.illustration[], tags: string[], durationName: string) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
-            if (session.guild) {
+            if (session.guildId) {
                 if (isGUI) {
-                    await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片").toString(), undefined, session.userId);
+                    await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片"), undefined, session.authorId);
                 } else {
-                    await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                        if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
-                            sendSuccess = true;
-                            mainCardMessageID = res.msgSent?.msgId;
-                        }
+                    await session.send([pixiv.cards.resaving("多张图片")]).then((res) => {
+                        sendSuccess = true;
+                        mainCardMessageID = res.msg_id;
                     }).catch((e) => {
                         if (e) {
                             if (e.code == 40012) { // Slow-mode limit
@@ -82,7 +80,7 @@ class Tag extends AppCommand {
             }).catch((e) => {
                 if (e) {
                     bot.logger.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e.stack));
+                    session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
             });
             for (var val of uploadResults) {
@@ -95,21 +93,21 @@ class Tag extends AppCommand {
             }
             bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
-                bot.API.message.update(msgID, pixiv.cards.tag(link, pid, tags, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
+                bot.API.message.update(msgID, pixiv.cards.tag(link, pid, tags, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
             } else {
-                if (session.guild) {
-                    session.updateMessage(mainCardMessageID, [pixiv.cards.tag(link, pid, tags, durationName, {})])
+                if (session.guildId) {
+                    session.update(mainCardMessageID, [pixiv.cards.tag(link, pid, tags, durationName, {})])
                         .then(() => {
-                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                            pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
                             bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
                             if (e) bot.logger.error(e);
                         });
                 } else {
-                    session.sendCard([pixiv.cards.tag(link, pid, tags, durationName, {})])
+                    session.send([pixiv.cards.tag(link, pid, tags, durationName, {})])
                         .then(() => {
-                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                            pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
                             bot.logger.error(`UserInterface: Failed sending message`);
@@ -139,13 +137,7 @@ class Tag extends AppCommand {
             var selection: string = tags[0];
             if (selection.split(".")[0] == "GUI") {
                 const UUID = selection.split(".")[1];
-                await bot.axios({
-                    url: "/v3/message/view",
-                    method: "GET",
-                    params: {
-                        msg_id: UUID
-                    }
-                }).then(() => {
+                await bot.API.message.view(UUID).then(() => {
                     isGUI = true;
                     msgID = UUID;
                 }).catch((e) => {
@@ -173,8 +165,8 @@ class Tag extends AppCommand {
             for (const tag of tags) {
                 if (pixiv.common.isForbittedTag(tag)) {
                     bot.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
-                    pixiv.common.registerBan(session.userId, this.trigger, 30);
-                    return session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
+                    pixiv.common.registerBan(session.authorId, this.name, 30);
+                    return session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.name}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.authorId, this.name)).toLocaleString("zh-cn")}`);
                 }
             }
             axios({
@@ -185,10 +177,10 @@ class Tag extends AppCommand {
                     keyword: tags.join(" "),
                     duration: duration,
                     user: {
-                        id: session.user.id,
-                        identifyNum: session.user.identifyNum,
-                        username: session.user.username,
-                        avatar: session.user.avatar
+                        id: session.author.id,
+                        identifyNum: session.author.identify_num,
+                        username: session.author.username,
+                        avatar: session.author.avatar
                     }
                 }
             }).then(async (res: any) => {
@@ -205,7 +197,7 @@ class Tag extends AppCommand {
             }).catch((e: any) => {
                 if (e) {
                     bot.logger.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e.stack));
+                    session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
             });
         }

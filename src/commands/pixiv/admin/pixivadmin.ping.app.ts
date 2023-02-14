@@ -1,18 +1,15 @@
-import { bot } from 'init/client';
-import { AppCommand, AppFunc, BaseSession, Card } from 'kbotify';
+import { BaseCommand, BaseSession, Card, CommandFunction } from "kasumi.js";
 import * as pixivadmin from './common';
 
-class Ping extends AppCommand {
-    code = 'ping'; // 只是用作标记
-    trigger = 'ping'; // 用于触发的文字
-    intro = 'Ping';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (!pixivadmin.common.isAdmin(session.userId)) {
+class Ping extends BaseCommand {
+    name = 'ping';
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (!pixivadmin.common.isAdmin(session.authorId)) {
             return session.reply("You do not have the permission to use this command")
         }
-        const remoteOrigin = session.msg.msgTimestamp;
+        const remoteOrigin = session.event.timestamp;
         const localOrigin = Date.now();
-        session.sendCard(new Card()
+        session.send([new Card()
             .addModule({
                 "type": "section",
                 "text": {
@@ -37,10 +34,10 @@ class Ping extends AppCommand {
                         }
                     ]
                 }
-            })).then((res) => {
+            })]).then((res) => {
                 const localResponse = Date.now()
-                const remoteReponse = res.msgSent?.msgTimestamp || -1;
-                const messageId = res.msgSent?.msgId;
+                const remoteReponse = res.msg_timestamp;
+                const messageId = res.msg_id;
                 if (messageId && remoteReponse) {
                     const localLatency = localResponse - localOrigin;
                     const remoteLatency = remoteReponse - remoteOrigin;
@@ -49,7 +46,7 @@ class Ping extends AppCommand {
                     const colorizeLatencyString = (time: number): string => {
                         return `(font)${time}ms(font)[${time > 1000 ? "danger" : time > 500 ? "warning" : "primary"}]`;
                     }
-                    bot.API.message.update(messageId, new Card()
+                    session.update(messageId, [new Card()
                         .addModule({
                             "type": "section",
                             "text": {
@@ -80,8 +77,7 @@ class Ping extends AppCommand {
                         .addText(`remoteLatency: ${colorizeLatencyString(remoteLatency)}`)
                         .addText(`originDiff: ${colorizeLatencyString(originDiff)}`)
                         .addText(`repsonseDiff: ${colorizeLatencyString(responseDiff)}`)
-                        .toString()
-                    )
+                    ])
                 }
             })
     }

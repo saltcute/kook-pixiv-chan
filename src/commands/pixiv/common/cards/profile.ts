@@ -1,4 +1,4 @@
-import { Card } from "kbotify"
+import { Card } from "kasumi.js"
 import { cards } from ".";
 import { users } from "../users";
 
@@ -6,15 +6,12 @@ export default (user: users.user) => {
     return new Card()
         .setTheme("info")
         .setSize("lg")
-        .addText(`**(font)${user.kook.username}#${user.kook.identifyNum}(font)[${cards.getTierColor(user.pixiv.tier)}]**\n级别: [${user.pixiv.tier}](${users.afdianTierLink[user.pixiv.tier]})`,
-            undefined,
-            "left",
-            {
-                "type": "image",
-                "circle": true,
-                "src": user.kook.avatar,
-                "size": "sm"
-            })
+        .addTextWithImage(
+            `**(font)${user.kook.username}#${user.kook.identifyNum}(font)[${cards.getTierColor(user.pixiv.tier)}]**\n级别: [${user.pixiv.tier}](${users.afdianTierLink[user.pixiv.tier]})`,
+            user.kook.avatar,
+            'sm',
+            true
+        )
         .addDivider()
         .addModule({
             "type": "section",

@@ -1,7 +1,7 @@
 
 import { bot } from 'init/client';
-import { ButtonClickEvent } from 'kaiheila-bot-root';
+import { ButtonClickedEvent } from "kasumi.js";
 import * as pixiv from 'commands/pixiv/common'
-export default async function (event: ButtonClickEvent, action: string[], data: any) {
-    bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.list().toString(), undefined, event.userId);
+export default async function (event: ButtonClickedEvent, action: string[], data: any) {
+    bot.API.message.update(event.targetMsgId, pixiv.cards.GUI.command.list(), undefined, event.authorId);
 }

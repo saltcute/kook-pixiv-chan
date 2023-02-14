@@ -1,19 +1,18 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, Card, CommandFunction } from "kasumi.js";
 import * as pixiv from '../common';
 import * as pixivadmin from './common';
 
-class Detection extends AppCommand {
-    code = 'detection'; // 只是用作标记
-    trigger = 'detection'; // 用于触发的文字
-    intro = 'Detection';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (!pixivadmin.common.isAdmin(session.userId)) {
+class Detection extends BaseCommand {
+    name = 'detection';
+    ;
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (!pixivadmin.common.isAdmin(session.authorId)) {
             return session.reply("You do not have the permission to use this command")
         }
         if (session.args.length == 0) {
             return session.replyTemp("Please specifiy an action");
         }
-        pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
+        pixiv.common.logInvoke(`.pixivadmin ${this.name}`, session);
         switch (session.args[0]) {
             case "setscene":
                 switch (session.args[1]) {
@@ -61,7 +60,7 @@ class Detection extends AppCommand {
                 session.reply(`Currently detecting: [${pixiv.aligreen.currentDetectScenes().join(', ')}] on Aliyun ${pixiv.aligreen.getServerRegion()}, hostname \`${pixiv.aligreen.getServerHostname()}\``);
                 break;
             case "list":
-                session.replyCard([{
+                session.reply([new Card({
                     "type": "card",
                     "theme": "warning",
                     "size": "lg",
@@ -146,8 +145,7 @@ class Detection extends AppCommand {
                             }
                         }
                     ]
-                }
-                ])
+                })])
                 break;
             default:
                 return session.replyTemp("Action invalid");

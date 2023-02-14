@@ -1,8 +1,8 @@
 import * as pixiv from 'commands/pixiv/common'
 import { bot } from 'init/client';
-import { ButtonClickEvent } from 'kaiheila-bot-root';
-import { Card } from 'kbotify';
-export default async function (event: ButtonClickEvent, action: string[], data: any) {
+import { ButtonClickedEvent } from "kasumi.js";
+import { Card } from "kasumi.js";
+export default async function (event: ButtonClickedEvent, action: string[], data: any) {
     let pid = data.pid,
         link = data.link,
         type = data.type;
@@ -28,5 +28,5 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
             card = pixiv.cards.error("无法加载卡片")
             break;
     }
-    bot.API.message.update(event.targetMsgId, card.toString(), undefined, event.userId);
+    bot.API.message.update(event.targetMsgId, card, undefined, event.authorId);
 }

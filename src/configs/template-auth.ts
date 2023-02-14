@@ -1,6 +1,6 @@
 export default {
     /**
-     * kbotify setup
+     * Kasumi setup
      */
     khltoken: 'Your Token',
 

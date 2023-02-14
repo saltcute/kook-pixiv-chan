@@ -2,7 +2,7 @@ import axios from 'axios';
 import auth from 'configs/auth';
 import config from 'configs/config';
 import { bot } from 'init/client';
-import { BaseSession } from 'kbotify';
+import { BaseSession } from "kasumi.js";
 import { cards } from '../cards';
 import { keygen } from '../keygen';
 
@@ -179,16 +179,16 @@ export namespace users {
         var reached = false;
         if (isCommand(trigger)) {
             await detail({
-                id: session.user.id,
-                identifyNum: session.user.identifyNum,
-                username: session.user.username,
-                avatar: session.user.avatar,
+                id: session.author.id,
+                identifyNum: session.author.identify_num,
+                username: session.author.username,
+                avatar: session.author.avatar,
             }).then((res) => {
                 if (tiersCommandLimitLeft(res, trigger) == "unlimited") reached = false;
                 else if (tiersCommandLimitLeft(res, trigger) <= 0) reached = true;
                 else reached = false;
                 if (reached) {
-                    session.replyCard([cards.reachesLimit(res, "command", trigger)]);
+                    session.reply([cards.reachesLimit(res, "command", trigger)]);
                 }
             }).catch((e) => {
                 bot.logger.error(e);
@@ -199,16 +199,16 @@ export namespace users {
     export async function reachesIllustLimit(session: BaseSession): Promise<boolean> {
         var reached = false;
         await detail({
-            id: session.user.id,
-            identifyNum: session.user.identifyNum,
-            username: session.user.username,
-            avatar: session.user.avatar,
+            id: session.author.id,
+            identifyNum: session.author.identify_num,
+            username: session.author.username,
+            avatar: session.author.avatar,
         }).then((res) => {
             if (tiersIllustLimitLeft(res) == "unlimited") reached = false;
             else if (tiersIllustLimitLeft(res) > 0) reached = false;
             else reached = true;
             if (reached) {
-                session.replyCard([cards.reachesLimit(res, "illust")]);
+                session.reply([cards.reachesLimit(res, "illust")]);
             }
         }).catch((e) => {
             bot.logger.error(e);
@@ -255,17 +255,17 @@ export namespace users {
     }
     /**
      * Update statistics of usage
-     * @param session kbotify session
+     * @param session Kasumi session
      * @param trigger command trigger
      * @param totalIllust requested illustrations number
      * @param newIllust requested new illustrations number
      */
     export function logInvoke(session: BaseSession, trigger: string, totalIllust: number, newIllust: number) {
         detail({
-            id: session.user.id,
-            identifyNum: session.user.identifyNum,
-            username: session.user.username,
-            avatar: session.user.avatar
+            id: session.author.id,
+            identifyNum: session.author.identify_num,
+            username: session.author.username,
+            avatar: session.author.avatar
         }).then((res) => {
             if (res) {
                 res.pixiv.statistics.last_seen_on = Date.now();

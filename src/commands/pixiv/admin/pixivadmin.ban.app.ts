@@ -1,19 +1,18 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
 import * as pixiv from '../common';
 import * as pixivadmin from './common';
 
-class Ban extends AppCommand {
-    code = 'ban'; // 只是用作标记
-    trigger = 'ban'; // 用于触发的文字
-    intro = 'Ban';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (!pixivadmin.common.isAdmin(session.userId)) {
+class Ban extends BaseCommand {
+    name = 'ban';
+    ;
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (!pixivadmin.common.isAdmin(session.authorId)) {
             return session.reply("You do not have the permission to use this command")
         }
         if (session.args.length == 0) {
             return session.replyTemp("Please specifiy an action: `add`, `remove` ");
         }
-        pixiv.common.logInvoke(`.pixivadmin ${this.trigger}`, session);
+        pixiv.common.logInvoke(`.pixivadmin ${this.name}`, session);
         const user = session.args[1];
         switch (session.args[0]) {
             case "add":

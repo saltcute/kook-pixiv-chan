@@ -1,4 +1,4 @@
-import { Card } from "kbotify"
+import { Card } from "kasumi.js"
 import fs from 'fs';
 import { common, type } from "..";
 
@@ -62,6 +62,7 @@ export default async (page: number) => {
         .setTheme("info")
         .addText("您可以在[爱发电](https://afdian.net/@hexona)支持 Pixiv酱的开发与运营！")
         .addDivider()
+        .addText("`kook-pixiv-chan`，基于 [Kasumi](https://github.com/Hexona69/kasumi)")
         .addTitle("特别感谢")
         .addText("[fi6](https://github.com/fi6) - [kBotify](https://github.com/fi6/kBotify) & [shugen002](https://github.com/shugen002) - [BotRoot](https://github.com/shugen002/BotRoot)\n[Microsoft](https://github.com/microsoft) - [Visual Studio Code](https://github.com/microsoft/vscode) 与 [Typescript](https://github.com/microsoft/TypeScript)")
         .addDivider()

@@ -1,4 +1,4 @@
-import { BaseSession } from 'kbotify';
+import { BaseSession } from "kasumi.js";
 import * as pixiv from '..'
 import { cards } from '..';
 
@@ -24,28 +24,7 @@ export default (data: any, r18: number, link: string[], pid: string[], { resave 
         })
         .addDivider()
         .addModule(pixiv.cards.GUI.portalEntry(link, pid, "author", { r18: r18 }))
-        .addModule({
-            "type": "image-group",
-            "elements": (() => {
-                var images: object[] = [];
-                var cnt = 0;
-                for (const val of link) {
-                    if (cnt >= 9) break;
-                    images.push({
-                        "type": "image",
-                        "src": val
-                    })
-                    cnt++;
-                }
-                while (images.length < 9) {
-                    images.push({
-                        "type": "image",
-                        "src": pixiv.common.akarin
-                    })
-                }
-                return images;
-            })()
-        })
+        .addImageGroup(...[...link, ...Array(9).fill(pixiv.common.akarin)].splice(0, 9))
         .addModule(cards.getCommercials())
         .addDivider()
         .addPID(pid)

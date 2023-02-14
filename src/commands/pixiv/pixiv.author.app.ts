@@ -1,4 +1,4 @@
-import { AppCommand, AppFunc, BaseSession, Card } from 'kbotify';
+// import { BaseCommand, AppFunc, BaseSession, Card } from "kasumi.js";
 import * as pixiv from './common';
 import * as pixivadmin from './admin/common'
 import axios from 'axios';
@@ -7,29 +7,28 @@ import { bot } from 'init/client';
 import { types } from 'pixnode';
 import FormData from 'form-data';
 import sharp from 'sharp';
+import { BaseCommand, CommandFunction, BaseSession, Card } from "kasumi.js";
 
-class Author extends AppCommand {
-    code = 'author'; // 只是用作标记
-    trigger = 'author'; // 用于触发的文字
-    intro = 'Author';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
+class Author extends BaseCommand {
+    name = 'author';
+    usage = '.pixiv author <Illustration ID>';
+    description = '获取用户的最新九张插画'
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
         if (await pixiv.users.reachesIllustLimit(session)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
-        if (pixiv.common.isBanned(session, this.trigger)) return;
-        if (pixiv.common.isRateLimited(session, 6, this.trigger)) return;
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
+        if (pixiv.common.isBanned(session, this.name)) return;
+        if (pixiv.common.isRateLimited(session, 6, this.name)) return;
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
         const sendCard = async (data: types.illustration[]) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
             if (isGUI) {
             } else {
-                if (session.guild) {
-                    await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                        if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
-                            sendSuccess = true;
-                            mainCardMessageID = res.msgSent?.msgId;
-                        }
+                if (session.guildId) {
+                    await session.send([pixiv.cards.resaving("多张图片")]).then((res) => {
+                        sendSuccess = true;
+                        mainCardMessageID = res.msg_id;
                     }).catch((e) => {
                         if (e) {
                             if (e.code == 40012) { // Slow-mode limit
@@ -80,7 +79,7 @@ class Author extends AppCommand {
             }).catch((e) => {
                 if (e) {
                     bot.logger.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e.stack));
+                    session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
             });
             for (var val of uploadResults) {
@@ -93,21 +92,21 @@ class Author extends AppCommand {
             }
             bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
-                bot.API.message.update(msgID, pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
+                bot.API.message.update(msgID, pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
             } else {
-                if (session.guild) {
-                    await session.updateMessage(mainCardMessageID, [pixiv.cards.author(data[0], r18, link, pid, {})])
+                if (session.guildId) {
+                    await session.update(mainCardMessageID, [pixiv.cards.author(data[0], r18, link, pid, {})])
                         .then(() => {
-                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                            pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
                             bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
                             if (e) bot.logger.error(e);
                         });
                 } else {
-                    session.sendCard([pixiv.cards.author(data[0], r18, link, pid, {})])
+                    session.send([pixiv.cards.author(data[0], r18, link, pid, {})])
                         .then(() => {
-                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                            pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
                             bot.logger.error(`UserInterface: Failed sending message`);
@@ -121,8 +120,8 @@ class Author extends AppCommand {
         } else {
             if (pixiv.common.isForbittedUser(session.args[0])) {
                 bot.logger.debug(`UserInterface: User violates user blacklist: ${session.args[0]}. Banned the user for 30 seconds`);
-                pixiv.common.registerBan(session.userId, this.trigger, 30);
-                return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.trigger}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, this.trigger)).toLocaleString("zh-cn")}`);
+                pixiv.common.registerBan(session.authorId, this.name, 30);
+                return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.name}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.authorId, this.name)).toLocaleString("zh-cn")}`);
             }
             if (isNaN(parseInt(session.args[0]))) {
                 axios({
@@ -132,10 +131,10 @@ class Author extends AppCommand {
                     params: {
                         keyword: session.args[0],
                         user: {
-                            id: session.user.id,
-                            identifyNum: session.user.identifyNum,
-                            username: session.user.username,
-                            avatar: session.user.avatar
+                            id: session.author.id,
+                            identifyNum: session.author.identify_num,
+                            username: session.author.username,
+                            avatar: session.author.avatar
                         }
                     }
                 }).then(async (res: any) => {
@@ -148,8 +147,7 @@ class Author extends AppCommand {
                     if (res.data.hasOwnProperty("code") && res.data.code == 500) {
                         return session.reply("Pixiv官方服务器不可用，请稍后再试");
                     }
-                    let messageId = (await session.sendCard(new Card().addText("正在加载……请稍候").addModule(pixiv.cards.getCommercials()))).msgSent?.msgId;
-                    if (!messageId) return;
+                    let messageId = (await session.send([new Card().addText("正在加载……请稍候").addModule(pixiv.cards.getCommercials())])).msg_id;
                     let data: {
                         user_previews: {
                             illusts: types.illustration[],
@@ -174,7 +172,7 @@ class Author extends AppCommand {
                         }).catch((e) => {
                             if (e) {
                                 bot.logger.error(e);
-                                session.sendCardTemp(pixiv.cards.error(e.stack));
+                                session.sendTemp([pixiv.cards.error(e.stack)]);
                             }
                         });
                         const avatarDetection = await pixiv.aligreen.simpleImageDetection(val.user.profile_image_urls.medium, val.user.id);
@@ -195,11 +193,11 @@ class Author extends AppCommand {
                             links: uploadResults.map(val => val.link)
                         });
                     }
-                    session.updateMessage(messageId, [pixiv.cards.searchForAuthor(users)]);
+                    session.update(messageId, [pixiv.cards.searchForAuthor(users)]);
                 }).catch((e: any) => {
                     if (e) {
                         bot.logger.error(e);
-                        session.sendCardTemp(pixiv.cards.error(e.stack));
+                        session.sendTemp([pixiv.cards.error(e.stack)]);
                     }
                 });
                 // return session.reply("请输入一个合法的用户ID（使用 `.pixiv help author` 查询指令详细用法）");
@@ -209,13 +207,8 @@ class Author extends AppCommand {
                 var msgID: string = "";
                 if (selection && selection.split(".")[0] == "GUI") {
                     const UUID = selection.split(".")[1];
-                    await bot.axios({
-                        url: "/v3/message/view",
-                        method: "GET",
-                        params: {
-                            msg_id: UUID
-                        }
-                    }).then(() => {
+
+                    bot.API.message.view(UUID).then(() => {
                         isGUI = true;
                         msgID = UUID;
                     }).catch((e) => {
@@ -231,10 +224,10 @@ class Author extends AppCommand {
                     params: {
                         keyword: session.args[0],
                         user: {
-                            id: session.user.id,
-                            identifyNum: session.user.identifyNum,
-                            username: session.user.username,
-                            avatar: session.user.avatar
+                            id: session.author.id,
+                            identifyNum: session.author.identify_num,
+                            username: session.author.username,
+                            avatar: session.author.avatar
                         }
                     }
                 }).then((res: any) => {
@@ -252,7 +245,7 @@ class Author extends AppCommand {
                 }).catch((e: any) => {
                     if (e) {
                         bot.logger.error(e);
-                        session.sendCardTemp(pixiv.cards.error(e.stack));
+                        session.sendTemp([pixiv.cards.error(e.stack)]);
                     }
                 });
             }

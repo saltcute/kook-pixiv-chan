@@ -1,13 +1,12 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { CommandFunction, BaseCommand, BaseSession } from "kasumi.js";
 import * as pixiv from './common'
 
-class Credit extends AppCommand {
-    code = 'credit'; // 只是用作标记
-    trigger = 'credit'; // 用于触发的文字
-    intro = 'Credits';
-    func: AppFunc<BaseSession> = async (session) => {
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        return session.sendCard([await pixiv.cards.credit(1)]);
+class Credit extends BaseCommand {
+    name = 'credit';
+    description = '查看赞助与感谢列表'
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
+        return session.send([await pixiv.cards.credit(1)]);
     }
 }
 

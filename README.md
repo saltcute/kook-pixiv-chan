@@ -1,6 +1,6 @@
 # kook-pixiv-chan
 
-Based on [`kbotify`](https://github.com/fi6/kBotify), `kook-pixiv-chan` is a somewhat powerful KOOK bot for [Pixiv](https://www.pixiv.net).
+Based on [`Kasumi`](https://github.com/Hexona69/kasumi), `kook-pixiv-chan` is a powerful KOOK bot for [Pixiv](https://www.pixiv.net).
 
 ## Deploying
 

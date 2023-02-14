@@ -14,52 +14,9 @@ import { random } from 'commands/pixiv/pixiv.random.app';
 import { top } from 'commands/pixiv/pixiv.top.app';
 import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
-import { TextMessage } from 'kbotify';
 import { gui } from 'commands/pixiv/pixiv.gui.app';
-import upath, { parse } from 'upath';
-import { ArgumentParser } from 'argparse';
+import upath from 'upath';
 
-
-const logFolderPath = upath.join(__dirname, 'configs', 'logs', new Date().toISOString())
-if (!fs.existsSync(logFolderPath)) {
-    fs.mkdirSync(logFolderPath, { recursive: true });
-}
-const traceLogStream = fs.createWriteStream(upath.join(logFolderPath, 'kook-pixiv-chan-trace.log'), { flags: 'a' });
-const debugLogStream = fs.createWriteStream(upath.join(logFolderPath, 'kook-pixiv-chan-debug.log'), { flags: 'a' });
-const infoLogStream = fs.createWriteStream(upath.join(logFolderPath, 'kook-pixiv-chan-info.log'), { flags: 'a' });
-bot.logger.fields.name = "kook-pixiv-chan";
-
-bot.logger.addStream({ level: 'trace', stream: traceLogStream });
-bot.logger.addStream({ level: 'debug', stream: debugLogStream });
-bot.logger.addStream({ level: 'info', stream: infoLogStream });
-
-
-
-process.argv[1] = "kook-pixiv-chan";
-const parser = new ArgumentParser({
-    description: 'Stream local audio file to a KOOK voice channel, without the need rejoin the channel when switching songs',
-    epilog: 'Have fun streaming'
-});
-
-parser.add_argument('-d', '--debug', {
-    help: 'Set log level to DEBUG',
-    action: 'store_true'
-})
-
-parser.add_argument('-v', '--verbose', {
-    help: 'Set log level to DEBUG',
-    action: 'store_true'
-})
-const args = parser.parse_args()
-if (args.debug) {
-    bot.logger.addStream({ level: 'debug', stream: process.stdout });
-    bot.logger.debug('DEBUG MODE ENABLED');
-} else if (args.verbose) {
-    bot.logger.addStream({ level: 'trace', stream: process.stdout });
-    bot.logger.trace('VERBOSE MODE ENABLED');
-} else {
-    bot.logger.addStream({ level: 'info', stream: process.stdout });
-}
 
 bot.logger.info("Initialization: kook-pixiv-chan initialization start");
 
@@ -67,12 +24,14 @@ bot.logger.info("Initialization: kook-pixiv-chan initialization start");
     /**
      * Linkmap initialization
      */
-    await pixiv.linkmap.init();
-    await pixiv.common.tokenPoolInit();
-    await pixivadmin.common.load();
-    await botActivityStatus();
+    await Promise.all([
+        bot.connect(),
+        pixiv.linkmap.init(),
+        pixiv.common.tokenPoolInit(),
+        pixivadmin.common.load(),
+        botActivityStatus()
+    ])
     bot.logger.info("Initialization: Done");
-    bot.connect();
 })()
 schedule.scheduleJob('0,15,30,45 * * * *', async () => {
     pixiv.linkmap.save();
@@ -99,28 +58,30 @@ if (config.enableBotMarket) {
     botMarketStayOnline();
 }
 
-bot.addCommands(pixivMenu);
-bot.addCommands(pixivAdminMenu);
+// bot.addCommands(pixivMenu);
+// bot.addCommands(pixivAdminMenu);
+
+bot.plugin.load(pixivMenu, pixivAdminMenu);
 
 /**
  * Add Chinese alias
  */
-bot.addAlias(pixivMenu, "p站", "P站");
+bot.plugin.addAlias(pixivMenu, "p站", "P站");
 pixivMenu.addAlias(top, "热门");
 pixivMenu.addAlias(random, "随机");
 pixivMenu.addAlias(detail, "插画", 'illust');
 pixivMenu.addAlias(author, "作者", "画师");
 pixivMenu.addAlias(gui, "GUI", "GUi", "GuI", "Gui", "guI", "gUI", "gUi");
-bot.addAlias(top, "p站热门", "P站热门", "pixiv热门", "热门");
-bot.addAlias(random, "p站随机", "P站随机", "pixiv随机");
-bot.addAlias(detail, "p站插画", "P站插画", "pixiv插画");
-bot.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P站画师", "pixiv画师");
+bot.plugin.addAlias(top, "p站热门", "P站热门", "pixiv热门", "热门");
+bot.plugin.addAlias(random, "p站随机", "P站随机", "pixiv随机");
+bot.plugin.addAlias(detail, "p站插画", "P站插画", "pixiv插画");
+bot.plugin.addAlias(author, "p站作者", "P站作者", "pixiv作者", "p站画师", "P站画师", "pixiv画师");
 
 /**
  * Add quick hand alias for .pixiv random and .pixiv top
  */
-bot.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
-bot.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
+bot.plugin.addAlias(random, "色图", "涩图", "setu", "瑟图", "蛇图")
+bot.plugin.addAlias(top, "不色图", "不涩图", "busetu", "不瑟图", "不蛇图")
 
 function getMatches(string: string, regex: RegExp): string[] {
     let matches = regex.exec(string);
@@ -133,33 +94,32 @@ function getMatches(string: string, regex: RegExp): string[] {
     return res;
 }
 
-bot.on('kmarkdownMessage', (event) => {
-    const text = new TextMessage(event, bot);
+bot.message.on('allTextMessages', (event) => {
     switch (true) {
         case new RegExp(String.raw`^(\(met\)${bot.userId}\(met\))? ?[再在]?多?来[一俩二仨三四五六七八九十百千万亿兆京]*[张点][不]?[涩色瑟蛇]?图?$`).test(event.content): {
-            random.exec('random', [], text);
+            // random.exec('random', [], text);
             break;
         };
         case /^查询画师 ?([0-9]+)$/.test(event.content): {
             const matches = getMatches(event.content, /^查询画师 ?([0-9]+)$/);
-            author.exec('author', [matches[0]], text);
+            // author.exec('author', [matches[0]], text);
             break;
         };
         case /^查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/.test(event.content): {
             const matches = getMatches(event.content, /^查询(?:图片|插画|涩涩|(?:[蛇色瑟涩]|se|she)图)? ?([0-9]+)$/);
-            detail.exec('detail', [matches[0]], text);
+            // detail.exec('detail', [matches[0]], text);
             break;
         }
     }
 })
 
-bot.on("buttonClick", async (event) => {
+bot.message.on("buttonClicked", async (event) => {
     try {
         const buttonValue = JSON.parse(event.value);
         try {
             const action = buttonValue.action.split(".");
             const data = buttonValue.data;
-            bot.logger.debug(`ButtonClicked: From ${event.user.username}#${event.user.identifyNum} (ID ${event.userId} in (${event.guildId}/${event.channelId}), invoke ${buttonValue.action}`);
+            bot.logger.debug(`ButtonClicked: From ${event.author.username}#${event.author.identify_num} (ID ${event.authorId} in (${event.guildId}/${event.channelId}), invoke ${buttonValue.action}`);
             const func: (e: typeof event, action: string[], data: any) => Promise<any> = require(upath.join(__dirname, 'commands', 'button', ...action, 'index')).default;
             await func(event, action, data).catch((e) => {
                 bot.logger.error(e);
@@ -170,10 +130,10 @@ bot.on("buttonClick", async (event) => {
     } catch (e: any) { // Compatibility
         const identifier = event.value.split("|")[0];
         if (identifier == "view_detail" || identifier == "view_return") {
-            bot.API.message.update(event.targetMsgId, pixiv.cards.error("此卡片专为旧版 Pixiv酱 设计，现已无法使用").toString(), undefined, event.userId);
+            bot.API.message.update(event.targetMsgId, pixiv.cards.error("此卡片专为旧版 Pixiv酱 设计，现已无法使用"), undefined, event.authorId);
         } else {
             bot.logger.error(e.stack);
-            bot.API.message.update(event.targetMsgId, pixiv.cards.error(`唤起按钮事件时出错：\n${event.value}\n\n错误信息：\n${e.stack}`).toString(), undefined, event.userId);
+            bot.API.message.update(event.targetMsgId, pixiv.cards.error(`唤起按钮事件时出错：\n${event.value}\n\n错误信息：\n${e.stack}`), undefined, event.authorId);
         }
     }
 })
@@ -182,7 +142,7 @@ async function getRandomStatus(): Promise<[string, string]> {
     try {
         switch (crypto.randomInt(6)) {
             case 0:
-                const serverCount = (await bot.API.guild.list()).meta.total;
+                const serverCount = ((await (bot.API.guild.list().next())).value)?.meta.total;
                 return ["ヘキソナ", `${serverCount} 个服务器的涩图要求`];
             case 1:
                 const songs: [string, string][] = [ // OMEGALUL WEEBOO AF
@@ -226,18 +186,8 @@ async function getRandomStatus(): Promise<[string, string]> {
 
 async function botActivityStatus() {
     try {
-        const [singer, music_name] = await getRandomStatus();
-        bot.axios({
-            url: "https://www.kookapp.cn/api/v3/game/activity",
-            method: "POST",
-            data: {
-                singer: singer,
-                music_name: music_name,
-                data_type: 2
-            }
-        }).catch((e) => {
-            bot.logger.warn(e);
-        })
+        const [singer, musicName] = await getRandomStatus();
+        bot.API.game.activity(singer, musicName);
     } catch (e) {
         bot.logger.warn(e);
     }
