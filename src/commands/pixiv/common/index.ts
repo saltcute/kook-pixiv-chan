@@ -343,6 +343,8 @@ export namespace common {
                         auth.assetUploadTokens[idx].active = false;
                         bot.logger.warn(`Initialization: Uploader #${parseInt(idx) + 1} is unavailable, message: ${res.data.message}`);
                     }
+                }).catch(() => {
+                    bot.logger.warn(`Initialization: Uploader #${idx} unavailable`);
                 })
             );
         }
