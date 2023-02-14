@@ -147,7 +147,9 @@ class Detail extends BaseCommand {
                     }
                 }
                 pixiv.common.getNotifications(session);
-                sendCard(res.data);
+                sendCard(res.data).catch((e) => {
+                    bot.logger.error(e);
+                })
             }).catch((e: any) => {
                 if (e) {
                     bot.logger.error(e);

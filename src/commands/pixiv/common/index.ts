@@ -188,7 +188,25 @@ export namespace common {
             headers: {
                 'Authorization': config.connectApexToken
             }
-        });
+        }).catch((e) => {
+            bot.logger.warn("ApexConnect: Checking Apex助手 status failed");
+            bot.logger.warn(e);
+            return {
+                data: {
+                    status: -1,
+                    data: {
+                        id: "-1",
+                        is_exist: false,
+                        is_vip: false,
+                        originData: {
+                            name: 'Unknown',
+                            uid: "-1",
+                            pid: "-1"
+                        }
+                    }
+                }
+            };
+        })
         return res.data;
     }
 
