@@ -63,8 +63,10 @@ class Random extends BaseCommand {
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
             for (const val of datas) {
-                if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
-                promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
+                if (detectionResults[val.id]) {
+                    if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
+                    promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
+                }
             }
             var uploadResults: {
                 link: string;
