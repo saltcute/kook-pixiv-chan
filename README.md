@@ -30,7 +30,7 @@ npm start
 or with
 
 ```
-npm run pm2 -- --name="Pixiv Chan"
+npm run pm2
 ```
 
 to start using pm2
