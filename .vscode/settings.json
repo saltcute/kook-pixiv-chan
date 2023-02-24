@@ -4,6 +4,7 @@
     },
     "search.useIgnoreFiles": false,
     "conventionalCommits.scopes": [
-        "pkg"
+        "pkg",
+        "shorthand"
     ]
 }
