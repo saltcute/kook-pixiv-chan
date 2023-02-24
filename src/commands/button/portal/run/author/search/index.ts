@@ -60,10 +60,6 @@ export default async function (event: ButtonClickedEvent, action: string[], data
             link.push(val.link);
             pid.push(val.pid);
         }
-        while (link.length <= 9) {
-            link.push(pixiv.common.akarin);
-            pid.push("没有了");
-        }
         bot.logger.debug(`UserInterface: Presenting card to user`);
         session.updateTemp(event.targetMsgId, [pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: 'portal.error.reset' }]))])
             .then(() => {

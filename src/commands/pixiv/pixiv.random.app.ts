@@ -44,7 +44,7 @@ class Random extends BaseCommand {
             var detection: number = 0;
             var link: string[] = [];
             var pid: string[] = [];
-            var datas: any[] = [];
+            var datas: types.illustration[] = [];
             var promises: Promise<any>[] = [];
             for (const k in data) {
                 if (data[k].x_restrict !== 0) {
@@ -73,22 +73,15 @@ class Random extends BaseCommand {
             var uploadResults: {
                 link: string;
                 pid: string;
-            }[] = [];
-            await Promise.all(promises).then((res) => {
-                uploadResults = res;
-            }).catch((e) => {
+            }[] = await Promise.all(promises).catch((e) => {
                 if (e) {
                     bot.logger.error(e);
                     session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
-            });
-            for (var val of uploadResults) {
+            }) || [];
+            for (let val of uploadResults) {
                 link.push(val.link);
                 pid.push(val.pid);
-            }
-            while (link.length <= 9) {
-                link.push(pixiv.common.akarin);
-                pid.push("没有了");
             }
             bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {

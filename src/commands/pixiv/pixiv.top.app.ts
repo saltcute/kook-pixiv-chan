@@ -10,7 +10,6 @@ class Top extends BaseCommand {
     name = 'top';
     description = '获取本日/周/月等的全站最热插画';
     func: CommandFunction<BaseSession, any> = async (session) => {
-        console.log(1);
         if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
         if (await pixiv.users.reachesIllustLimit(session)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
@@ -25,7 +24,6 @@ class Top extends BaseCommand {
                 await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片"), undefined, session.authorId);
             } else {
                 if (session.guildId) {
-                    console.log(1);
                     await session.send([pixiv.cards.resaving("多张图片")]).then((res) => {
                         if (res) {
                             sendSuccess = true;
@@ -89,12 +87,7 @@ class Top extends BaseCommand {
                 link.push(val.link);
                 pid.push(val.pid);
             }
-            while (link.length <= 9) {
-                link.push(pixiv.common.akarin);
-                pid.push("没有了");
-            }
             bot.logger.debug(`UserInterface: Presenting card to user`);
-            console.log(2);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.top(link, pid, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.run.command.top", text: "上级" }, { action: "GUI.view.command.list", text: "命令列表" }])), undefined, session.authorId);
             } else {

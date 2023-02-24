@@ -91,10 +91,6 @@ class Tag extends BaseCommand {
                 link.push(val.link);
                 pid.push(val.pid);
             }
-            while (link.length <= 9) {
-                link.push(pixiv.common.akarin);
-                pid.push("没有了");
-            }
             bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.tag(link, pid, tags, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);

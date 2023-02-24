@@ -104,6 +104,11 @@ export namespace type {
 }
 
 export namespace common {
+
+    export function fillUntil<T>(array: T[], length: number, placeholder: T) {
+        return [...array, ...Array(length).fill(placeholder)].splice(0, length);
+    }
+
     /**
      * Placeholder for forbidden images
      * 

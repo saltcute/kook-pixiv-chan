@@ -165,6 +165,7 @@ export namespace aligreen {
             bot.logger.debug("ImageDetection: No detection needed for the given illustrations");
             return linkmapResults;
         }
+        console.log(linkmapResults);
         bot.logger.debug(`ImageDetection: Aliyun image detection started for:`);
         bot.logger.debug(Object.keys(imageURL).map(str => `${str}_p0.jpg`).join(", "));
         var result: { [key: string]: type.detectionResult } = {};
@@ -245,6 +246,9 @@ export namespace aligreen {
                 bot.logger.error(e);
             }
         });
-        return result;
+        return {
+            ...linkmapResults,
+            ...result
+        };
     }
 }

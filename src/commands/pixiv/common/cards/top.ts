@@ -17,10 +17,10 @@ export default (link: string[], pid: string[], durationName: string, { resave = 
         })
         .addDivider()
         .addModule(pixiv.cards.GUI.portalEntry(link, pid, "top", { durationName: durationName }))
-        .addImageGroup(...[...link, ...Array(9).fill(pixiv.common.akarin)].splice(0, 9))
+        .addImageGroup(...pixiv.common.fillUntil(link, 9, pixiv.common.akarin))
         .addModule(cards.getCommercials())
         .addDivider()
-        .addPID(pid)
+        .addPID(pixiv.common.fillUntil(pid, 9, "没有了"))
         .addResave(link, resave, id)
         .addNSFW(nsfw, id)
 }

@@ -90,10 +90,6 @@ class Author extends BaseCommand {
                 link.push(val.link);
                 pid.push(val.pid);
             }
-            while (link.length <= 9) {
-                link.push(pixiv.common.akarin);
-                pid.push("没有了");
-            }
             bot.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
