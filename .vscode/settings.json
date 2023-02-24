@@ -2,5 +2,8 @@
     "search.exclude": {
         "**/node_modules": true
     },
-    "search.useIgnoreFiles": false
+    "search.useIgnoreFiles": false,
+    "conventionalCommits.scopes": [
+        "pkg"
+    ]
 }
