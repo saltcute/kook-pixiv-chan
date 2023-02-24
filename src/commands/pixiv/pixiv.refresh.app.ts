@@ -65,8 +65,10 @@ class Refresh extends BaseCommand {
                     var mainCardMessageID = "";
                     if (session.guildId) {
                         await session.send([pixiv.cards.resaving(val.id)]).then((res) => {
-                            sendSuccess = true;
-                            mainCardMessageID = res.msg_id;
+                            if (res) {
+                                sendSuccess = true;
+                                mainCardMessageID = res.msg_id;
+                            }
                         }).catch((e) => {
                             if (e) {
                                 if (e.code == 40012) { // Slow-mode limit

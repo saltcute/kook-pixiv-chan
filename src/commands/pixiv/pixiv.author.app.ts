@@ -27,8 +27,10 @@ class Author extends BaseCommand {
             } else {
                 if (session.guildId) {
                     await session.send([pixiv.cards.resaving("多张图片")]).then((res) => {
-                        sendSuccess = true;
-                        mainCardMessageID = res.msg_id;
+                        if (res) {
+                            sendSuccess = true;
+                            mainCardMessageID = res.msg_id;
+                        }
                     }).catch((e) => {
                         if (e) {
                             if (e.code == 40012) { // Slow-mode limit
@@ -149,7 +151,8 @@ class Author extends BaseCommand {
                     if (res.data.hasOwnProperty("code") && res.data.code == 500) {
                         return session.reply("Pixiv官方服务器不可用，请稍后再试");
                     }
-                    let messageId = (await session.send([new Card().addText("正在加载……请稍候").addModule(pixiv.cards.getCommercials())])).msg_id;
+                    let messageId = (await session.send([new Card().addText("正在加载……请稍候").addModule(pixiv.cards.getCommercials())]))?.msg_id;
+                    if (!messageId) return;
                     let data: {
                         user_previews: {
                             illusts: types.illustration[],

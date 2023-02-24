@@ -25,8 +25,10 @@ class Tag extends BaseCommand {
                     await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片"), undefined, session.authorId);
                 } else {
                     await session.send([pixiv.cards.resaving("多张图片")]).then((res) => {
-                        sendSuccess = true;
-                        mainCardMessageID = res.msg_id;
+                        if (res) {
+                            sendSuccess = true;
+                            mainCardMessageID = res.msg_id;
+                        }
                     }).catch((e) => {
                         if (e) {
                             if (e.code == 40012) { // Slow-mode limit
