@@ -186,12 +186,11 @@ async function getRandomStatus(): Promise<[string, string]> {
 }
 
 async function botActivityStatus() {
-    try {
-        const [singer, musicName] = await getRandomStatus();
-        bot.API.game.activity(singer, musicName);
-    } catch (e) {
+    const [singer, musicName] = await getRandomStatus();
+    bot.API.game.activity(singer, musicName).catch((e) => {
+        bot.logger.warn(`Activity: Falied updating activity`);
         bot.logger.warn(e);
-    }
+    })
 }
 
 function botMarketStayOnline() {
