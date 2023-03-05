@@ -15,19 +15,19 @@ class Notice extends BaseCommand {
         pixiv.common.logInvoke(`.pixivadmin ${this.name}`, session);
         switch (session.args[0]) {
             case "add":
-                bot.logger.debug("AdminNotice: Added notification:")
+                this.logger.debug("AdminNotice: Added notification:")
                 const content = session.args.slice(1).join(" ");
-                bot.logger.debug(content);
+                this.logger.debug(content);
                 session.replyTemp([pixiv.cards.notification(content)]);
                 pixiv.common.addNotifications(content);
                 break;
             case "delete":
-                bot.logger.debug("AdminNotice: Deleted current notification");
+                this.logger.debug("AdminNotice: Deleted current notification");
                 session.replyTemp("Deleted");
                 pixiv.common.deleteNotifications();
                 break;
             default:
-                bot.logger.warn("AdminNotice: Action invalid");
+                this.logger.warn("AdminNotice: Action invalid");
                 return session.replyTemp("Action invalid");
         }
     }

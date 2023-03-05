@@ -39,9 +39,9 @@ class Detail extends BaseCommand {
                     }).catch((e) => {
                         if (e) {
                             if (e.code == 40012) { // Slow-mode limit
-                                bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
+                                this.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                             } else {
-                                bot.logger.error(e);
+                                this.logger.error(e);
                             }
                         }
                         sendSuccess = false;
@@ -51,7 +51,7 @@ class Detail extends BaseCommand {
             }
             const detectionResult = (await pixiv.aligreen.imageDetectionSync([data]))[data.id];
             if (!detectionResult) {
-                bot.logger.error("ImageDetection: No detection result was returned");
+                this.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
             var uploadResult: {
@@ -63,11 +63,11 @@ class Detail extends BaseCommand {
                 uploadResult = res;
             }).catch((e) => {
                 if (e) {
-                    bot.logger.error(e);
+                    this.logger.error(e);
                     session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
             });
-            bot.logger.debug(`UserInterface: Presenting card to user`);
+            this.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.detail(data, uploadResult.link, { isVIP }).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
             } else {
@@ -77,8 +77,8 @@ class Detail extends BaseCommand {
                             pixiv.users.logInvoke(session, this.name, 1, detection)
                         })
                         .catch((e) => {
-                            bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
-                            if (e) bot.logger.error(e);
+                            this.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
+                            if (e) this.logger.error(e);
                         });
                 } else {
                     session.send([pixiv.cards.detail(data, uploadResult.link, { isVIP })])
@@ -86,8 +86,8 @@ class Detail extends BaseCommand {
                             pixiv.users.logInvoke(session, this.name, 1, detection)
                         })
                         .catch((e) => {
-                            bot.logger.error(`UserInterface: Failed sending message`);
-                            if (e) bot.logger.error(e);
+                            this.logger.error(`UserInterface: Failed sending message`);
+                            if (e) this.logger.error(e);
                         });
                 }
             }
@@ -107,8 +107,8 @@ class Detail extends BaseCommand {
                     isGUI = true;
                     msgID = UUID;
                 }).catch((e) => {
-                    bot.logger.warn("GUI:Unknown GUI msgID");
-                    bot.logger.warn(e);
+                    this.logger.warn("GUI:Unknown GUI msgID");
+                    this.logger.warn(e);
                     isGUI = false;
                 })
             }
@@ -136,25 +136,25 @@ class Detail extends BaseCommand {
                     return session.reply("Pixiv官方服务器不可用，请稍后再试");
                 }
                 if (pixiv.common.isForbittedUser(res.data.user.uid)) {
-                    bot.logger.debug(`UserInterface: User violates user blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
+                    this.logger.debug(`UserInterface: User violates user blacklist: ${res.data.user.uid}. Banned the user for 30 seconds`);
                     pixiv.common.registerBan(session.authorId, this.name, 30);
                     return session.reply(`此插画来自用户黑名单中的用户，您已被暂时停止使用 \`.pixiv ${this.name}\` 指令 30秒`);
                 }
                 for (const val of res.data.tags) {
                     const tag = val.name;
                     if (pixiv.common.isForbittedTag(tag)) {
-                        bot.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
+                        this.logger.debug(`UserInterface: User violates tag blacklist: ${tag}. Banned the user for 30 seconds`);
                         pixiv.common.registerBan(session.authorId, this.name, 30);
                         return session.reply(`此插画包含标签黑名单中的标签，您已被暂时停止使用 \`.pixiv ${this.name}\` 指令 30秒`);
                     }
                 }
                 pixiv.common.getNotifications(session);
                 sendCard(res.data).catch((e) => {
-                    bot.logger.error(e);
+                    this.logger.error(e);
                 })
             }).catch((e: any) => {
                 if (e) {
-                    bot.logger.error(e);
+                    this.logger.error(e);
                     session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
             });

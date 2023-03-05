@@ -95,7 +95,9 @@ export default async function (event: ButtonClickedEvent, action: string[], data
             return session.reply("Pixiv官方服务器不可用，请稍后再试");
         }
         pixiv.common.getNotifications(session);
-        sendCard(res.data);
+        sendCard(res.data).catch((e) => {
+            bot.logger.error(e);
+        })
     }).catch((e: any) => {
         if (e) {
             bot.logger.error(e);

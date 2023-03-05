@@ -32,9 +32,9 @@ class Top extends BaseCommand {
                     }).catch((e) => {
                         if (e) {
                             if (e.code == 40012) { // Slow-mode limit
-                                bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
+                                this.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                             } else {
-                                bot.logger.error(e);
+                                this.logger.error(e);
                             }
                         }
                         sendSuccess = false;
@@ -62,7 +62,7 @@ class Top extends BaseCommand {
             }
             const detectionResults = await pixiv.aligreen.imageDetectionSync(datas);
             if (!detectionResults) {
-                bot.logger.error("ImageDetection: No detection result was returned");
+                this.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
             for (const val of datas) {
@@ -79,7 +79,7 @@ class Top extends BaseCommand {
                 uploadResults = res;
             }).catch((e) => {
                 if (e) {
-                    bot.logger.error(e);
+                    this.logger.error(e);
                     session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
             });
@@ -87,7 +87,7 @@ class Top extends BaseCommand {
                 link.push(val.link);
                 pid.push(val.pid);
             }
-            bot.logger.debug(`UserInterface: Presenting card to user`);
+            this.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
                 bot.API.message.update(msgID, pixiv.cards.top(link, pid, durationName, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.run.command.top", text: "上级" }, { action: "GUI.view.command.list", text: "命令列表" }])), undefined, session.authorId);
             } else {
@@ -97,8 +97,8 @@ class Top extends BaseCommand {
                             pixiv.users.logInvoke(session, this.name, datas.length, detection);
                         })
                         .catch((e) => {
-                            bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
-                            if (e) bot.logger.error(e);
+                            this.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
+                            if (e) this.logger.error(e);
                         });
                 } else {
                     session.send([pixiv.cards.top(link, pid, durationName, {})])
@@ -106,8 +106,8 @@ class Top extends BaseCommand {
                             pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
-                            bot.logger.error(`UserInterface: Failed sending message`);
-                            if (e) bot.logger.error(e);
+                            this.logger.error(`UserInterface: Failed sending message`);
+                            if (e) this.logger.error(e);
                         });
                 }
             }
@@ -144,8 +144,8 @@ class Top extends BaseCommand {
                 isGUI = true;
                 msgID = UUID;
             }).catch((e) => {
-                bot.logger.warn("GUI:Unknown GUI msgID");
-                bot.logger.warn(e);
+                this.logger.warn("GUI:Unknown GUI msgID");
+                this.logger.warn(e);
                 isGUI = false;
             })
         }
@@ -178,10 +178,12 @@ class Top extends BaseCommand {
                 return session.replyTemp(`无法找到任何插画，这多半是出错了`);
             }
             pixiv.common.getNotifications(session);
-            sendCard(res.data, durationName);
+            sendCard(res.data, durationName).catch((e) => {
+                this.logger.error(e);
+            })
         }).catch((e: any) => {
             if (e) {
-                bot.logger.error(e);
+                this.logger.error(e);
                 session.sendTemp([pixiv.cards.error(e.stack)]);
             }
         });

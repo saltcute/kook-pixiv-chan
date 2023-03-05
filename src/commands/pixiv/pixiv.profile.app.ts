@@ -17,7 +17,7 @@ class Profile extends BaseCommand {
         }).then((res) => {
             return session.send([pixiv.cards.profile(res)]);
         }).catch((e) => {
-            bot.logger.warn(e);
+            this.logger.warn(e);
             return session.replyTemp([pixiv.cards.error(e.stack)]);
         });
     }

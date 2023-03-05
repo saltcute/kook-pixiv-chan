@@ -54,7 +54,7 @@ class Redeem extends BaseCommand {
                             }).then((res) => {
                                 return session.send([pixiv.cards.profile(res)]);
                             }).catch((e) => {
-                                bot.logger.warn(e);
+                                this.logger.warn(e);
                                 return session.replyTemp([pixiv.cards.error(e.stack)]);
                             });
                             break;
@@ -66,8 +66,8 @@ class Redeem extends BaseCommand {
                             break;
                     }
                 }).catch((e) => {
-                    bot.logger.error(`Subscription: Failed activating key ${key}`);
-                    bot.logger.error(e);
+                    this.logger.error(`Subscription: Failed activating key ${key}`);
+                    this.logger.error(e);
                     session.send([pixiv.cards.error(e, false)]);
                 })
             } else {
