@@ -63,6 +63,6 @@ In regard of server bandwidth and load time, original image will be resize to 76
 
 `kook-pixiv-chan` will detect whether the image is NSFW or not and amount of blur to apply based on Aliyun Image Detection.
 
-A list of banned tags is defined in `/src/commands/pixiv/common/tagBanList.ts` and a list of banned user is defined in `/src/commands/pixiv/common/userBanList.ts`. Illustration with one or more of those tags or users in the list will be rejected anyway, without checking nsfw.
+A list of banned tags is defined in `/src/commands/pixivchan/pixiv/common/tagBanList.ts` and a list of banned user is defined in `/src/commands/pixivchan/pixiv/common/userBanList.ts`. Illustration with one or more of those tags or users in the list will be rejected anyway, without checking nsfw.
 
 ![akarin~](https://img.kaiheila.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg)

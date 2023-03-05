@@ -1,4 +1,4 @@
-import auth from '../configs/auth';
+import auth from 'configs/auth';
 // import Kasumi from 'kasumi.js';
 import Kasumi from "kasumi.js"
 import { KasumiConfig } from 'kasumi.js/dist/type'
