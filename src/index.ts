@@ -96,7 +96,7 @@ function getMatches(string: string, regex: RegExp): string[] {
 
 bot.message.on('allTextMessages', (event) => {
     switch (true) {
-        case /[再在]?多?来[一俩二仨三四五六七八九十百千万亿兆京]*[张点][不]?[涩色瑟蛇]?图?$/.test(event.content): {
+        case /[再在]?多?来[一俩二仨三四五六七八九十百千万亿兆京]*[张点][不]?[涩色瑟蛇]?图?/.test(event.content): {
             // case new RegExp(String.raw`^(\(met\)${bot.userId}\(met\))? ?[再在]?多?来[一俩二仨三四五六七八九十百千万亿兆京]*[张点][不]?[涩色瑟蛇]?图?$`).test(event.content): {
             random.exec([], event, bot);
             break;
