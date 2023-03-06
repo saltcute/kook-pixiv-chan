@@ -18,6 +18,9 @@ import * as pixivadmin from '../admin/common';
 import { types } from 'pixnode';
 import crypto from 'crypto';
 const sharp = require('sharp');
+import * as fs from 'fs';
+import upath from 'upath';
+
 
 export namespace type {
     export type detectionResult = {
@@ -115,6 +118,20 @@ export namespace common {
      * R-18, network failure, etc.
      */
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
+
+    export function gitHash() {
+        try {
+            let rev = fs.readFileSync(upath.join(__dirname, '..', '..', '..', '..', '.git', 'HEAD')).toString().trim().split(/.*[: ]/).slice(-1)[0];
+            if (rev.indexOf('/') === -1) {
+            } else {
+                rev = fs.readFileSync(upath.join(__dirname, '..', '..', '..', '..', '.git', rev)).toString().trim();
+            }
+            return rev.slice(0, 7);
+        } catch (e) {
+            bot.logger.warn(e);
+        }
+
+    }
 
     export async function getAfdianSupporter(page: number): Promise<type.afdian.sponserData> {
         let user_id = "b775664e507311ea9e2b52540025c377";
