@@ -5,6 +5,7 @@ import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
 import { types } from 'pixnode';
+import auth from "configs/auth";
 
 class Tag extends BaseCommand {
     name = 'tag';
@@ -171,6 +172,10 @@ class Tag extends BaseCommand {
             }
             axios({
                 baseURL: config.pixivAPIBaseURL,
+                headers: {
+                    'Authorization': auth.remoteLinkmapToken,
+                    'uuid': auth.remoteLinkmapUUID
+                },
                 url: "/illustration/tag",
                 method: "GET",
                 params: {

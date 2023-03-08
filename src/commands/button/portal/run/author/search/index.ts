@@ -1,4 +1,3 @@
-import { author } from 'commands/pixiv/pixiv.author.app';
 import { bot } from 'init/client';
 import * as pixiv from 'commands/pixiv/common';
 import * as pixivadmin from 'commands/pixiv/admin/common'
@@ -6,6 +5,7 @@ import { BaseSession, ButtonClickedEvent } from "kasumi.js";
 import { types } from 'pixnode';
 import axios from 'axios';
 import config from 'configs/config';
+import auth from 'configs/auth';
 export default async function (event: ButtonClickedEvent, action: string[], data: {
     username: string,
     avatar: string,
@@ -73,6 +73,10 @@ export default async function (event: ButtonClickedEvent, action: string[], data
     }
     axios({
         baseURL: config.pixivAPIBaseURL,
+        headers: {
+            'Authorization': auth.remoteLinkmapToken,
+            'uuid': auth.remoteLinkmapUUID
+        },
         url: "/creator/illustration",
         method: "GET",
         params: {

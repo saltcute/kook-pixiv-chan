@@ -30,6 +30,10 @@ export namespace linkmap {
         if (config.useRemoteLinkmap) {
             await axios({
                 baseURL: config.remoteLinkmapBaseURL,
+                headers: {
+                    'Authorization': auth.remoteLinkmapToken,
+                    'uuid': auth.remoteLinkmapUUID
+                },
                 url: "/linkmap",
                 method: "GET"
             }).then((res) => {

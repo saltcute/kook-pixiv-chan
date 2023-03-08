@@ -332,6 +332,10 @@ export namespace common {
     export async function getIllustDetail(illustID: string): Promise<types.illustration> {
         return (await axios({
             baseURL: config.pixivAPIBaseURL,
+            headers: {
+                'Authorization': auth.remoteLinkmapToken,
+                'uuid': auth.remoteLinkmapUUID
+            },
             url: "/illustration/detail",
             method: "GET",
             params: {

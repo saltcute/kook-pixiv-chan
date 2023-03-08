@@ -33,7 +33,7 @@ export default {
      * 
      * Check out https://github.com/Hexona69/pixiv-web-api
      */
-    pixivAPIBaseURL: "https://pixiv.lolicon.ac.cn",
+    pixivAPIBaseURL: "",
 
     /**
      * URL of remote linkmap
@@ -47,7 +47,7 @@ export default {
      * Check out https://github.com/Hexona69/pixiv-web-api
      */
     useRemoteLinkmap: true,
-    remoteLinkmapBaseURL: "https://pixiv.lolicon.ac.cn",
+    remoteLinkmapBaseURL: "",
 
     /**
      * Whether this instance of Pixiv Chan is contributing to the remote linkmap or not
@@ -105,7 +105,7 @@ export default {
      * Aliyun OSS config
      */
     OSSRegion: 'oss-cn-shenzhen',
-    OSSBucketName: 'kook-pixiv-chan',
+    OSSBucketName: '',
 
     commercialText: "有定制 KOOK 机器人需求的朋友们可以联系 Hexona#6969\n[进服](https://kook.top/iOOsLu)@我或者私信（请详细描述需求） \n您也可以在[爱发电](https://afdian.net/@hexona)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
 }

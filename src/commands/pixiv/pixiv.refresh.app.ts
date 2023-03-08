@@ -28,6 +28,10 @@ class Refresh extends BaseCommand {
                 this.logger.debug(`ImageProcessing: Refreshing ${illust_id}_0.jpg`);
                 axios({
                     baseURL: config.pixivAPIBaseURL,
+                    headers: {
+                        'Authorization': auth.remoteLinkmapToken,
+                        'uuid': auth.remoteLinkmapUUID
+                    },
                     url: "/illustration/detail",
                     method: "GET",
                     params: {

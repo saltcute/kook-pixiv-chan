@@ -28,7 +28,7 @@ class Redeem extends BaseCommand {
                     url: "/user/key/activate",
                     method: "POST",
                     headers: {
-                        'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
+                        'Authorization': auth.remoteLinkmapToken,
                         'uuid': auth.remoteLinkmapUUID
                     },
                     data: {

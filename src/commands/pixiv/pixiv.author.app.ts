@@ -5,9 +5,9 @@ import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
 import { types } from 'pixnode';
-import FormData from 'form-data';
 import sharp from 'sharp';
 import { BaseCommand, CommandFunction, BaseSession, Card } from "kasumi.js";
+import auth from 'configs/auth';
 
 class Author extends BaseCommand {
     name = 'author';
@@ -126,6 +126,10 @@ class Author extends BaseCommand {
             if (isNaN(parseInt(session.args[0]))) {
                 axios({
                     baseURL: config.pixivAPIBaseURL,
+                    headers: {
+                        'Authorization': auth.remoteLinkmapToken,
+                        'uuid': auth.remoteLinkmapUUID
+                    },
                     url: "/creator/search",
                     method: "GET",
                     params: {
@@ -220,6 +224,10 @@ class Author extends BaseCommand {
                 }
                 axios({
                     baseURL: config.pixivAPIBaseURL,
+                    headers: {
+                        'Authorization': auth.remoteLinkmapToken,
+                        'uuid': auth.remoteLinkmapUUID
+                    },
                     url: "/creator/illustration",
                     method: "GET",
                     params: {

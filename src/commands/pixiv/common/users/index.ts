@@ -236,6 +236,10 @@ export namespace users {
         return axios({
             url: `${config.remoteLinkmapBaseURL}/user/profile`,
             method: "GET",
+            headers: {
+                'Authorization': auth.remoteLinkmapToken,
+                'uuid': auth.remoteLinkmapUUID
+            },
             params: {
                 id: userMeta.id,
                 user: userMeta
