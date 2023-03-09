@@ -1,4 +1,4 @@
-import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
+import { BaseCommand, BaseSession, Card, CommandFunction } from "kasumi.js";
 import * as pixiv from './common';
 import * as pixivadmin from './admin/common'
 import axios from 'axios';
@@ -11,12 +11,12 @@ class Random extends BaseCommand {
     name = 'random';
     description = '获取⑨张随机插画';
     func: CommandFunction<BaseSession, any> = async (session) => {
-        if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
-        if (await pixiv.users.reachesIllustLimit(session)) return;
-        if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
-        if (pixiv.common.isBanned(session, this.name)) return;
-        if (pixiv.common.isRateLimited(session, 10, this.name)) return;
-        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
+        // if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
+        // if (await pixiv.users.reachesIllustLimit(session)) return;
+        // if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
+        // if (pixiv.common.isBanned(session, this.name)) return;
+        // if (pixiv.common.isRateLimited(session, 10, this.name)) return;
+        // pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
         const sendCard = async (data: types.illustration[]) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
@@ -86,10 +86,10 @@ class Random extends BaseCommand {
             }
             this.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
-                bot.API.message.update(msgID, pixiv.cards.random(link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
+                await bot.API.message.update(msgID, pixiv.cards.random(link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
             } else {
                 if (session.guildId) {
-                    session.update(mainCardMessageID, [pixiv.cards.random(link, pid, {})])
+                    await session.update(mainCardMessageID, pixiv.cards.random(link, pid, {}))
                         .then(() => {
                             pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
@@ -98,7 +98,7 @@ class Random extends BaseCommand {
                             if (e) this.logger.error(e);
                         });
                 } else {
-                    session.send([pixiv.cards.random(link, pid, {})])
+                    await session.send([pixiv.cards.random(link, pid, {})])
                         .then(() => {
                             pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
@@ -123,7 +123,7 @@ class Random extends BaseCommand {
                 isGUI = false;
             })
         }
-        axios({
+        await axios({
             baseURL: config.pixivAPIBaseURL,
             headers: {
                 'Authorization': auth.remoteLinkmapToken,
@@ -139,18 +139,16 @@ class Random extends BaseCommand {
                     avatar: session.author.avatar
                 }
             }
-        }).then((res: any) => {
+        }).then(async (res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {
-                return session.reply("Pixiv官方服务器不可用，请稍后再试");
+                return await session.reply("Pixiv官方服务器不可用，请稍后再试");
             }
-            pixiv.common.getNotifications(session);
-            sendCard(res.data).catch((e) => {
-                this.logger.error(e);
-            })
-        }).catch((e: any) => {
+            await pixiv.common.getNotifications(session);
+            await sendCard(res.data);
+        }).catch(async (e: any) => {
             if (e) {
                 this.logger.error(e);
-                session.sendTemp([pixiv.cards.error(e.stack)]);
+                await session.sendTemp([pixiv.cards.error(e.stack)]);
             }
         });
     };

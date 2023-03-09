@@ -178,62 +178,65 @@ export namespace users {
     export async function reachesCommandLimit(session: BaseSession, trigger: string): Promise<boolean> {
         var reached = false;
         if (isCommand(trigger)) {
-            await detail({
+            const res = await detail({
                 id: session.author.id,
                 identifyNum: session.author.identify_num,
                 username: session.author.username,
                 avatar: session.author.avatar,
-            }).then((res) => {
+            }).catch((e) => {
+                bot.logger.error(e);
+            })
+            if (res) {
                 if (tiersCommandLimitLeft(res, trigger) == "unlimited") reached = false;
                 else if (tiersCommandLimitLeft(res, trigger) <= 0) reached = true;
                 else reached = false;
                 if (reached) {
-                    session.reply([cards.reachesLimit(res, "command", trigger)]);
+                    session.reply([cards.reachesLimit(res, "command", trigger)])
+                        .catch((e) => { bot.logger.error(e) });
                 }
-            }).catch((e) => {
-                bot.logger.error(e);
-            })
+            }
         }
         return reached;
     }
     export async function reachesIllustLimit(session: BaseSession): Promise<boolean> {
         var reached = false;
-        await detail({
+        const res = await detail({
             id: session.author.id,
             identifyNum: session.author.identify_num,
             username: session.author.username,
             avatar: session.author.avatar,
-        }).then((res) => {
+        }).catch((e) => {
+            bot.logger.error(e);
+        })
+        if (res) {
             if (tiersIllustLimitLeft(res) == "unlimited") reached = false;
             else if (tiersIllustLimitLeft(res) > 0) reached = false;
             else reached = true;
             if (reached) {
-                session.reply([cards.reachesLimit(res, "illust")]);
+                session.reply([cards.reachesLimit(res, "illust")])
+                    .catch((e) => { bot.logger.error(e) });
             }
-        }).catch((e) => {
-            bot.logger.error(e);
-        })
+        }
         return reached;
     }
-    export async function update(user: user) {
-        axios({
+    export async function update(user: user): Promise<void> {
+        const res = await axios({
             url: `${config.remoteLinkmapBaseURL}/user/profile/update`,
             method: "POST",
             data: user,
             headers: {
-                'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
+                'Authorization': auth.remoteLinkmapToken,
                 'uuid': auth.remoteLinkmapUUID
             }
-        }).then((res) => {
-            if (res.data.code != 0) {
-                throw res.data;
-            }
         }).catch((e) => {
-            throw e.data;
+            throw e;
         });
+        if (res && res.data.code != 0) {
+            throw res.data;
+        }
     }
     export async function detail(userMeta: userMeta): Promise<users.user> {
-        return axios({
+        const res = await axios({
             url: `${config.remoteLinkmapBaseURL}/user/profile`,
             method: "GET",
             headers: {
@@ -244,18 +247,17 @@ export namespace users {
                 id: userMeta.id,
                 user: userMeta
             }
-        }).then((res) => {
-            if (res.data.code == 0) {
-                var user: users.user = res.data.data;
-                user.kook = userMeta;
-                update(user);
-                return user;
-            } else {
-                throw res;
-            }
         }).catch((e) => {
-            throw e.data;
+            throw e;
         });
+        if (res && res.data.code == 0) {
+            var user: users.user = res.data.data;
+            user.kook = userMeta;
+            update(user);
+            return user;
+        } else {
+            throw new Error(res.data);
+        }
     }
     /**
      * Update statistics of usage
@@ -264,58 +266,62 @@ export namespace users {
      * @param totalIllust requested illustrations number
      * @param newIllust requested new illustrations number
      */
-    export function logInvoke(session: BaseSession, trigger: string, totalIllust: number, newIllust: number) {
-        detail({
-            id: session.author.id,
-            identifyNum: session.author.identify_num,
-            username: session.author.username,
-            avatar: session.author.avatar
-        }).then((res) => {
-            if (res) {
-                res.pixiv.statistics.last_seen_on = Date.now();
+    export async function logInvoke(session: BaseSession, trigger: string, totalIllust: number, newIllust: number) {
+        try {
+            return detail({
+                id: session.author.id,
+                identifyNum: session.author.identify_num,
+                username: session.author.username,
+                avatar: session.author.avatar
+            }).then(async (res) => {
+                if (res) {
+                    res.pixiv.statistics.last_seen_on = Date.now();
 
-                if (isCommand(trigger)) {
-                    const commandLeft = tiersCommandLimitLeftRaw(res, trigger)
-                    if (commandLeft != 'unlimited') {
-                        var reduction = 0;
-                        if (commandLeft < newIllust) {
-                            reduction = (newIllust - commandLeft);
-                        } else {
-                            reduction = newIllust;
+                    if (isCommand(trigger)) {
+                        const commandLeft = tiersCommandLimitLeftRaw(res, trigger)
+                        if (commandLeft != 'unlimited') {
+                            var reduction = 0;
+                            if (commandLeft < newIllust) {
+                                reduction = (newIllust - commandLeft);
+                            } else {
+                                reduction = newIllust;
+                            }
+
+                            if (res.pixiv.quantum_pack_capacity > reduction) {
+                                res.pixiv.quantum_pack_capacity -= reduction;
+                            } else {
+                                res.pixiv.quantum_pack_capacity = 0;
+                            }
                         }
+                    }
 
-                        if (res.pixiv.quantum_pack_capacity > reduction) {
-                            res.pixiv.quantum_pack_capacity -= reduction;
-                        } else {
-                            res.pixiv.quantum_pack_capacity = 0;
+                    res.pixiv.statistics.new_illustration_requested += newIllust;
+                    res.pixiv.statistics.total_illustration_requested += totalIllust;
+
+                    res.pixiv.statistics_today.new_illustration_requested += newIllust;
+                    res.pixiv.statistics_today.total_illustration_requested += totalIllust;
+
+                    res.pixiv.statistics.total_requests_counter++;
+                    if (isCommand(trigger)) {
+                        if (trigger == "refresh") {
+                            res.pixiv.statistics_today.command_requests_counter[trigger]++;
                         }
+                        if (newIllust > 0) {
+                            res.pixiv.statistics_today.command_requests_counter[trigger]++;
+                        }
+                        res.pixiv.statistics.command_requests_counter[trigger]++;
                     }
+                    await update(res).catch((e) => {
+                        bot.logger.warn("UserProfile: Bad request when updating profile");
+                        bot.logger.warn(e);
+                    });
                 }
-
-                res.pixiv.statistics.new_illustration_requested += newIllust;
-                res.pixiv.statistics.total_illustration_requested += totalIllust;
-
-                res.pixiv.statistics_today.new_illustration_requested += newIllust;
-                res.pixiv.statistics_today.total_illustration_requested += totalIllust;
-
-                res.pixiv.statistics.total_requests_counter++;
-                if (isCommand(trigger)) {
-                    if (trigger == "refresh") {
-                        res.pixiv.statistics_today.command_requests_counter[trigger]++;
-                    }
-                    if (newIllust > 0) {
-                        res.pixiv.statistics_today.command_requests_counter[trigger]++;
-                    }
-                    res.pixiv.statistics.command_requests_counter[trigger]++;
-                }
-                update(res).catch((e) => {
-                    bot.logger.warn("UserProfile: Bad request when updating profile");
-                    bot.logger.warn(e);
-                });
-            }
-        }).catch((e) => {
-            bot.logger.warn("UserProfile: Bad request when fetching profile");
-            bot.logger.warn(e);
-        })
+            }).catch((e) => {
+                bot.logger.warn("UserProfile: Bad request when fetching profile");
+                bot.logger.warn(e);
+            })
+        } catch (e) {
+            console.log(1);
+        }
     }
 }

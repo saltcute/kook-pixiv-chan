@@ -8,7 +8,6 @@ export default async function (event: ButtonClickedEvent, action: string[], data
         username: event.author.username,
         avatar: event.author.avatar
     }).then((res) => {
-        console.log(event.authorId);
         bot.API.message.update(event.targetMsgId, pixiv.cards.profile(res)
             .addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.main" }])),
             undefined, event.authorId);

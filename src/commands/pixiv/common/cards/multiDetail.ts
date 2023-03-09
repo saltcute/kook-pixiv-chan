@@ -12,7 +12,6 @@ type apexEvent = {
 
 class MultiDetailCard extends Card {
     addApex(pid: string, apex?: apexEvent, data?: any) {
-        // console.log(data);
         if (config.connectApex) {
             if (!apex?.isVIP) {
                 if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
@@ -207,7 +206,6 @@ class MultiDetailCard extends Card {
 }
 
 export default (data: any, curLink: string, idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", apex?: apexEvent, inheritData?: any) => {
-    // console.log(pid, idx, pid[idx - 1], pid[idx], pid[idx + 1]);
     try {
         return new MultiDetailCard()
             .setTheme("info")

@@ -55,7 +55,7 @@ export namespace linkmap {
                 url: "/linkmap/update",
                 method: "POST",
                 headers: {
-                    'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
+                    'Authorization': auth.remoteLinkmapToken,
                     'uuid': auth.remoteLinkmapUUID
                 },
                 data: diff,
