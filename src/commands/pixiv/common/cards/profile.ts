@@ -8,9 +8,11 @@ export default (user: users.user) => {
         .setSize("lg")
         .addTextWithImage(
             `**(font)${user.kook.username}#${user.kook.identifyNum}(font)[${cards.getTierColor(user.pixiv.tier)}]**\n级别: [${user.pixiv.tier}](${users.afdianTierLink[user.pixiv.tier]})`,
-            user.kook.avatar,
-            'sm',
-            true
+            {
+                url: user.kook.avatar,
+                size: 'sm',
+                circle: true
+            }
         )
         .addDivider()
         .addModule({

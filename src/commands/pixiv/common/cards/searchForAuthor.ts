@@ -13,36 +13,37 @@ export default (creators: {
         if (index != 0) {
             card.addDivider();
         }
-        card.addTextWithImage(`(font)${creator.username}(font)[pink]`, creator.avatar, 'sm')
-            .addImageGroup(...(() => {
-                var images: any[] = [];
-                for (var i = 0; i < 3; ++i) {
-                    if (creator.links[i]) {
-                        images.push(creator.links[i])
-                    } else {
-                        images.push(pixiv.common.akarin);
+        card.addTextWithImage(`(font)${creator.username}(font)[pink]`, {
+            url: creator.avatar,
+            size: 'sm'
+        }).addImageGroup(...(() => {
+            var images: any[] = [];
+            for (var i = 0; i < 3; ++i) {
+                if (creator.links[i]) {
+                    images.push(creator.links[i])
+                } else {
+                    images.push(pixiv.common.akarin);
+                }
+            }
+            return images;
+        })()).addModule({
+            "type": "action-group",
+            "elements": [
+                {
+                    "type": "button",
+                    "theme": "primary",
+                    "value": JSON.stringify({
+                        action: `portal.run.author.search`,
+                        data: creator
+                    }),
+                    "click": "return-val",
+                    "text": {
+                        "type": "plain-text",
+                        "content": "确定"
                     }
                 }
-                return images;
-            })())
-            .addModule({
-                "type": "action-group",
-                "elements": [
-                    {
-                        "type": "button",
-                        "theme": "primary",
-                        "value": JSON.stringify({
-                            action: `portal.run.author.search`,
-                            data: creator
-                        }),
-                        "click": "return-val",
-                        "text": {
-                            "type": "plain-text",
-                            "content": "确定"
-                        }
-                    }
-                ]
-            })
+            ]
+        })
     }
     return card;
 }

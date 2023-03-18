@@ -15,7 +15,7 @@ export default (e: any, containTrace: boolean = false) => {
         .setTheme("danger")
         .setSize("lg")
         .addTextWithButton("**内部错误 | Internal Error**", {
-            content: "重置",
+            buttonContent: "重置",
             theme: 'primary',
             position: 'right',
             click: 'return-val',
