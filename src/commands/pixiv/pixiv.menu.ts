@@ -12,7 +12,7 @@ import { redeem } from './pixiv.redeem.app';
 import { gui } from './pixiv.gui.app';
 class PixivMenu extends BaseMenu {
     name = 'pixiv'
-    prefix = './'
+    prefix = './!。！'
 }
 
 export const pixivMenu = new PixivMenu(top, tag, detail, author, refresh, help, credit, random, profile, redeem, gui);

@@ -66,6 +66,7 @@ bot.plugin.load(pixivMenu, pixivAdminMenu);
 /**
  * Add Chinese alias
  */
+bot.plugin.setPrefix('./!。！');
 bot.plugin.addAlias(pixivMenu, "p站", "P站");
 pixivMenu.addAlias(top, "热门");
 pixivMenu.addAlias(random, "随机");
