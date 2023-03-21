@@ -26,7 +26,7 @@ class Refresh extends BaseCommand {
                 pixiv.common.getNotifications(session);
                 var rtLink = pixiv.linkmap.getLink(illust_id, "0");
                 this.logger.debug(`ImageProcessing: Refreshing ${illust_id}_0.jpg`);
-                axios({
+                await axios({
                     baseURL: config.pixivAPIBaseURL,
                     headers: {
                         'Authorization': auth.remoteLinkmapToken,

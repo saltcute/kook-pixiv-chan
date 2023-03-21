@@ -170,7 +170,7 @@ class Tag extends BaseCommand {
                     return session.reply(`您已触犯标签黑名单并被禁止使用 \`.pixiv ${this.name}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.authorId, this.name)).toLocaleString("zh-cn")}`);
                 }
             }
-            axios({
+            await axios({
                 baseURL: config.pixivAPIBaseURL,
                 headers: {
                     'Authorization': auth.remoteLinkmapToken,

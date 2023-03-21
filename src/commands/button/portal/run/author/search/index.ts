@@ -71,7 +71,7 @@ export default async function (event: ButtonClickedEvent, action: string[], data
         pixiv.common.registerBan(session.authorId, 'author', 30);
         return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${'author'}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.authorId, 'author')).toLocaleString("zh-cn")}`);
     }
-    axios({
+    await axios({
         baseURL: config.pixivAPIBaseURL,
         headers: {
             'Authorization': auth.remoteLinkmapToken,

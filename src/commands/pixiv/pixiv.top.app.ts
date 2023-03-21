@@ -158,7 +158,7 @@ class Top extends BaseCommand {
             duration = durationList.week;
             durationName = durationNameList.week;
         }
-        axios({
+        await axios({
             baseURL: config.pixivAPIBaseURL,
             headers: {
                 'Authorization': auth.remoteLinkmapToken,

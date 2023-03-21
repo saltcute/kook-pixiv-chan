@@ -113,7 +113,7 @@ class Detail extends BaseCommand {
                     isGUI = false;
                 })
             }
-            axios({
+            await axios({
                 baseURL: config.pixivAPIBaseURL,
                 headers: {
                     'Authorization': auth.remoteLinkmapToken,

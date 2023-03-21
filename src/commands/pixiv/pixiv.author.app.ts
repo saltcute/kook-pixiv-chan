@@ -124,7 +124,7 @@ class Author extends BaseCommand {
                 return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${this.name}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.authorId, this.name)).toLocaleString("zh-cn")}`);
             }
             if (isNaN(parseInt(session.args[0]))) {
-                axios({
+                await axios({
                     baseURL: config.pixivAPIBaseURL,
                     headers: {
                         'Authorization': auth.remoteLinkmapToken,
@@ -222,7 +222,7 @@ class Author extends BaseCommand {
                         isGUI = false;
                     })
                 }
-                axios({
+                await axios({
                     baseURL: config.pixivAPIBaseURL,
                     headers: {
                         'Authorization': auth.remoteLinkmapToken,

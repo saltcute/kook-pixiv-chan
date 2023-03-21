@@ -23,7 +23,7 @@ class Redeem extends BaseCommand {
                 return session.reply("~~兑换成功：在下个星期四V我50~~\n开玩笑的，用这个怎么可能换的出东西呢！");
             }
             if (pixiv.keygen.validate(key)) {
-                axios({
+                await axios({
                     baseURL: config.remoteLinkmapBaseURL,
                     url: "/user/key/activate",
                     method: "POST",

@@ -50,7 +50,7 @@ export namespace linkmap {
 
     export async function upload() {
         if (config.maintainingRemoteLinkmap) {
-            axios({
+            await axios({
                 baseURL: config.remoteLinkmapBaseURL,
                 url: "/linkmap/update",
                 method: "POST",
