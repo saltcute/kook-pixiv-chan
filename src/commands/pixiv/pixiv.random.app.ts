@@ -11,12 +11,12 @@ class Random extends BaseCommand {
     name = 'random';
     description = '获取⑨张随机插画';
     func: CommandFunction<BaseSession, any> = async (session) => {
-        // if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
-        // if (await pixiv.users.reachesIllustLimit(session)) return;
-        // if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
-        // if (pixiv.common.isBanned(session, this.name)) return;
-        // if (pixiv.common.isRateLimited(session, 10, this.name)) return;
-        // pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
+        if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
+        if (await pixiv.users.reachesIllustLimit(session)) return;
+        if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
+        if (pixiv.common.isBanned(session, this.name)) return;
+        if (pixiv.common.isRateLimited(session, 10, this.name)) return;
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
         const sendCard = async (data: types.illustration[]) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
