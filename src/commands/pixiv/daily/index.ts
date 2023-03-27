@@ -126,9 +126,10 @@ class Daily {
         return Time.timeToString(time);
     }
     unregister(channelId: string) {
-        let time = this.map[channelId] || -1;
+        let time = this.map[channelId].interval || -1;
         delete this.map[channelId];
-        return Time.timeToString(time.interval);
+        schedule.cancelJob(channelId);
+        return Time.timeToString(time);
     }
     async uploadFile(val: any, bodyFormData: FormData) {
         var rtLink: string | undefined = undefined;
