@@ -10,6 +10,7 @@ import * as pixiv from '../common';
 import * as fs from 'fs';
 import upath from 'upath';
 import dailyCmd from './pixiv.daily.app';
+import schedule from 'node-schedule';
 
 class Time {
     static readonly DAY = 86400;
@@ -52,7 +53,10 @@ class Daily {
         this.schedule();
     }
     private map: {
-        [id: string]: number
+        [id: string]: {
+            next: number,
+            interval: number
+        }
     } = {};
     private _save() {
         const data = JSON.stringify(this.map);
@@ -83,16 +87,19 @@ class Daily {
     }
     schedule() {
         for (const channelId in this.map) {
-            this.callback(channelId, false);
+            this.callback(channelId, false, false);
         }
     }
-    callback(id: string, override: boolean = true) {
+    callback(id: string, override: boolean = false, immediatResponse: boolean = false) {
         const time = this.map[id];
         if (time) {
-            setTimeout(() => {
-                this.callback(id);
-            }, time)
-            if (override) this.exec(id);
+            if (time.interval < 1800 * 1000) time.interval = 1800 * 1000;
+            schedule.cancelJob(id);
+            if (override || time.next < Date.now()) time.next = Date.now() + time.interval;
+            schedule.scheduleJob(id, time.next, () => {
+                this.callback(id, false, true);
+            });
+            if (!immediatResponse) this.exec(id);
         }
     }
     register(channelId: string, timeString: string) {
@@ -111,15 +118,17 @@ class Daily {
         }
         else time = 86400;
         if (time < 1800) time = 1800;
-        if (time > 214748) time = 214748;
-        this.map[channelId] = time * 1000;
-        this.callback(channelId);
+        this.map[channelId] = {
+            next: -1,
+            interval: time * 1000
+        }
+        this.callback(channelId, true, false);
         return Time.timeToString(time);
     }
     unregister(channelId: string) {
         let time = this.map[channelId] || -1;
         delete this.map[channelId];
-        return Time.timeToString(time);
+        return Time.timeToString(time.interval);
     }
     async uploadFile(val: any, bodyFormData: FormData) {
         var rtLink: string | undefined = undefined;
