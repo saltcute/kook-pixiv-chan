@@ -16,6 +16,7 @@ import { detail } from 'commands/pixiv/pixiv.detail.app';
 import { author } from 'commands/pixiv/pixiv.author.app';
 import { gui } from 'commands/pixiv/pixiv.gui.app';
 import upath from 'upath';
+import daily from 'commands/pixiv/daily';
 
 
 bot.logger.info("Initialization: kook-pixiv-chan initialization start");
@@ -34,6 +35,7 @@ bot.logger.info("Initialization: kook-pixiv-chan initialization start");
     bot.logger.info("Initialization: Done");
 })()
 schedule.scheduleJob('0,15,30,45 * * * *', async () => {
+    daily.save();
     pixiv.linkmap.save();
     pixivadmin.common.save();
     await pixiv.linkmap.upload();

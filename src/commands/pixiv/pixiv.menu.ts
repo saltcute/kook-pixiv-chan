@@ -10,9 +10,10 @@ import { profile } from './pixiv.profile.app';
 import { tag } from './pixiv.tag.app';
 import { redeem } from './pixiv.redeem.app';
 import { gui } from './pixiv.gui.app';
+import daily from "./daily/pixiv.daily.app";
 class PixivMenu extends BaseMenu {
     name = 'pixiv'
     prefix = './!。！'
 }
 
-export const pixivMenu = new PixivMenu(top, tag, detail, author, refresh, help, credit, random, profile, redeem, gui);
+export const pixivMenu = new PixivMenu(top, tag, detail, author, refresh, help, credit, random, profile, redeem, gui, daily);
