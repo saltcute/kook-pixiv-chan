@@ -126,7 +126,7 @@ class Daily {
         return Time.timeToString(time);
     }
     unregister(channelId: string) {
-        let time = this.map[channelId].interval || -1;
+        let time = Math.floor(this.map[channelId].interval / 1000) || -1;
         delete this.map[channelId];
         schedule.cancelJob(channelId);
         return Time.timeToString(time);
