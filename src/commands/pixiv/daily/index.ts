@@ -111,6 +111,7 @@ class Daily {
         }
         else time = 86400;
         if (time < 1800) time = 1800;
+        if (time > 214748) time = 214748;
         this.map[channelId] = time * 1000;
         this.callback(channelId);
         return Time.timeToString(time);
