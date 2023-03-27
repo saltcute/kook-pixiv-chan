@@ -99,7 +99,7 @@ class Daily {
             schedule.scheduleJob(id, time.next, () => {
                 this.callback(id, false, true);
             });
-            if (!immediatResponse) this.exec(id);
+            if (immediatResponse) this.exec(id);
         }
     }
     register(channelId: string, timeString: string) {
