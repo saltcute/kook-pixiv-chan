@@ -10,8 +10,10 @@ class Profile extends BaseCommand {
         if (pixiv.common.isBanned(session, this.name)) return;
         if (pixiv.common.isRateLimited(session, 5, this.name)) return;
         pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
-        let userId, user, data: pixiv.users.userMeta;
-        if (pixivadmin.common.isAdmin(session.authorId) && (userId = session.args[0]) && (user = await bot.API.user.view(userId))) {
+        let userId, user, res, data: pixiv.users.userMeta;
+        if (pixivadmin.common.isAdmin(session.authorId) && (userId = session.args[0]) && (res = await bot.API.user.view(userId))) {
+            if (res.err) throw res.err;
+            user = res.data;
             data = {
                 id: user.id,
                 identifyNum: user.identify_num,

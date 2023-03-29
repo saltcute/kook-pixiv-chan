@@ -32,20 +32,17 @@ class Detail extends BaseCommand {
                 await bot.API.message.update(msgID, pixiv.cards.resaving(data.id), undefined, session.authorId);
             } else {
                 if (session.guildId) {
-                    await session.send([pixiv.cards.resaving(data.id)]).then((res) => {
-                        if (res) {
-                            sendSuccess = true;
-                            mainCardMessageID = res.msg_id
-                        }
-                    }).catch((e) => {
-                        if (e) {
-                            if (e.code == 40012) { // Slow-mode limit
+                    await session.send([pixiv.cards.resaving(data.id)]).then(({ err, data }) => {
+                        if (err) {
+                            if ((err as any).code == 40012) { // Slow-mode limit
                                 this.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                             } else {
-                                this.logger.error(e);
+                                this.logger.error(err);
                             }
+                        } else {
+                            sendSuccess = true;
+                            mainCardMessageID = data.msg_id;
                         }
-                        sendSuccess = false;
                     });
                     if (!sendSuccess) return;
                 }

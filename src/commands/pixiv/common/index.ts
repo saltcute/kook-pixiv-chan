@@ -133,9 +133,39 @@ export namespace common {
 
     }
 
+    export async function isServerAdmin(guildId: string, userId: string) {
+        return false
+        /**
+         * TODO: check admin status
+         */
+        /*
+        const { err, data } = await bot.API.user.view(userId, guildId);
+        if (err) {
+            bot.logger.error(err);
+            return false;
+        }
+        const userRole = data.roles.map(v => v.toString());
+        for await (const { err, data } of bot.API.guild.role.list(guildId)) {
+            if (err) {
+                bot.logger.error(err);
+                return false;
+            }
+            const guildAdminRoles: string[] = [];
+            for (const role of data.items) {
+                if (role.permissions & (0b0111000000010010011111111111)) {
+                    guildAdminRoles.push(role.role_id);
+                }
+            }
+            const intersection = userRole.filter(v => guildAdminRoles.includes(v));
+            if (intersection.length) return true;
+        }
+        return false;
+        */
+    }
+
     export async function getAfdianSupporter(page: number): Promise<type.afdian.sponserData> {
-        let user_id = "b775664e507311ea9e2b52540025c377";
-        let token = "9SrdBnJPVgNFHYcTbC8M56fEGpqwkWDe";
+        let user_id = auth.afdianUserId;
+        let token = auth.afdianAPIToken;
         let body = {
             page
         };

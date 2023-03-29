@@ -34,7 +34,7 @@ class Ping extends BaseCommand {
                         }
                     ]
                 }
-            })]).then((res) => {
+            })]).then(({ err, data: res }) => {
                 const localResponse = Date.now()
                 if (res) {
                     const remoteReponse = res.msg_timestamp;

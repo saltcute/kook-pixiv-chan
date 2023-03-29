@@ -146,8 +146,12 @@ async function getRandomStatus(): Promise<[string, string]> {
     try {
         switch (crypto.randomInt(6)) {
             case 0:
-                const serverCount = ((await (bot.API.guild.list().next())).value)?.meta.total;
-                return ["ヘキソナ", `${serverCount} 个服务器的涩图要求`];
+                for await (const { err, data } of bot.API.guild.list()) {
+                    let serverCount;
+                    if (err) serverCount = 'NaN';
+                    else serverCount = data.meta.total;
+                    return ["ヘキソナ", `${serverCount} 个服务器的涩图要求`];
+                }
             case 1:
                 const songs: [string, string][] = [ // OMEGALUL WEEBOO AF
                     ["John Denver", "Take Me Home, Country Roads"],
