@@ -9,7 +9,8 @@ class Daily extends BaseCommand {
     func: CommandFunction<BaseSession, any> = async (session) => {
         if (!session.guildId) return session.reply("只能在服务器中设置每日涩图");
         if (pixiv.common.isRateLimited(session, 60, this.name)) return;
-        if (pixivadmin.common.isAdmin(session.authorId) || await pixiv.common.isServerAdmin(session.guildId, session.authorId)) return;
+        if (!pixivadmin.common.isAdmin(session.authorId) && !await pixiv.common.isServerAdmin(session.guildId, session.authorId))
+            return session.reply("You do not have the permission to use this command")
         switch (session.args[0]) {
             case 'add': {
                 let time = daily.register(session.channelId, session.args[1]);
