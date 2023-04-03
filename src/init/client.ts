@@ -16,7 +16,8 @@ if (auth.useWebHook) {
 } else {
     config = {
         type: 'websocket',
-        vendor: 'botroot',
+        // vendor: 'botroot',
+        vendor: 'kookts',
         token: auth.khltoken
     }
 }
