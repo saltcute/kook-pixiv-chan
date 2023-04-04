@@ -11,14 +11,16 @@ if (auth.useWebHook) {
         token: auth.khltoken,
         verifyToken: auth.khlverifytoken,
         encryptKey: auth.khlkey,
-        port: auth.khlport
+        port: auth.khlport,
+        disableSnOrderCheck: true
     }
 } else {
     config = {
         type: 'websocket',
         // vendor: 'botroot',
-        vendor: 'kookts',
-        token: auth.khltoken
+        // vendor: 'kookts',
+        token: auth.khltoken,
+        disableSnOrderCheck: true
     }
 }
 
