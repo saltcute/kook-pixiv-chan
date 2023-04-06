@@ -13,5 +13,9 @@ export default async function (event: ButtonClickedEvent, action: string[], data
         bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
             isVIP: apex.data.is_vip
         }, data), undefined, event.authorId);
-    })
+    }).catch((e: any) => {
+        if (e) {
+            bot.logger.error(e);
+        }
+    });
 }

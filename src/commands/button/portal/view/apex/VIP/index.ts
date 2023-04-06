@@ -11,7 +11,7 @@ export default async function (event: ButtonClickedEvent, action: string[], data
                 type = data.type,
                 curIndex = pid[idx],
                 curLink = link[idx];
-            let pdata = await pixiv.common.getIllustDetail(curIndex)
+            let pdata = await pixiv.common.getIllustDetail(curIndex);
             let apexUserInfo = (await pixiv.common.getApexVIPStatus(event.authorId)).data;
             let apexPreviewImageLink = (await pixiv.common.getApexImagePreview(pixiv.linkmap.getLink(curIndex, "0"), apexUserInfo.originData.uid)).url;
             bot.logger.debug("ApexConnect: Fetched data for preview");

@@ -16,13 +16,11 @@ export default async function (event: ButtonClickedEvent, action: string[], data
                 type = data.type,
                 curIndex = pid[idx],
                 curLink = link[idx];
-            await pixiv.common.getIllustDetail(curIndex).then((res) => {
-                bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
+            pixiv.common.getIllustDetail(curIndex).then(async (res) => {
+                await bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
                     isVIP: true,
                     isSent: true
                 }, data), undefined, event.authorId);
-            })
-            pixiv.common.getIllustDetail(curIndex).then(async (res) => {
                 const pdata = res;
                 const originalImageURL = (pdata.page_count > 1 ? pdata.meta_pages[0].image_urls.original : pdata.meta_single_page.original_image_url) || pixiv.common.akarin;
                 const master1200 = pixiv.common.getProxiedImageLink(originalImageURL.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
@@ -75,14 +73,22 @@ export default async function (event: ButtonClickedEvent, action: string[], data
                                     })
                                 }, 1500);
                             })
-                        })
+                        }).catch((e: any) => {
+                            if (e) {
+                                bot.logger.error(e);
+                            }
+                        });
                     });
                 }).catch(async (e) => {
                     bot.logger.warn(`ApexConnect: Upload ${curIndex} failed`);
                     bot.logger.warn(e);
                     bot.API.message.update(event.channelId, pixiv.cards.error(e.stack), undefined, event.authorId);
                 });
-            });;
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
+            });
         };
         case 'detail': {
             let curIndex = data.pid,
@@ -92,7 +98,11 @@ export default async function (event: ButtonClickedEvent, action: string[], data
                     isVIP: true,
                     isSent: true
                 }), undefined, event.authorId);
-            })
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
+            });
             pixiv.common.getIllustDetail(curIndex).then(async (res) => {
                 const pdata = res;
                 const originalImageURL = (pdata.page_count > 1 ? pdata.meta_pages[0].image_urls.original : pdata.meta_single_page.original_image_url) || pixiv.common.akarin;
@@ -146,14 +156,22 @@ export default async function (event: ButtonClickedEvent, action: string[], data
                                     })
                                 }, 1500);
                             })
-                        })
+                        }).catch((e: any) => {
+                            if (e) {
+                                bot.logger.error(e);
+                            }
+                        });
                     });
                 }).catch(async (e) => {
                     bot.logger.warn(`ApexConnect: Upload ${curIndex} failed`);
                     bot.logger.warn(e);
                     bot.API.message.update(event.channelId, pixiv.cards.error(e.stack), undefined, event.authorId);
                 });
-            });;
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
+            });
         };
     }
 }

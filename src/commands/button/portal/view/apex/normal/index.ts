@@ -15,6 +15,10 @@ export default async function (event: ButtonClickedEvent, action: string[], data
                 bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
                     isSendButtonClicked: true
                 }, data), undefined, event.authorId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
             });
             break;
         };
@@ -24,7 +28,11 @@ export default async function (event: ButtonClickedEvent, action: string[], data
             pixiv.common.getIllustDetail(curIndex).then((res) => {
                 bot.API.message.update(event.targetMsgId, pixiv.cards.detail(res, curLink, {
                     isSendButtonClicked: true
-                },), undefined, event.authorId);
+                }), undefined, event.authorId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
             });
             break;
         }
