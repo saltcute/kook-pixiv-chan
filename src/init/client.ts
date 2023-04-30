@@ -18,7 +18,7 @@ if (auth.useWebHook) {
     config = {
         type: 'websocket',
         // vendor: 'botroot',
-         vendor: 'kookts',
+        vendor: 'kookts',
         token: auth.khltoken,
         disableSnOrderCheck: true
     }
