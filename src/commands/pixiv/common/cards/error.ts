@@ -17,7 +17,6 @@ export default (e: any, containTrace: boolean = false) => {
         .addTextWithButton("**内部错误 | Internal Error**", {
             buttonContent: "重置",
             theme: 'primary',
-            position: 'right',
             click: 'return-val',
             value: JSON.stringify({
                 action: "portal.error.reset"
