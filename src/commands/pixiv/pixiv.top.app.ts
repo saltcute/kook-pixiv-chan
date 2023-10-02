@@ -50,6 +50,9 @@ class Top extends BaseCommand {
                 if (data[k].x_restrict !== 0) {
                     continue;
                 }
+                if (pixiv.common.isForbittedUser(data[k].user.uid.toString())) {
+                    continue;
+                }
                 for (const val of data[k].tags) {
                     const tag = val.name;
                     if (pixiv.common.isForbittedTag(tag)) {
