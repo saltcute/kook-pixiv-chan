@@ -30,6 +30,10 @@ export namespace linkmap {
         if (config.useRemoteLinkmap) {
             await axios({
                 baseURL: config.remoteLinkmapBaseURL,
+                headers: {
+                    'Authorization': auth.remoteLinkmapToken,
+                    'uuid': auth.remoteLinkmapUUID
+                },
                 url: "/linkmap",
                 method: "GET"
             }).then((res) => {
@@ -46,12 +50,12 @@ export namespace linkmap {
 
     export async function upload() {
         if (config.maintainingRemoteLinkmap) {
-            axios({
+            await axios({
                 baseURL: config.remoteLinkmapBaseURL,
                 url: "/linkmap/update",
                 method: "POST",
                 headers: {
-                    'Authorization': `Bearer ${auth.remoteLinkmapToken}`,
+                    'Authorization': auth.remoteLinkmapToken,
                     'uuid': auth.remoteLinkmapUUID
                 },
                 data: diff,

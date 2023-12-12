@@ -12,12 +12,15 @@ import config from 'configs/config';
 import { linkmap } from './linkmap';
 import tagBanList from './tagBanList';
 import userBanList from './userBanList';
-import { BaseSession, Card } from 'kbotify';
+import { BaseSession, Card } from "kasumi.js";
 import FormData, { Stream } from 'form-data';
 import * as pixivadmin from '../admin/common';
 import { types } from 'pixnode';
 import crypto from 'crypto';
 const sharp = require('sharp');
+import * as fs from 'fs';
+import upath from 'upath';
+
 
 export namespace type {
     export type detectionResult = {
@@ -104,6 +107,11 @@ export namespace type {
 }
 
 export namespace common {
+
+    export function fillUntil<T>(array: T[], length: number, placeholder: T) {
+        return [...array, ...Array(length).fill(placeholder)].splice(0, length);
+    }
+
     /**
      * Placeholder for forbidden images
      * 
@@ -111,9 +119,53 @@ export namespace common {
      */
     export const akarin = "https://img.kookapp.cn/assets/2022-07/vlOSxPNReJ0dw0dw.jpg";
 
+    export function gitHash() {
+        try {
+            let rev = fs.readFileSync(upath.join(__dirname, '..', '..', '..', '..', '.git', 'HEAD')).toString().trim().split(/.*[: ]/).slice(-1)[0];
+            if (rev.indexOf('/') === -1) {
+            } else {
+                rev = fs.readFileSync(upath.join(__dirname, '..', '..', '..', '..', '.git', rev)).toString().trim();
+            }
+            return rev.slice(0, 7);
+        } catch (e) {
+            bot.logger.warn(e);
+        }
+
+    }
+
+    export async function isServerAdmin(guildId: string, userId: string) {
+        return false
+        /**
+         * TODO: check admin status
+         */
+        /*
+        const { err, data } = await bot.API.user.view(userId, guildId);
+        if (err) {
+            bot.logger.error(err);
+            return false;
+        }
+        const userRole = data.roles.map(v => v.toString());
+        for await (const { err, data } of bot.API.guild.role.list(guildId)) {
+            if (err) {
+                bot.logger.error(err);
+                return false;
+            }
+            const guildAdminRoles: string[] = [];
+            for (const role of data.items) {
+                if (role.permissions & (0b0111000000010010011111111111)) {
+                    guildAdminRoles.push(role.role_id);
+                }
+            }
+            const intersection = userRole.filter(v => guildAdminRoles.includes(v));
+            if (intersection.length) return true;
+        }
+        return false;
+        */
+    }
+
     export async function getAfdianSupporter(page: number): Promise<type.afdian.sponserData> {
-        let user_id = "b775664e507311ea9e2b52540025c377";
-        let token = "9SrdBnJPVgNFHYcTbC8M56fEGpqwkWDe";
+        let user_id = auth.afdianUserId;
+        let token = auth.afdianAPIToken;
         let body = {
             page
         };
@@ -235,13 +287,8 @@ export namespace common {
                 player: uid
             }
         }).catch((e) => {
-            bot.logger.warn("ApexConnect: Getting Apex image preview failed");
-            bot.logger.warn(e);
-            return {
-                data: {
-                    url: akarin
-                }
-            }
+            bot.logger.warn("ApexConnect: Getting preview failed");
+            throw e;
         })).data;
         return res;
     }
@@ -273,10 +320,10 @@ export namespace common {
     /**
      * Log an execution of command
      * @param command command name
-     * @param session kbotify session
+     * @param session Kasumi session
      */
     export function logInvoke(command: string, session: BaseSession) {
-        bot.logger.debug(`InvokedCommand: From ${session.user.username}#${session.user.identifyNum} (ID ${session.user.id}) in (${session.guildId}/${session.channel.id}), invoke ${command} ${session.args.join(" ")}`);
+        bot.logger.debug(`InvokedCommand: From ${session.author.username}#${session.author.identify_num} (ID ${session.author.id}) in (${session.guildId}/${session.channelId}), invoke ${command} ${session.args.join(" ")}`);
     }
 
     /**
@@ -315,6 +362,10 @@ export namespace common {
     export async function getIllustDetail(illustID: string): Promise<types.illustration> {
         return (await axios({
             baseURL: config.pixivAPIBaseURL,
+            headers: {
+                'Authorization': auth.remoteLinkmapToken,
+                'uuid': auth.remoteLinkmapUUID
+            },
             url: "/illustration/detail",
             method: "GET",
             params: {
@@ -366,9 +417,8 @@ export namespace common {
                         auth.assetUploadTokens[idx].active = false;
                         bot.logger.warn(`Initialization: Uploader #${parseInt(idx) + 1} is unavailable, message: ${res.data.message}`);
                     }
-                }).catch((e) => {
-                    auth.assetUploadTokens[idx].active = false;
-                    bot.logger.warn(`Initialization: Uploader #${parseInt(idx) + 1} unavailable, message: ${e.message}`);
+                }).catch(() => {
+                    bot.logger.warn(`Initialization: Uploader #${idx} unavailable`);
                 })
             );
         }
@@ -376,11 +426,7 @@ export namespace common {
             await getNextToken();
             await bot.API.message.create(9, config.uploaderOnlineMessageDestination, "---------------------Uploader Check Finished---------------------");
             bot.logger.info("Initialization: Uploader check passed");
-        }).catch((e) => {
-            bot.logger.fatal("Initialization: Checking uploader availibility failed. Error message:");
-            bot.logger.fatal(e);
-            process.exit();
-        })
+        });
     }
     var currentIndex = 0;
     /**
@@ -451,7 +497,7 @@ export namespace common {
     }
     /**
      * Upload a file to KOOK's server
-     * @param session kbotify session
+     * @param session Kasumi session
      * @param val illustration data from Pixiv web API 
      * @param bodyFormData form data to be uploaded
      * @returns The link to the uploaded file
@@ -475,11 +521,10 @@ export namespace common {
                 bot.logger.debug(`ImageProcessing: Retrying with another token`);
                 deactiveCurrentToken();
                 if (await cycleThroughTokens()) {
-                    await session.replyCard(new Card()
+                    await session.reply([new Card()
                         .addTitle("FATAL ERROR | 致命错误")
                         .addDivider()
-                        .addText("**所有**图片上传机器人均不可用！Pixiv酱将立即下线并通知管理员修复。请耐心等待，通常情况下下，这个问题可以被很快解决。")
-                    )
+                        .addText("**所有**图片上传机器人均不可用！Pixiv酱将立即下线并通知管理员修复。请耐心等待，通常情况下下，这个问题可以被很快解决。")])
                     process.exit();
                 }
             });
@@ -491,7 +536,7 @@ export namespace common {
      * upload it to KOOK's server
      * @param data illustration data from Pixiv web API
      * @param detectionResult Aliyun Image Green detection result
-     * @param session kbotify session
+     * @param session Kasumi session
      * @returns link to the image on img.kookapp.cn and its pixiv id
      */
     export async function uploadImage(data: types.illustration, detectionResult: type.detectionResult, session: BaseSession): Promise<{ link: string, pid: number }> {
@@ -519,7 +564,7 @@ export namespace common {
         } else {
             bot.logger.error("ImageDetection: Failed detecting the image. Replacing the image with Akarin");
             bot.logger.error(detectionResult);
-            session.sendCardTemp([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
+            session.sendTemp([cards.error(`// 阿里云远端返回错误，这（在大多数情况下）**不是**Pixiv酱的问题\n插画仍会加载但可能会显示出错\n// 信息:\n${JSON.stringify(detectionResult, null, 4)}`, false)]);
             return { link: akarin, pid: val.id };
         }
     }
@@ -546,13 +591,13 @@ export namespace common {
     /**
      * If there were a notification and the user hasn't read the it,
      * send it to the user and record.
-     * @param session kbotify session
+     * @param session Kasumi session
      * @returns kbotify funcResult
      */
     export function getNotifications(session: BaseSession) {
-        if (enableNotification && !noticed.includes(session.user.id)) {
-            noticed.push(session.user.id)
-            return session.sendCardTemp([cards.notification(notification)]);
+        if (enableNotification && !noticed.includes(session.author.id)) {
+            noticed.push(session.author.id)
+            return session.sendTemp([cards.notification(notification)]);
         }
     }
 
@@ -571,18 +616,18 @@ export namespace common {
     }
     /**
      * Check if user is rate limited
-     * @param session kbotify session
+     * @param session Kasumi session
      * @param limit rate limit in seconds for the command
      * @param trigger command trigger
      * @returns Whether or not the user shall be limited
      */
     export function isRateLimited(session: BaseSession, limit: number, trigger: string): boolean {
-        const lastExecutionTimestamp = common.getLastExecutionTimestamp(session.userId, trigger);
-        if (!pixivadmin.common.isAdmin(session.userId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
+        const lastExecutionTimestamp = common.getLastExecutionTimestamp(session.authorId, trigger);
+        if (!pixivadmin.common.isAdmin(session.authorId) && lastExecutionTimestamp !== -1 && Date.now() - lastExecutionTimestamp <= limit * 1000) {
             session.replyTemp(`您已达到速率限制。每个用户每 ${limit} 秒内只能发起一次 \`.pixiv ${trigger}\` 指令，请于 ${Math.round((lastExecutionTimestamp + limit * 1000 - Date.now()) / 1000)} 秒后再试。`);
             return true;
         } else {
-            common.registerExecution(session.userId, trigger);
+            common.registerExecution(session.authorId, trigger);
             return false;
         }
     }
@@ -615,13 +660,13 @@ export namespace common {
 
     /**
      * Check if a user has been banned
-     * @param session kbotify session
+     * @param session Kasumi session
      * @param trigger command trigger
      * @returns Whether or not the user is banned
      */
     export function isBanned(session: BaseSession, trigger: string): boolean {
-        const banEndTimestamp = common.getBanEndTimestamp(session.userId, trigger);
-        if (!pixivadmin.common.isAdmin(session.userId) && Date.now() < banEndTimestamp) {
+        const banEndTimestamp = common.getBanEndTimestamp(session.authorId, trigger);
+        if (!pixivadmin.common.isAdmin(session.authorId) && Date.now() < banEndTimestamp) {
             session.replyTemp(`您已被禁止使用 \`.pixiv ${trigger}\` 指令至 ${new Date(banEndTimestamp).toLocaleString("zh-cn")}，请于 ${Math.round((banEndTimestamp - Date.now()) / 1000)} 秒后再试`);
             return true;
         } else {

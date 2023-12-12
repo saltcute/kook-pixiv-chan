@@ -1,6 +1,7 @@
 import config from "configs/config";
-import { Card, CardObject } from "kbotify"
+import { Card } from "kasumi.js"
 import error from "./error";
+import { cards } from ".";
 
 type apexEvent = {
     isVIP?: boolean,
@@ -12,7 +13,6 @@ type apexEvent = {
 
 class MultiDetailCard extends Card {
     addApex(pid: string, apex?: apexEvent, data?: any) {
-        // console.log(data);
         if (config.connectApex) {
             if (!apex?.isVIP) {
                 if (apex?.isSendButtonClicked || apex?.isSent || apex?.isSuccess) {
@@ -35,7 +35,7 @@ class MultiDetailCard extends Card {
                                     "theme": "danger",
                                     "value": JSON.stringify({
                                         action: `portal.view.detail`,
-                                         data: data
+                                        data: data
                                     }),
                                     "click": "return-val",
                                     "text": {
@@ -115,7 +115,7 @@ class MultiDetailCard extends Card {
     addControl(idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", apex?: apexEvent, data?: any) {
         this.addModule({
             "type": "action-group",
-            "elements": (() => {
+            "elements": <any>(() => {
                 var arr = [];
                 if (!isNaN(parseInt(pid[idx - 1]))) {
                     arr.push({
@@ -207,7 +207,6 @@ class MultiDetailCard extends Card {
 }
 
 export default (data: any, curLink: string, idx: number, pid: string[], link: string[], type: "tag" | "top" | "random" | "author", apex?: apexEvent, inheritData?: any) => {
-    // console.log(pid, idx, pid[idx - 1], pid[idx], pid[idx + 1]);
     try {
         return new MultiDetailCard()
             .setTheme("info")
@@ -235,16 +234,7 @@ export default (data: any, curLink: string, idx: number, pid: string[], link: st
                 pid: pid
             })
             .addImage(curLink)
-            .addModule({
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "kmarkdown",
-                        "content": "有定制 KOOK 机器人需求的朋友们可以联系 Hexona#6969\n可以[进服](https://kook.top/iOOsLu)@我或者私信（请详细描述需求） \n您也可以在[爱发电](https://afdian.net/@hexona)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
-                        // "content": "喜欢 Pixiv酱吗？来 [Bot Market](https://www.botmarket.cn/bots?id=8) 留下一个五星好评吧！\n您也可以在[爱发电](https://afdian.net/@hexona)帮助Pixiv酱的开发！\n[问题反馈&建议](https://kook.top/iOOsLu)"
-                    }
-                ]
-            })
+            .addModule(cards.getCommercials())
             .addDivider()
             .addModule({
                 "type": "context",

@@ -1,5 +1,5 @@
-import { Card } from 'kbotify';
-import * as pixiv from '../'
+import { Card } from "kasumi.js";
+import * as pixiv from '..'
 
 export default (creators: {
     username: string,
@@ -13,29 +13,20 @@ export default (creators: {
         if (index != 0) {
             card.addDivider();
         }
-        card.addText(`(font)${creator.username}(font)[pink]`, undefined, 'left', {
-            type: 'image',
-            src: creator.avatar,
+        card.addTextWithImage(`(font)${creator.username}(font)[pink]`, {
+            url: creator.avatar,
             size: 'sm'
-        }).addModule({
-            "type": "image-group",
-            "elements": (() => {
-                var images: any[] = [];
-                for (var i = 0; i < 3; ++i) {
-                    if (creator.links[i]) {
-                        images.push(creator.links[i])
-                    } else {
-                        images.push(pixiv.common.akarin);
-                    }
+        }).addImageGroup(...(() => {
+            var images: any[] = [];
+            for (var i = 0; i < 3; ++i) {
+                if (creator.links[i]) {
+                    images.push(creator.links[i])
+                } else {
+                    images.push(pixiv.common.akarin);
                 }
-                return images.map((val) => {
-                    return {
-                        "type": "image",
-                        "src": val
-                    }
-                });
-            })()
-        }).addModule({
+            }
+            return images;
+        })()).addModule({
             "type": "action-group",
             "elements": [
                 {

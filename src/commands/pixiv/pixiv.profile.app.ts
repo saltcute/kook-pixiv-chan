@@ -1,25 +1,38 @@
 import { bot } from 'init/client';
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
 import * as pixiv from './common'
+import * as pixivadmin from './admin/common'
 
-class Profile extends AppCommand {
-    code = 'profile'; // 只是用作标记
-    trigger = 'profile'; // 用于触发的文字
-    intro = 'Check user profile';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (pixiv.common.isBanned(session, this.trigger)) return;
-        if (pixiv.common.isRateLimited(session, 5, this.trigger)) return;
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        pixiv.users.detail({
-            id: session.user.id,
-            identifyNum: session.user.identifyNum,
-            username: session.user.username,
-            avatar: session.user.avatar
-        }).then((res) => {
-            return session.sendCard([pixiv.cards.profile(res)]);
+class Profile extends BaseCommand {
+    name = 'profile';
+    description = '查看个人信息';
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (pixiv.common.isBanned(session, this.name)) return;
+        if (pixiv.common.isRateLimited(session, 5, this.name)) return;
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
+        let userId, user, res, data: pixiv.users.userMeta;
+        if (pixivadmin.common.isAdmin(session.authorId) && (userId = session.args[0]) && (res = await bot.API.user.view(userId))) {
+            if (res.err) throw res.err;
+            user = res.data;
+            data = {
+                id: user.id,
+                identifyNum: user.identify_num,
+                username: user.username,
+                avatar: user.avatar
+            }
+        } else {
+            data = {
+                id: session.author.id,
+                identifyNum: session.author.identify_num,
+                username: session.author.username,
+                avatar: session.author.avatar
+            }
+        }
+        pixiv.users.detail(data).then((res) => {
+            return session.send([pixiv.cards.profile(res)]);
         }).catch((e) => {
-            bot.logger.warn(e);
-            return session.replyCardTemp([pixiv.cards.error(e.stack)]);
+            this.logger.warn(e);
+            return session.replyTemp([pixiv.cards.error(e.stack)]);
         });
     }
 }

@@ -1,4 +1,4 @@
-import { Card } from "kbotify";
+import { Card } from "kasumi.js";
 import { cards } from "../..";
 
 export default () => {

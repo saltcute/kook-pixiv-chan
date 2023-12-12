@@ -17,31 +17,10 @@ export default (link: string[], pid: string[], durationName: string, { resave = 
         })
         .addDivider()
         .addModule(pixiv.cards.GUI.portalEntry(link, pid, "top", { durationName: durationName }))
-        .addModule({
-            "type": "image-group",
-            "elements": (() => {
-                var images: object[] = [];
-                var cnt = 0;
-                for (const val of link) {
-                    if (cnt >= 9) break;
-                    images.push({
-                        "type": "image",
-                        "src": val
-                    })
-                    cnt++;
-                }
-                while (images.length < 9) {
-                    images.push({
-                        "type": "image",
-                        "src": pixiv.common.akarin
-                    })
-                }
-                return images;
-            })()
-        })
+        .addImageGroup(...pixiv.common.fillUntil(link, 9, pixiv.common.akarin))
         .addModule(cards.getCommercials())
         .addDivider()
-        .addPID(pid)
+        .addPID(pixiv.common.fillUntil(pid, 9, "没有了"))
         .addResave(link, resave, id)
         .addNSFW(nsfw, id)
 }

@@ -1,19 +1,18 @@
-import { author } from 'commands/pixiv/pixiv.author.app';
 import { bot } from 'init/client';
-import { ButtonClickEvent } from 'kaiheila-bot-root';
 import * as pixiv from 'commands/pixiv/common';
 import * as pixivadmin from 'commands/pixiv/admin/common'
-import { BaseSession, ButtonEventMessage } from 'kbotify';
+import { BaseSession, ButtonClickedEvent } from "kasumi.js";
 import { types } from 'pixnode';
 import axios from 'axios';
 import config from 'configs/config';
-export default async function (event: ButtonClickEvent, action: string[], data: {
+import auth from 'configs/auth';
+export default async function (event: ButtonClickedEvent, action: string[], data: {
     username: string,
     avatar: string,
     uid: number,
     links: string[]
 }) {
-    let session = new BaseSession(author, [], new ButtonEventMessage(event, bot));
+    let session = new BaseSession([], event, bot);
     if (await pixiv.users.reachesCommandLimit(session, 'author')) return;
     if (await pixiv.users.reachesIllustLimit(session)) return;
     if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
@@ -45,8 +44,10 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
             return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
         }
         for (const val of datas) {
-            if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
-            promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
+            if (detectionResults[val.id]) {
+                if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
+                promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
+            }
         }
         var uploadResults: {
             link: string;
@@ -54,44 +55,37 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
         }[] = [];
         await Promise.all(promises).then((res) => {
             uploadResults = res;
-        }).catch((e) => {
-            if (e) {
-                bot.logger.error(e);
-                session.sendCardTemp(pixiv.cards.error(e.stack));
-            }
-        });
+        });;
         for (var val of uploadResults) {
             link.push(val.link);
             pid.push(val.pid);
         }
-        while (link.length <= 9) {
-            link.push(pixiv.common.akarin);
-            pid.push("没有了");
-        }
         bot.logger.debug(`UserInterface: Presenting card to user`);
-        session.updateMessageTemp(event.targetMsgId, [pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: 'portal.error.reset' }]))])
+        session.updateTemp(event.targetMsgId, [pixiv.cards.author(data[0], r18, link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: 'portal.error.reset' }]))])
             .then(() => {
                 pixiv.users.logInvoke(session, 'author', datas.length, detection)
-            }).catch((e) => {
-                if (e) bot.logger.error(e);
-            });
+            });;
     }
     if (pixiv.common.isForbittedUser(data.uid.toString())) {
         bot.logger.debug(`UserInterface: User violates user blacklist: ${data.uid}. Banned the user for 30 seconds`);
-        pixiv.common.registerBan(session.userId, 'author', 30);
-        return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${'author'}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.userId, 'author')).toLocaleString("zh-cn")}`);
+        pixiv.common.registerBan(session.authorId, 'author', 30);
+        return session.reply(`您已触犯用户黑名单并被禁止使用 \`.pixiv ${'author'}\` 指令至 ${new Date(pixiv.common.getBanEndTimestamp(session.authorId, 'author')).toLocaleString("zh-cn")}`);
     }
-    axios({
+    await axios({
         baseURL: config.pixivAPIBaseURL,
+        headers: {
+            'Authorization': auth.remoteLinkmapToken,
+            'uuid': auth.remoteLinkmapUUID
+        },
         url: "/creator/illustration",
         method: "GET",
         params: {
             keyword: data.uid,
             user: {
-                id: session.user.id,
-                identifyNum: session.user.identifyNum,
-                username: session.user.username,
-                avatar: session.user.avatar
+                id: session.author.id,
+                identifyNum: session.author.identify_num,
+                username: session.author.username,
+                avatar: session.author.avatar
             }
         }
     }).then((res: any) => {
@@ -105,11 +99,13 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
             return session.reply("Pixiv官方服务器不可用，请稍后再试");
         }
         pixiv.common.getNotifications(session);
-        sendCard(res.data);
+        sendCard(res.data).catch((e) => {
+            bot.logger.error(e);
+        })
     }).catch((e: any) => {
         if (e) {
             bot.logger.error(e);
-            session.sendCardTemp(pixiv.cards.error(e.stack));
+            session.sendTemp(pixiv.cards.error(e.stack));
         }
     });
 }

@@ -1,18 +1,20 @@
-import { Card } from "kbotify"
+import { Card } from "kasumi.js"
 import fs from 'fs';
 import { common, type } from "..";
 
 const pak = JSON.parse(fs.readFileSync("package.json", { encoding: "utf-8", flag: "r" }));
 
+
+let afdianMap: Map<string, String> = new Map();
+afdianMap.set('两瓶快乐水', 'Backer (两瓶快乐水)')
+    .set('很多快乐水', 'Supporter (很多快乐水)')
+    .set('Quantum Pack', 'Quantum Pack')
+    .set('一月订阅 Backer', 'Backer (一月订阅)')
+    .set('一月订阅 Supporter', 'Supporter (一月订阅)')
+    .set('一月订阅 Sponser', 'Sponser (一月订阅)');
+
 function afdianToCommonNameCoverter(string: string) {
-    let map: Map<string, String> = new Map();
-    map.set('两瓶快乐水', 'Backer (两瓶快乐水)')
-        .set('很多快乐水', 'Supporter (很多快乐水)')
-        .set('Quantum Pack', 'Quantum Pack')
-        .set('一月订阅 Backer', 'Backer (一月订阅)')
-        .set('一月订阅 Supporter', 'Supporter (一月订阅)')
-        .set('一月订阅 Sponser', 'Sponser (一月订阅)');
-    return map.get(string) || string;
+    return afdianMap.get(string) || string || "获取名称出错";
 }
 
 class CreditCard extends Card {
@@ -62,6 +64,7 @@ export default async (page: number) => {
         .setTheme("info")
         .addText("您可以在[爱发电](https://afdian.net/@hexona)支持 Pixiv酱的开发与运营！")
         .addDivider()
+        .addText("`kook-pixiv-chan`，基于 [Kasumi](https://github.com/Hexona69/kasumi)")
         .addTitle("特别感谢")
         .addText("[fi6](https://github.com/fi6) - [kBotify](https://github.com/fi6/kBotify) & [shugen002](https://github.com/shugen002) - [BotRoot](https://github.com/shugen002/BotRoot)\n[Microsoft](https://github.com/microsoft) - [Visual Studio Code](https://github.com/microsoft/vscode) 与 [Typescript](https://github.com/microsoft/TypeScript)")
         .addDivider()
@@ -73,7 +76,7 @@ export default async (page: number) => {
             "elements": [
                 {
                     "type": "plain-text",
-                    "content": `${pak.name} v${pak.version}\nCopyright © 2022 potatopotat0. All rights reserved.`
+                    "content": `${pak.name} v${pak.version}, build ${common.gitHash()}\nCopyright © 2022 potatopotat0. All rights reserved.`
                 }
             ]
         });

@@ -4,9 +4,9 @@ import * as pixiv from 'commands/pixiv/common'
 import FormData from 'form-data';
 import got from 'got/dist/source';
 import { bot } from 'init/client';
-import { ButtonClickEvent } from 'kaiheila-bot-root';
+import { ButtonClickedEvent } from "kasumi.js";
 import sharp from 'sharp';
-export default async function (event: ButtonClickEvent, action: string[], data: any) {
+export default async function (event: ButtonClickedEvent, action: string[], data: any) {
     const trigger = data.trigger;
     switch (trigger) {
         case 'multi': {
@@ -16,13 +16,11 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
                 type = data.type,
                 curIndex = pid[idx],
                 curLink = link[idx];
-            await pixiv.common.getIllustDetail(curIndex).then((res) => {
-                bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
+            pixiv.common.getIllustDetail(curIndex).then(async (res) => {
+                await bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
                     isVIP: true,
                     isSent: true
-                }, data).toString(), undefined, event.userId);
-            })
-            pixiv.common.getIllustDetail(curIndex).then(async (res) => {
+                }, data), undefined, event.authorId);
                 const pdata = res;
                 const originalImageURL = (pdata.page_count > 1 ? pdata.meta_pages[0].image_urls.original : pdata.meta_single_page.original_image_url) || pixiv.common.akarin;
                 const master1200 = pixiv.common.getProxiedImageLink(originalImageURL.replace(/\/c\/[a-zA-z0-9]+/gm, "")); // Get image link
@@ -47,9 +45,9 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
                     const link = res.data.data.url;
                     const body = {
                         kook: {
-                            user_id: event.userId,
-                            username: event.user.username,
-                            identify_num: event.user.identifyNum
+                            user_id: event.authorId,
+                            username: event.author.username,
+                            identify_num: event.author.identify_num
                         },
                         pixiv: {
                             illust_id: curIndex,
@@ -68,27 +66,28 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
                             bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
                                 isVIP: true,
                                 isSuccess: true
-                            }, data).toString(), undefined, event.userId).then(() => {
+                            }, data), undefined, event.authorId).then(() => {
                                 setTimeout(() => {
-                                    pixiv.common.getApexVIPStatus(event.userId).then((rep) => {
-                                        bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, { isVIP: rep.data.is_vip }, data).toString(), undefined, event.userId);
+                                    pixiv.common.getApexVIPStatus(event.authorId).then((rep) => {
+                                        bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, { isVIP: rep.data.is_vip }, data), undefined, event.authorId);
                                     })
                                 }, 1500);
                             })
-                        })
-                    }).catch((e) => {
-                        bot.logger.warn("ApexConnect: Update user setting failed");
-                        bot.logger.warn(e.message);
-                        bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
-                    })
+                        }).catch((e: any) => {
+                            if (e) {
+                                bot.logger.error(e);
+                            }
+                        });
+                    });
                 }).catch(async (e) => {
                     bot.logger.warn(`ApexConnect: Upload ${curIndex} failed`);
                     bot.logger.warn(e);
-                    bot.API.message.update(event.channelId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
+                    bot.API.message.update(event.channelId, pixiv.cards.error(e.stack), undefined, event.authorId);
                 });
-            }).catch((e) => {
-                bot.logger.warn(e);
-                bot.API.message.update(event.targetMsgId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
             });
         };
         case 'detail': {
@@ -98,8 +97,12 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
                 bot.API.message.update(event.targetMsgId, pixiv.cards.detail(res, curLink, {
                     isVIP: true,
                     isSent: true
-                }).toString(), undefined, event.userId);
-            })
+                }), undefined, event.authorId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
+            });
             pixiv.common.getIllustDetail(curIndex).then(async (res) => {
                 const pdata = res;
                 const originalImageURL = (pdata.page_count > 1 ? pdata.meta_pages[0].image_urls.original : pdata.meta_single_page.original_image_url) || pixiv.common.akarin;
@@ -125,9 +128,9 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
                     const link = res.data.data.url;
                     const body = {
                         kook: {
-                            user_id: event.userId,
-                            username: event.user.username,
-                            identify_num: event.user.identifyNum
+                            user_id: event.authorId,
+                            username: event.author.username,
+                            identify_num: event.author.identify_num
                         },
                         pixiv: {
                             illust_id: curIndex,
@@ -146,27 +149,28 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
                             bot.API.message.update(event.targetMsgId, pixiv.cards.detail(res, curLink, {
                                 isVIP: true,
                                 isSuccess: true
-                            }).toString(), undefined, event.userId).then(() => {
+                            }), undefined, event.authorId).then(() => {
                                 setTimeout(() => {
-                                    pixiv.common.getApexVIPStatus(event.userId).then((rep) => {
-                                        bot.API.message.update(event.targetMsgId, pixiv.cards.detail(res, curLink, { isVIP: rep.data.is_vip }).toString(), undefined, event.userId);
+                                    pixiv.common.getApexVIPStatus(event.authorId).then((rep) => {
+                                        bot.API.message.update(event.targetMsgId, pixiv.cards.detail(res, curLink, { isVIP: rep.data.is_vip }), undefined, event.authorId);
                                     })
                                 }, 1500);
                             })
-                        })
-                    }).catch((e) => {
-                        bot.logger.warn("ApexConnect: Update user setting failed");
-                        bot.logger.warn(e.message);
-                        bot.API.message.update(event.targetMsgId, pixiv.cards.error(e).toString(), undefined, event.userId);
-                    })
+                        }).catch((e: any) => {
+                            if (e) {
+                                bot.logger.error(e);
+                            }
+                        });
+                    });
                 }).catch(async (e) => {
                     bot.logger.warn(`ApexConnect: Upload ${curIndex} failed`);
                     bot.logger.warn(e);
-                    bot.API.message.update(event.channelId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
+                    bot.API.message.update(event.channelId, pixiv.cards.error(e.stack), undefined, event.authorId);
                 });
-            }).catch((e) => {
-                bot.logger.warn(e);
-                bot.API.message.update(event.targetMsgId, pixiv.cards.error(e.stack).toString(), undefined, event.userId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
             });
         };
     }

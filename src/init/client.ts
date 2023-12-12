@@ -1,24 +1,27 @@
-import { KBotify } from 'kbotify';
-import { BotConfig } from 'kbotify/dist/core/kbotify/types';
 import auth from '../configs/auth';
+// import Kasumi from 'kasumi.js';
+import Kasumi from "kasumi.js"
+import { KasumiConfig } from 'kasumi.js/dist/type'
 
-var kbotifyConfig: BotConfig;
+var config: KasumiConfig;
 
 if (auth.useWebHook) {
-    kbotifyConfig = {
-        mode: 'webhook',
+    config = {
+        type: 'webhook',
         token: auth.khltoken,
         verifyToken: auth.khlverifytoken,
-        key: auth.khlkey,
+        encryptKey: auth.khlkey,
         port: auth.khlport,
-        ignoreDecryptError: false
+        disableSnOrderCheck: true
     }
 } else {
-    kbotifyConfig = {
-        mode: 'websocket',
+    config = {
+        type: 'websocket',
+        // vendor: 'botroot',
+        vendor: 'kookts',
         token: auth.khltoken,
-        ignoreDecryptError: false
+        disableSnOrderCheck: true
     }
 }
 
-export const bot = new KBotify(kbotifyConfig);
+export const bot = new Kasumi(config);

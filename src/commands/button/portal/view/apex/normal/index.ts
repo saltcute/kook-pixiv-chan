@@ -1,7 +1,7 @@
 import * as pixiv from 'commands/pixiv/common'
 import { bot } from 'init/client';
-import { ButtonClickEvent } from 'kaiheila-bot-root';
-export default async function (event: ButtonClickEvent, action: string[], data: any) {
+import { ButtonClickedEvent } from "kasumi.js";
+export default async function (event: ButtonClickedEvent, action: string[], data: any) {
     const trigger = data.trigger;
     switch (trigger) {
         case 'mutil': {
@@ -14,10 +14,12 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
             pixiv.common.getIllustDetail(curIndex).then((res) => {
                 bot.API.message.update(event.targetMsgId, pixiv.cards.multiDetail(res, curLink, idx, pid, link, type, {
                     isSendButtonClicked: true
-                }, data).toString(), undefined, event.userId);
-            }).catch((e) => {
-                bot.logger.error(e);
-            })
+                }, data), undefined, event.authorId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
+            });
             break;
         };
         case 'detail': {
@@ -26,10 +28,12 @@ export default async function (event: ButtonClickEvent, action: string[], data: 
             pixiv.common.getIllustDetail(curIndex).then((res) => {
                 bot.API.message.update(event.targetMsgId, pixiv.cards.detail(res, curLink, {
                     isSendButtonClicked: true
-                },).toString(), undefined, event.userId);
-            }).catch((e) => {
-                bot.logger.error(e);
-            })
+                }), undefined, event.authorId);
+            }).catch((e: any) => {
+                if (e) {
+                    bot.logger.error(e);
+                }
+            });
             break;
         }
     };

@@ -1,14 +1,13 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
 import * as pixiv from './common'
 import { cards } from './common';
 
-class GUI extends AppCommand {
-    code = 'gui'; // 只是用作标记
-    trigger = 'gui'; // 用于触发的文字
-    intro = 'Pixiv Chan GUI interface';
-    func: AppFunc<BaseSession> = async (session) => {
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
-        session.sendCard(pixiv.cards.GUI.main());
+class GUI extends BaseCommand {
+    name = 'gui';
+    description = '使用交互式图形界面';
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
+        session.send([pixiv.cards.GUI.main()]);
     }
 }
 

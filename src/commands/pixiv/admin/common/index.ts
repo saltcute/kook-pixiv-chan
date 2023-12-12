@@ -1,5 +1,5 @@
 import { bot } from 'init/client';
-import { BaseSession, Card } from 'kbotify';
+import { BaseSession, Card } from "kasumi.js";
 import config from '../../../../configs/config';
 import fs from 'fs';
 import upath from 'upath';
@@ -81,36 +81,28 @@ export namespace common {
         return isBanned(session, "bannedAll");
     }
     export function isBanned(session: BaseSession, trigger: string): boolean {
-        const banEndTimestamp = getBanEndTimestamp(session.userId, trigger);
-        if (!isAdmin(session.userId) && Date.now() < banEndTimestamp) {
+        const banEndTimestamp = getBanEndTimestamp(session.authorId, trigger);
+        if (!isAdmin(session.authorId) && Date.now() < banEndTimestamp) {
             return true;
         } else {
             return false;
         }
     }
     export function notifyBan(session: BaseSession, trigger: string) {
-        const banEndTimestamp = getBanEndTimestamp(session.userId, trigger);
-        const banMessage = getBanMessage(session.userId, trigger);
-        return session.replyCardTemp(new Card()
+        const banEndTimestamp = getBanEndTimestamp(session.authorId, trigger);
+        const banMessage = getBanMessage(session.authorId, trigger);
+        return session.replyTemp([new Card()
             .setTheme("danger")
             .setSize("lg")
-            .addText(`**${session.user.username}#${session.user.identifyNum}：**`)
+            .addText(`**${session.author.username}#${session.author.identify_num}：**`)
             .addText(`您已被管理员禁止使用 ${trigger == "bannedAll" ? "Pixiv酱" : `.pixiv ${trigger} 指令`} 至 ${new Date(banEndTimestamp).toLocaleString("zh-cn")}。`)
             .addText(`如有疑问请至[服务器](https://kook.top/iOOsLu)咨询。`)
             .addDivider()
             .addText("管理员留言：")
             .addText(banMessage)
             .addDivider()
-            .addModule({
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "plain-text",
-                        "content": "请不要利用Pixiv酱进行违法违规操作。"
-                    }
-                ]
-            })
-        );
+            .addContext("请不要利用Pixiv酱进行违法违规操作。")
+        ]);
     }
     export function notifyGlobalBan(session: BaseSession) {
         return notifyBan(session, "bannedAll");

@@ -1,5 +1,5 @@
 import * as greenNodejs from './aligreen';
-import { common, linkmap, type } from '../'
+import { common, linkmap, type } from '..'
 import { bot } from 'init/client';
 import OSS from 'ali-oss';
 import auth from 'configs/auth';
@@ -21,7 +21,6 @@ export namespace oss {
             method: 'GET',
             responseType: 'arraybuffer',
         })).data;
-        // console.log(buffer);
         const res = await client.put(upath.join(...path).normalize(), buffer);
         return res.url;
     }
@@ -245,6 +244,9 @@ export namespace aligreen {
                 bot.logger.error(e);
             }
         });
-        return result;
+        return {
+            ...linkmapResults,
+            ...result
+        };
     }
 }

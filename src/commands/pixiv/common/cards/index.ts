@@ -17,9 +17,9 @@ import SearchForAuthor from './searchForAuthor'
 import GUIMain from './GUI/main'
 import GUICMDLST from './GUI/command/list'
 import GUICMDTOP from './GUI/command/top'
-import { Card } from 'kbotify'
-import * as pixiv from "../"
-import { users } from '../'
+import { Card } from "kasumi.js"
+import * as pixiv from ".."
+import { users } from '..'
 import config from 'configs/config'
 
 

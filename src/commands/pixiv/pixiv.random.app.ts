@@ -1,43 +1,40 @@
-import { AppCommand, AppFunc, BaseSession } from 'kbotify';
+import { BaseCommand, BaseSession, Card, CommandFunction } from "kasumi.js";
 import * as pixiv from './common';
 import * as pixivadmin from './admin/common'
 import axios from 'axios';
 import config from 'configs/config';
 import { bot } from 'init/client';
 import { types } from 'pixnode';
+import auth from "configs/auth";
 
-class Random extends AppCommand {
-    code = 'random'; // 只是用作标记
-    trigger = 'random'; // 用于触发的文字
-    intro = 'Recommendation';
-    func: AppFunc<BaseSession> = async (session) => {
-        if (await pixiv.users.reachesCommandLimit(session, this.trigger)) return;
+class Random extends BaseCommand {
+    name = 'random';
+    description = '获取⑨张随机插画';
+    func: CommandFunction<BaseSession, any> = async (session) => {
+        if (await pixiv.users.reachesCommandLimit(session, this.name)) return;
         if (await pixiv.users.reachesIllustLimit(session)) return;
         if (pixivadmin.common.isGlobalBanned(session)) return pixivadmin.common.notifyGlobalBan(session);
-        if (pixiv.common.isBanned(session, this.trigger)) return;
-        if (pixiv.common.isRateLimited(session, 10, this.trigger)) return;
-        pixiv.common.logInvoke(`.pixiv ${this.trigger}`, session);
+        if (pixiv.common.isBanned(session, this.name)) return;
+        if (pixiv.common.isRateLimited(session, 10, this.name)) return;
+        pixiv.common.logInvoke(`.pixiv ${this.name}`, session);
         const sendCard = async (data: types.illustration[]) => {
             var sendSuccess = false;
             var mainCardMessageID = "";
             if (isGUI) {
-                await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片").toString(), undefined, session.userId);
+                await bot.API.message.update(msgID, pixiv.cards.resaving("多张图片"), undefined, session.authorId);
             } else {
-                if (session.guild) {
-                    await session.sendCard(pixiv.cards.resaving("多张图片")).then((res) => {
-                        if (res.resultType == "SUCCESS" && res.msgSent?.msgId !== undefined) {
-                            sendSuccess = true;
-                            mainCardMessageID = res.msgSent?.msgId;
-                        }
-                    }).catch((e) => {
-                        if (e) {
-                            if (e.code == 40012) { // Slow-mode limit
-                                bot.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
+                if (session.guildId) {
+                    await session.send([pixiv.cards.resaving("多张图片")]).then(({ err, data }) => {
+                        if (err) {
+                            if ((err as any).code == 40012) { // Slow-mode limit
+                                this.logger.warn("UserInterface: Bot is limited by slow-mode, no operation can be done");
                             } else {
-                                bot.logger.error(e);
+                                this.logger.error(err);
                             }
+                        } else {
+                            sendSuccess = true;
+                            mainCardMessageID = data.msg_id;
                         }
-                        sendSuccess = false;
                     });
                     if (!sendSuccess) return;
                 }
@@ -45,10 +42,13 @@ class Random extends AppCommand {
             var detection: number = 0;
             var link: string[] = [];
             var pid: string[] = [];
-            var datas: any[] = [];
+            var datas: types.illustration[] = [];
             var promises: Promise<any>[] = [];
             for (const k in data) {
                 if (data[k].x_restrict !== 0) {
+                    continue;
+                }
+                if (pixiv.common.isForbittedUser(data[k].user.uid.toString())) {
                     continue;
                 }
                 for (const val of data[k].tags) {
@@ -62,54 +62,49 @@ class Random extends AppCommand {
             }
             const detectionResults = await pixiv.aligreen.imageDetectionSync(datas)
             if (!detectionResults) {
-                bot.logger.error("ImageDetection: No detection result was returned");
+                this.logger.error("ImageDetection: No detection result was returned");
                 return session.sendTemp("所有图片的阿里云检测均返回失败，这极有可能是因为国际网络线路不稳定，请稍后再试。");
             }
             for (const val of datas) {
-                if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
-                promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
+                if (detectionResults[val.id]) {
+                    if (!pixiv.linkmap.isInDatabase(val.id, "0") && detectionResults[val.id].success) detection++;
+                    promises.push(pixiv.common.uploadImage(val, detectionResults[val.id], session));
+                }
             }
             var uploadResults: {
                 link: string;
                 pid: string;
-            }[] = [];
-            await Promise.all(promises).then((res) => {
-                uploadResults = res;
-            }).catch((e) => {
+            }[] = await Promise.all(promises).catch((e) => {
                 if (e) {
-                    bot.logger.error(e);
-                    session.sendCardTemp(pixiv.cards.error(e.stack));
+                    this.logger.error(e);
+                    session.sendTemp([pixiv.cards.error(e.stack)]);
                 }
-            });
-            for (var val of uploadResults) {
+            }) || [];
+            for (let val of uploadResults) {
                 link.push(val.link);
                 pid.push(val.pid);
             }
-            while (link.length <= 9) {
-                link.push(pixiv.common.akarin);
-                pid.push("没有了");
-            }
-            bot.logger.debug(`UserInterface: Presenting card to user`);
+            this.logger.debug(`UserInterface: Presenting card to user`);
             if (isGUI) {
-                bot.API.message.update(msgID, pixiv.cards.random(link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])).toString(), undefined, session.userId);
+                await bot.API.message.update(msgID, pixiv.cards.random(link, pid, {}).addModule(pixiv.cards.GUI.returnButton([{ action: "GUI.view.command.list" }])), undefined, session.authorId);
             } else {
-                if (session.guild) {
-                    session.updateMessage(mainCardMessageID, [pixiv.cards.random(link, pid, {})])
+                if (session.guildId) {
+                    await session.update(mainCardMessageID, pixiv.cards.random(link, pid, {}))
                         .then(() => {
-                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                            pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
-                            bot.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
-                            if (e) bot.logger.error(e);
+                            this.logger.error(`UserInterface: Failed updating message ${mainCardMessageID}`);
+                            if (e) this.logger.error(e);
                         });
                 } else {
-                    session.sendCard([pixiv.cards.random(link, pid, {})])
+                    await session.send([pixiv.cards.random(link, pid, {})])
                         .then(() => {
-                            pixiv.users.logInvoke(session, this.trigger, datas.length, detection)
+                            pixiv.users.logInvoke(session, this.name, datas.length, detection)
                         })
                         .catch((e) => {
-                            bot.logger.error(`UserInterface: Failed sending message`);
-                            if (e) bot.logger.error(e);
+                            this.logger.error(`UserInterface: Failed sending message`);
+                            if (e) this.logger.error(e);
                         });
                 }
             }
@@ -119,43 +114,41 @@ class Random extends AppCommand {
         var msgID: string = "";
         if (GUIString && GUIString.split(".")[0] == "GUI") {
             const UUID = GUIString.split(".")[1];
-            await bot.axios({
-                url: "/v3/message/view",
-                method: "GET",
-                params: {
-                    msg_id: UUID
-                }
-            }).then(() => {
+            await bot.API.message.view(UUID).then(() => {
                 isGUI = true;
                 msgID = UUID;
             }).catch((e) => {
-                bot.logger.warn("GUI:Unknown GUI msgID");
-                bot.logger.warn(e);
+                this.logger.warn("GUI:Unknown GUI msgID");
+                this.logger.warn(e);
                 isGUI = false;
             })
         }
-        axios({
+        await axios({
             baseURL: config.pixivAPIBaseURL,
+            headers: {
+                'Authorization': auth.remoteLinkmapToken,
+                'uuid': auth.remoteLinkmapUUID
+            },
             url: "/illustration/recommend",
             method: "GET",
             params: {
                 user: {
-                    id: session.user.id,
-                    identifyNum: session.user.identifyNum,
-                    username: session.user.username,
-                    avatar: session.user.avatar
+                    id: session.author.id,
+                    identifyNum: session.author.identify_num,
+                    username: session.author.username,
+                    avatar: session.author.avatar
                 }
             }
-        }).then((res: any) => {
+        }).then(async (res: any) => {
             if (res.data.hasOwnProperty("code") && res.data.code == 500) {
-                return session.reply("Pixiv官方服务器不可用，请稍后再试");
+                return await session.reply("Pixiv官方服务器不可用，请稍后再试");
             }
-            pixiv.common.getNotifications(session);
-            sendCard(res.data);
-        }).catch((e: any) => {
+            await pixiv.common.getNotifications(session);
+            await sendCard(res.data);
+        }).catch(async (e: any) => {
             if (e) {
-                bot.logger.error(e);
-                session.sendCardTemp(pixiv.cards.error(e.stack));
+                this.logger.error(e);
+                await session.sendTemp([pixiv.cards.error(e.stack)]);
             }
         });
     };
